@@ -1,0 +1,29 @@
+{
+  "_설명": "수집 설정 파일입니다. keywords만 바꿔도 다른 주제 모니터링기로 쓸 수 있습니다.",
+
+  "keywords": ["인공지능", "AI", "RPA", "챗봇", "생성형", "빅데이터", "디지털트윈", "LLM"],
+
+  "_제외어_설명": "공고명에 이 단어가 있으면 제외합니다. 영문 약어 오탐(MAIL, TRAIN, AIR 등)은 수집기가 자동으로 거르므로 넣지 않아도 됩니다.",
+  "exclude_keywords": ["취소공고"],
+
+  "bid_types": ["용역", "물품"],
+
+  "daily_lookback_days": 3,
+  "backfill_days": 90,
+
+  "award_inqry_div": "2",
+
+  "api_base": "https://apis.data.go.kr/1230000",
+  "endpoints": {
+    "bid": {
+      "용역": "ad/BidPublicInfoService/getBidPblancListInfoServcPPSSrch",
+      "물품": "ad/BidPublicInfoService/getBidPblancListInfoThngPPSSrch",
+      "공사": "ad/BidPublicInfoService/getBidPblancListInfoCnstwkPPSSrch"
+    },
+    "award": {
+      "용역": "as/ScsbidInfoService/getScsbidListSttusServcPPSSrch",
+      "물품": "as/ScsbidInfoService/getScsbidListSttusThngPPSSrch",
+      "공사": "as/ScsbidInfoService/getScsbidListSttusCnstwkPPSSrch"
+    }
+  }
+}

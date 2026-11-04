@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나라장터 AI 사업 모니터</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f5f3; --surface:#fcfcfb; --surface-2:#f0efec; --border:#e2e1dc;
+  --text:#0b0b0b; --text-2:#52514e; --muted:#8a8984;
+  --series-1:#2a78d6; --series-1-soft:#cde2fb; --grid:#e8e7e2;
+  --good:#1a7f37; --good-bg:#e6f4ea; --warn:#9a6700; --warn-bg:#fff4d6;
+  --info:#1c5cab; --info-bg:#e3eefc; --new:#c2410c; --new-bg:#ffedd5;
+  --shadow:0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#121211; --surface:#1a1a19; --surface-2:#242422; --border:#33332f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86;
+    --series-1:#3987e5; --series-1-soft:#184f95; --grid:#2c2c29;
+    --good:#4ac26b; --good-bg:#12301c; --warn:#e3b341; --warn-bg:#33270a;
+    --info:#86b6ef; --info-bg:#132a47; --new:#fb923c; --new-bg:#3a1f0c;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#121211; --surface:#1a1a19; --surface-2:#242422; --border:#33332f;
+  --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86;
+  --series-1:#3987e5; --series-1-soft:#184f95; --grid:#2c2c29;
+  --good:#4ac26b; --good-bg:#12301c; --warn:#e3b341; --warn-bg:#33270a;
+  --info:#86b6ef; --info-bg:#132a47; --new:#fb923c; --new-bg:#3a1f0c;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-size:22px;margin:0;letter-spacing:-.02em}
+.sub{color:var(--text-2);font-size:13px;margin-top:4px}
+.banner{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;
+  padding:8px 14px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--series-1);border-color:var(--series-1);color:#fff}
+.btn.primary:hover{filter:brightness(1.07)}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:12px;margin-bottom:16px;box-shadow:var(--shadow)}
+.filters input,.filters select{font:inherit;font-size:13px;color:var(--text);background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;padding:7px 10px;min-width:0}
+.filters input[type=search]{flex:1 1 220px}
+.filters select{flex:0 1 auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%}
+.chip{border:1px solid var(--border);background:var(--bg);color:var(--text-2);border-radius:999px;
+  padding:4px 11px;font-size:12px;cursor:pointer;user-select:none}
+.chip.on{background:var(--series-1);border-color:var(--series-1);color:#fff}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .label{color:var(--text-2);font-size:12px}
+.kpi .value{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .hint{color:var(--muted);font-size:12px}
+
+.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:14px;margin:0 0 2px}
+.card .desc{color:var(--muted);font-size:12px;margin-bottom:10px}
+.span2{grid-column:1/-1}
+svg text{font-family:inherit}
+.chart{width:100%;display:block}
+.bar{fill:var(--series-1)}
+.bar.dim{opacity:.35}
+.hit{fill:transparent;cursor:pointer}
+.tip{position:fixed;pointer-events:none;background:var(--text);color:var(--surface);border-radius:8px;
+  padding:7px 10px;font-size:12px;line-height:1.45;opacity:0;transition:opacity .08s;z-index:10;white-space:nowrap}
+
+.tablehead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tbl-wrap{overflow-x:auto;border-top:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{color:var(--text-2);font-weight:600;font-size:12px;white-space:nowrap;cursor:pointer;user-select:none;background:var(--surface);position:sticky;top:0}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+th .arr{color:var(--muted);margin-left:2px}
+td.title a{color:var(--text);text-decoration:none;font-weight:500}
+td.title a:hover{text-decoration:underline}
+td .meta{color:var(--muted);font-size:12px}
+.badge{display:inline-block;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-open{background:var(--info-bg);color:var(--info)}
+.b-closed{background:var(--warn-bg);color:var(--warn)}
+.b-award{background:var(--good-bg);color:var(--good)}
+.b-new{background:var(--new-bg);color:var(--new);margin-right:4px}
+.kw{display:inline-block;color:var(--text-2);background:var(--surface-2);border-radius:4px;padding:0 5px;font-size:11px;margin:2px 3px 0 0}
+.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:12px;color:var(--text-2);font-size:13px}
+.empty{color:var(--muted);text-align:center;padding:32px}
+footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
+
+@media (max-width:900px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.kpi .value{font-size:22px}.hide-sm{display:none}td.title{min-width:170px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>나라장터 AI 사업 모니터</h1>
+      <div class="sub" id="updated">데이터 불러오는 중…</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="themeBtn" title="화면 테마 전환">🌓</button>
+      <button class="btn primary" id="xlsxBtn">⬇ 엑셀 다운로드</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <section class="filters" aria-label="필터">
+    <input type="search" id="q" placeholder="공고명·기관·낙찰업체 검색">
+    <select id="fType"><option value="">유형 전체</option></select>
+    <select id="fRegion"><option value="">지역 전체</option></select>
+    <select id="fStatus">
+      <option value="">상태 전체</option><option value="open">진행중</option>
+      <option value="closed">마감(결과대기)</option><option value="award">낙찰완료</option>
+    </select>
+    <select id="fPeriod">
+      <option value="30">최근 30일</option><option value="90" selected>최근 90일</option>
+      <option value="180">최근 180일</option><option value="0">전체 기간</option>
+    </select>
+    <select id="fAmount">
+      <option value="0">금액 전체</option><option value="50000000">5천만원 이상</option>
+      <option value="100000000">1억 이상</option><option value="500000000">5억 이상</option>
+      <option value="1000000000">10억 이상</option>
+    </select>
+    <div class="chips" id="kwChips"></div>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><div class="label">공고 건수</div><div class="value" id="kCount">-</div><div class="hint" id="kCountHint">&nbsp;</div></div>
+    <div class="kpi"><div class="label">사업 규모 합계 (배정예산)</div><div class="value" id="kBudget">-</div><div class="hint" id="kBudgetHint">&nbsp;</div></div>
+    <div class="kpi"><div class="label">낙찰 완료</div><div class="value" id="kAward">-</div><div class="hint" id="kAwardHint">&nbsp;</div></div>
+    <div class="kpi"><div class="label">최근 7일 신규</div><div class="value" id="kNew">-</div><div class="hint">수집일 기준</div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>월별 공고 건수</h2>
+      <div class="desc">공고게시일 기준 · 막대에 마우스를 올리면 금액 표시</div>
+      <svg class="chart" id="cMonth" role="img" aria-label="월별 공고 건수 막대그래프"></svg>
+    </div>
+    <div class="card">
+      <h2>지역별 공고 건수</h2>
+      <div class="desc">수요기관명으로 추정 · 막대를 누르면 해당 지역만 보기</div>
+      <svg class="chart" id="cRegion" role="img" aria-label="지역별 공고 건수 막대그래프"></svg>
+    </div>
+    <div class="card span2">
+      <h2>발주기관 TOP 10 (사업 규모)</h2>
+      <div class="desc">배정예산 합계 · 막대를 누르면 해당 기관 공고만 검색</div>
+      <svg class="chart" id="cOrg" role="img" aria-label="발주기관별 사업 규모 막대그래프"></svg>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tablehead">
+      <div><h2 style="margin:0">공고 목록</h2><div class="desc" id="tblDesc" style="margin:0"></div></div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th data-k="status">상태</th>
+          <th data-k="title">공고명</th>
+          <th data-k="demand" class="hide-sm">수요기관</th>
+          <th data-k="noticeDt" class="num hide-sm">공고일</th>
+          <th data-k="closeDt" class="num hide-sm">마감일</th>
+          <th data-k="budget" class="num">배정예산</th>
+          <th data-k="winner" class="hide-sm">낙찰업체</th>
+          <th data-k="awardAmt" class="num">낙찰금액</th>
+          <th data-k="rate" class="num hide-sm">낙찰률</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <footer>
+    출처: 조달청 나라장터 OpenAPI(공공데이터포털) · 매일 자동 수집 · 지역은 기관명 기준 추정값입니다.<br>
+    공고 세부내용과 최종 계약사항은 반드시 나라장터 원문에서 확인하세요.
+  </footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const DAY = 864e5;
+  const PAGE = 30;
+  const state = { all: [], kws: new Set(), sort: { k: "noticeDt", dir: -1 }, page: 1, org: "" , sample:false, meta:{} };
+
+  // ───────── 형식 도우미 ─────────
+  const parseDt = s => {
+    if (!s) return null;
+    const d = String(s).replace(/[^0-9]/g, "");
+    if (d.length < 8) return null;
+    const t = new Date(+d.slice(0,4), +d.slice(4,6)-1, +d.slice(6,8), +(d.slice(8,10)||0), +(d.slice(10,12)||0));
+    return isNaN(t) ? null : t;
+  };
+  const ymd = d => d ? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}` : "-";
+  const won = n => {
+    if (n == null) return "-";
+    if (n >= 1e8) return (n/1e8).toLocaleString("ko-KR",{maximumFractionDigits:1}) + "억";
+    if (n >= 1e4) return Math.round(n/1e4).toLocaleString("ko-KR") + "만";
+    return n.toLocaleString("ko-KR");
+  };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  const statusOf = (b, now) => b.award ? "award" : ((b._close && b._close > now) ? "open" : "closed");
+  const STATUS_LABEL = { open: "진행중", closed: "결과대기", award: "낙찰" };
+  const STATUS_CLASS = { open: "b-open", closed: "b-closed", award: "b-award" };
+
+  // ───────── 데이터 불러오기 ─────────
+  async function load() {
+    try {
+      const r = await fetch("data/bids.json", { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      const j = await r.json();
+      if (!j.items || !j.items.length) throw new Error("empty");
+      return { meta: j, items: j.items, sample: false };
+    } catch (e) {
+      return { meta: { updated: null }, items: makeSample(), sample: true };
+    }
+  }
+
+  function prepare(items) {
+    const now = new Date();
+    return items.map(b => {
+      const x = { ...b };
+      x._notice = parseDt(b.noticeDt);
+      x._close = parseDt(b.closeDt);
+      x._seen = parseDt(b.firstSeen);
+      x.status = statusOf(x, now);
+      x.winner = b.award?.winner || "";
+      x.awardAmt = b.award?.amount ?? null;
+      x.rate = b.award?.rate ?? null;
+      x.isNew = x._seen && (now - x._seen) <= 7*DAY;
+      x._hay = [b.title, b.org, b.demand, x.winner].join(" ").toLowerCase();
+      return x;
+    });
+  }
+
+  // ───────── 필터 ─────────
+  function filtered() {
+    const q = $("#q").value.trim().toLowerCase();
+    const type = $("#fType").value, region = $("#fRegion").value, st = $("#fStatus").value;
+    const period = +$("#fPeriod").value, amt = +$("#fAmount").value;
+    const since = period ? Date.now() - period*DAY : 0;
+    return state.all.filter(b =>
+      (!q || b._hay.includes(q)) &&
+      (!type || b.type === type) &&
+      (!region || b.region === region) &&
+      (!st || b.status === st) &&
+      (!since || (b._notice && +b._notice >= since)) &&
+      (!amt || (b.budget || 0) >= amt) &&
+      (!state.kws.size || (b.keywords || []).some(k => state.kws.has(k)))
+    );
+  }
+
+  // ───────── 차트 공통 ─────────
+  const tip = $("#tip");
+  const showTip = (e, html) => {
+    tip.innerHTML = html; tip.style.opacity = 1;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + 12, y = e.clientY - h - 10;
+    if (x + w > innerWidth - 8) x = e.clientX - w - 12;
+    if (y < 8) y = e.clientY + 16;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  const hideTip = () => { tip.style.opacity = 0; };
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, text) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  };
+  const niceMax = v => {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  };
+
+  // 세로 막대 (월별)
+  function drawMonth(rows) {
+    const svg = $("#cMonth"); svg.innerHTML = "";
+    const map = new Map();
+    rows.forEach(b => {
+      if (!b._notice) return;
+      const k = `${b._notice.getFullYear()}-${String(b._notice.getMonth()+1).padStart(2,"0")}`;
+      const o = map.get(k) || { n: 0, amt: 0 }; o.n++; o.amt += b.budget || 0; map.set(k, o);
+    });
+    // 빈 달도 채움
+    const keys = [...map.keys()].sort();
+    const data = [];
+    if (keys.length) {
+      let [y, m] = keys[0].split("-").map(Number);
+      const [ey, em] = keys[keys.length-1].split("-").map(Number);
+      while (y < ey || (y === ey && m <= em)) {
+        const k = `${y}-${String(m).padStart(2,"0")}`;
+        data.push({ k, label: `${m}월`, ...(map.get(k) || { n: 0, amt: 0 }) });
+        if (++m > 12) { m = 1; y++; }
+      }
+    }
+    const W = svg.clientWidth || 640, H = 220, L = 34, R = 8, T = 14, B = 26;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H);
+    if (!data.length) { svg.append(el("text", { x: W/2, y: H/2, "text-anchor": "middle", fill: "var(--muted)", "font-size": 13 }, "데이터 없음")); return; }
+    const peak = Math.max(...data.map(d => d.n));
+    const tickStep = Math.max(1, niceMax(peak / 4) / (niceMax(peak / 4) >= peak / 2 ? 2 : 1));
+    const nTicks = Math.max(1, Math.ceil(peak / tickStep));
+    const max = tickStep * nTicks;
+    const iw = W - L - R, ih = H - T - B, bw = iw / data.length, barW = Math.min(36, bw * 0.62);
+    for (let i = 0; i <= nTicks; i++) {
+      const v = tickStep * i, y = T + ih - ih * i / nTicks;
+      svg.append(el("line", { x1: L, x2: W - R, y1: y, y2: y, stroke: "var(--grid)", "stroke-width": 1 }));
+      svg.append(el("text", { x: L - 6, y: y + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 }, Math.round(v)));
+    }
+    const step = Math.ceil(data.length / Math.max(1, Math.floor(iw / 42)));
+    data.forEach((d, i) => {
+      const cx = L + bw * i + bw / 2, h = ih * d.n / max, y = T + ih - h;
+      if (h > 0) {
+        const r = Math.min(4, barW / 2, h);
+        svg.append(el("path", { class: "bar", d:
+          `M${cx-barW/2},${T+ih} V${y+r} Q${cx-barW/2},${y} ${cx-barW/2+r},${y} H${cx+barW/2-r} Q${cx+barW/2},${y} ${cx+barW/2},${y+r} V${T+ih} Z` }));
+      }
+      if (i % step === 0 || i === data.length - 1)
+        svg.append(el("text", { x: cx, y: H - 8, "text-anchor": "middle", fill: "var(--text-2)", "font-size": 11 },
+          (i === 0 || d.label === "1월") ? `${d.k.slice(2,4)}년 ${d.label}` : d.label));
+      const hit = el("rect", { class: "hit", x: L + bw * i, y: T, width: bw, height: ih });
+      hit.addEventListener("mousemove", e => showTip(e, `<b>${d.k.replace("-", "년 ")}월</b><br>공고 ${d.n}건 · 배정예산 ${won(d.amt)}원`));
+      hit.addEventListener("mouseleave", hideTip);
+      svg.append(hit);
+    });
+    // 최댓값 직접 라벨
+    const top = data.reduce((a, b) => b.n > a.n ? b : a);
+    const ti = data.indexOf(top);
+    svg.append(el("text", { x: L + bw * ti + bw / 2, y: T + ih - ih * top.n / max - 5, "text-anchor": "middle", fill: "var(--text)", "font-size": 11, "font-weight": 600 }, top.n));
+  }
+
+  // 가로 막대 (지역, 기관)
+  function drawHBar(svgId, data, { fmt, tipFmt, onClick, active, maxRows = 10 }) {
+    const svg = $(svgId); svg.innerHTML = "";
+    data = data.slice(0, maxRows);
+    const W = svg.clientWidth || 480, rowH = 26, T = 4, H = Math.max(60, data.length * rowH + T * 2);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H);
+    if (!data.length) { svg.append(el("text", { x: W/2, y: H/2, "text-anchor": "middle", fill: "var(--muted)", "font-size": 13 }, "데이터 없음")); return; }
+    const labW = Math.min(W * 0.38, 210), valW = 64, iw = W - labW - valW - 8;
+    const max = Math.max(...data.map(d => d.v)) || 1;
+    data.forEach((d, i) => {
+      const y = T + i * rowH, bh = 14, by = y + (rowH - bh) / 2, w = Math.max(2, iw * d.v / max);
+      const label = d.label.length > 16 && labW < 200 ? d.label.slice(0, 15) + "…" : d.label;
+      svg.append(el("text", { x: labW - 8, y: y + rowH / 2 + 4, "text-anchor": "end", fill: "var(--text-2)", "font-size": 12 }, label));
+      const r = Math.min(4, bh / 2, w);
+      svg.append(el("path", { class: "bar" + (active && active !== d.label ? " dim" : ""), d:
+        `M${labW},${by} H${labW + w - r} Q${labW + w},${by} ${labW + w},${by + r} V${by + bh - r} Q${labW + w},${by + bh} ${labW + w - r},${by + bh} H${labW} Z` }));
+      svg.append(el("text", { x: labW + w + 6, y: y + rowH / 2 + 4, fill: "var(--text)", "font-size": 12, "font-variant-numeric": "tabular-nums" }, fmt(d.v)));
+      const hit = el("rect", { class: "hit", x: 0, y, width: W, height: rowH });
+      hit.addEventListener("mousemove", e => showTip(e, tipFmt(d)));
+      hit.addEventListener("mouseleave", hideTip);
+      if (onClick) hit.addEventListener("click", () => { hideTip(); onClick(d); });
+      svg.append(hit);
+    });
+  }
+
+  function drawCharts(rows) {
+    drawMonth(rows);
+    const reg = new Map();
+    rows.forEach(b => { const o = reg.get(b.region) || { n: 0, amt: 0 }; o.n++; o.amt += b.budget || 0; reg.set(b.region, o); });
+    drawHBar("#cRegion", [...reg].map(([label, o]) => ({ label, v: o.n, amt: o.amt })).sort((a, b) => b.v - a.v), {
+      fmt: v => v + "건",
+      tipFmt: d => `<b>${esc(d.label)}</b><br>공고 ${d.v}건 · 배정예산 ${won(d.amt)}원`,
+      active: $("#fRegion").value || null,
+      onClick: d => { const s = $("#fRegion"); s.value = s.value === d.label ? "" : d.label; render(); }
+    });
+    const org = new Map();
+    rows.forEach(b => { const k = b.demand || b.org || "미상"; const o = org.get(k) || { n: 0, amt: 0 }; o.n++; o.amt += b.budget || 0; org.set(k, o); });
+    drawHBar("#cOrg", [...org].map(([label, o]) => ({ label, v: o.amt, n: o.n })).filter(d => d.v > 0).sort((a, b) => b.v - a.v), {
+      fmt: v => won(v),
+      tipFmt: d => `<b>${esc(d.label)}</b><br>배정예산 ${won(d.v)}원 · ${d.n}건`,
+      active: state.org || null,
+      onClick: d => { const same = $("#q").value === d.label; $("#q").value = same ? "" : d.label; state.org = same ? "" : d.label; render(); }
+    });
+  }
+
+  // ───────── KPI ─────────
+  function drawKpis(rows) {
+    const budget = rows.reduce((s, b) => s + (b.budget || 0), 0);
+    const awards = rows.filter(b => b.award);
+    const awardAmt = awards.reduce((s, b) => s + (b.awardAmt || 0), 0);
+    const rates = awards.map(b => b.rate).filter(v => v != null);
+    const open = rows.filter(b => b.status === "open").length;
+    $("#kCount").textContent = rows.length.toLocaleString("ko-KR") + "건";
+    $("#kCountHint").textContent = `진행중 ${open}건`;
+    $("#kBudget").textContent = won(budget) + "원";
+    $("#kBudgetHint").textContent = rows.length ? `건당 평균 ${won(Math.round(budget / Math.max(1, rows.filter(b => b.budget).length)))}원` : " ";
+    $("#kAward").textContent = awards.length.toLocaleString("ko-KR") + "건";
+    $("#kAwardHint").textContent = awards.length ? `낙찰총액 ${won(awardAmt)}원 · 평균 낙찰률 ${(rates.reduce((a, b) => a + b, 0) / Math.max(1, rates.length)).toFixed(1)}%` : "아직 없음";
+    $("#kNew").textContent = rows.filter(b => b.isNew).length.toLocaleString("ko-KR") + "건";
+  }
+
+  // ───────── 표 ─────────
+  function sortRows(rows) {
+    const { k, dir } = state.sort;
+    const key = b => k === "noticeDt" ? +(b._notice || 0) : k === "closeDt" ? +(b._close || 0) : b[k];
+    return [...rows].sort((a, b) => {
+      const x = key(a), y = key(b);
+      if (x == null || x === "") return 1; if (y == null || y === "") return -1;
+      return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "ko")) * dir;
+    });
+  }
+
+  function drawTable(rows) {
+    const sorted = sortRows(rows);
+    const pages = Math.max(1, Math.ceil(sorted.length / PAGE));
+    state.page = Math.min(state.page, pages);
+    const slice = sorted.slice((state.page - 1) * PAGE, state.page * PAGE);
+    $("#tblDesc").textContent = `${rows.length.toLocaleString("ko-KR")}건 · 열 제목을 누르면 정렬`;
+    $("#tbody").innerHTML = slice.length ? slice.map(b => `
+      <tr>
+        <td><span class="badge ${STATUS_CLASS[b.status]}">${STATUS_LABEL[b.status]}</span></td>
+        <td class="title">
+          ${b.isNew ? '<span class="badge b-new">NEW</span>' : ""}
+          ${b.url ? `<a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.title)}</a>` : esc(b.title)}
+          <div class="meta">${esc(b.type)} · ${esc(b.method || "계약방법 미기재")} · ${esc(b.no)}</div>
+          <div>${(b.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join("")}</div>
+        </td>
+        <td class="hide-sm">${esc(b.demand)}<div class="meta">${esc(b.region)}</div></td>
+        <td class="num hide-sm">${ymd(b._notice)}</td>
+        <td class="num hide-sm">${ymd(b._close)}</td>
+        <td class="num">${won(b.budget)}</td>
+        <td class="hide-sm">${esc(b.winner || "-")}</td>
+        <td class="num">${won(b.awardAmt)}</td>
+        <td class="num hide-sm">${b.rate != null ? b.rate.toFixed(2) + "%" : "-"}</td>
+      </tr>`).join("") : `<tr><td colspan="9" class="empty">조건에 맞는 공고가 없습니다.</td></tr>`;
+    document.querySelectorAll("th[data-k]").forEach(th => {
+      th.querySelector(".arr")?.remove();
+      if (th.dataset.k === state.sort.k) th.insertAdjacentHTML("beforeend", `<span class="arr">${state.sort.dir < 0 ? "▼" : "▲"}</span>`);
+    });
+    $("#pager").innerHTML = pages > 1 ? `
+      <button class="btn" ${state.page <= 1 ? "disabled" : ""} data-p="-1">이전</button>
+      <span>${state.page} / ${pages}</span>
+      <button class="btn" ${state.page >= pages ? "disabled" : ""} data-p="1">다음</button>` : "";
+  }
+
+  // ───────── 엑셀 ─────────
+  function exportXlsx() {
+    const rows = sortRows(filtered()).map(b => ({
+      "상태": STATUS_LABEL[b.status], "공고번호": b.no, "차수": b.ord, "유형": b.type, "공고명": b.title,
+      "공고기관": b.org, "수요기관": b.demand, "지역(추정)": b.region, "계약방법": b.method,
+      "공고일": ymd(b._notice), "마감일": ymd(b._close), "배정예산(원)": b.budget ?? "", "추정가격(원)": b.estPrice ?? "",
+      "낙찰업체": b.winner, "낙찰금액(원)": b.awardAmt ?? "", "낙찰률(%)": b.rate ?? "",
+      "키워드": (b.keywords || []).join(", "), "원문": b.url
+    }));
+    const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    if (window.XLSX) {
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws["!cols"] = [8,16,5,6,50,22,22,10,14,11,11,14,14,20,14,9,20,30].map(w => ({ wch: w }));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "공고목록");
+      XLSX.writeFile(wb, `나라장터_AI사업_${stamp}.xlsx`);
+    } else { // 라이브러리를 못 불러온 경우 CSV로 대체
+      const head = Object.keys(rows[0] || { "결과": "" });
+      const csv = [head, ...rows.map(r => head.map(h => r[h]))].map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }));
+      a.download = `나라장터_AI사업_${stamp}.csv`; a.click();
+    }
+  }
+
+  // ───────── 렌더 ─────────
+  function render() {
+    const rows = filtered();
+    if (state.org && $("#q").value !== state.org) state.org = "";
+    drawKpis(rows); drawCharts(rows); drawTable(rows);
+  }
+
+  function initControls() {
+    const types = [...new Set(state.all.map(b => b.type))].sort();
+    types.forEach(t => $("#fType").insertAdjacentHTML("beforeend", `<option>${esc(t)}</option>`));
+    const order = ["제주","서울","부산","대구","인천","광주","대전","울산","세종","경기","강원","충북","충남","전북","전남","경북","경남","중앙·기타"];
+    const regions = [...new Set(state.all.map(b => b.region))].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    regions.forEach(r => $("#fRegion").insertAdjacentHTML("beforeend", `<option>${esc(r)}</option>`));
+    const kws = state.meta.keywords || [...new Set(state.all.flatMap(b => b.keywords || []))];
+    $("#kwChips").innerHTML = `<span class="chip on" data-kw="">전체 키워드</span>` + kws.map(k => `<span class="chip" data-kw="${esc(k)}">${esc(k)}</span>`).join("");
+    $("#kwChips").addEventListener("click", e => {
+      const c = e.target.closest(".chip"); if (!c) return;
+      const k = c.dataset.kw;
+      if (!k) state.kws.clear(); else state.kws.has(k) ? state.kws.delete(k) : state.kws.add(k);
+      document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x.dataset.kw ? state.kws.has(x.dataset.kw) : !state.kws.size));
+      state.page = 1; render();
+    });
+    let t; $("#q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { state.page = 1; render(); }, 150); });
+    ["#fType", "#fRegion", "#fStatus", "#fPeriod", "#fAmount"].forEach(s => $(s).addEventListener("change", () => { state.page = 1; render(); }));
+    document.querySelectorAll("th[data-k]").forEach(th => th.addEventListener("click", () => {
+      const k = th.dataset.k;
+      state.sort = state.sort.k === k ? { k, dir: -state.sort.dir } : { k, dir: ["title", "demand", "winner", "status"].includes(k) ? 1 : -1 };
+      render();
+    }));
+    $("#pager").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { state.page += +b.dataset.p; drawTable(filtered()); } });
+    $("#xlsxBtn").addEventListener("click", exportXlsx);
+    $("#themeBtn").addEventListener("click", () => {
+      const root = document.documentElement;
+      const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      root.dataset.theme = dark ? "light" : "dark";
+      try { localStorage.setItem("g2b-theme", root.dataset.theme); } catch (e) {}
+    });
+    let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => drawCharts(filtered()), 120); });
+  }
+
+  // ───────── 샘플 데이터 (실데이터가 없을 때 화면 미리보기용) ─────────
+  function makeSample() {
+    let seed = 20261104; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    const pick = a => a[Math.floor(rnd() * a.length)];
+    const orgs = [["제주특별자치도","제주"],["서귀포시","제주"],["제주시","제주"],["서울특별시","서울"],["부산광역시","부산"],["경기도","경기"],["경기도 수원시","경기"],["인천광역시","인천"],["대구광역시","대구"],["전라남도","전남"],["충청남도","충남"],["경상남도 창원시","경남"],["행정안전부","중앙·기타"],["한국지능정보사회진흥원","중앙·기타"],["과학기술정보통신부","중앙·기타"],["국토교통부","중앙·기타"],["강원특별자치도","강원"],["대전광역시","대전"]];
+    const tpl = [["AI 기반 민원 상담 챗봇 구축 용역",["AI","챗봇"]],["생성형 AI 행정업무 지원 플랫폼 구축",["생성형","AI"]],["RPA 업무자동화 확대 구축 사업",["RPA"]],["빅데이터 분석 플랫폼 고도화 용역",["빅데이터"]],["디지털트윈 기반 도시관리 시스템 구축",["디지털트윈"]],["인공지능 CCTV 선별관제 시스템 구축",["인공지능"]],["LLM 기반 내부 문서검색 시스템 구축",["LLM"]],["AI 재난안전 예측 모델 개발 용역",["AI"]],["AI 학습데이터 구축 사업",["AI"]],["인공지능 교통신호 최적화 시스템 구축",["인공지능"]],["행정 빅데이터 통합 분석 용역",["빅데이터"]],["AI 기반 해양쓰레기 탐지 시스템",["AI"]],["RPA 솔루션 라이선스 구매",["RPA"]],["AI 서버(GPU) 구매",["AI"]]];
+    const methods = ["협상에의한계약","제한경쟁","일반경쟁","수의계약"];
+    const winners = ["(주)한빛데이터","(주)제주AI랩","(주)누리소프트","(주)마루정보","(주)바른시스템","(주)온새미로테크","(주)다온아이엔씨"];
+    const now = Date.now(), out = [];
+    for (let i = 0; i < 140; i++) {
+      const [org, region] = pick(orgs), [title, kws] = pick(tpl);
+      const isThing = /구매/.test(title);
+      const notice = new Date(now - Math.floor(rnd() * 170 + 1) * DAY - Math.floor(rnd() * 8) * 36e5);
+      const close = new Date(+notice + (10 + Math.floor(rnd() * 15)) * DAY);
+      const budget = Math.round((rnd() < .15 ? 1e9 + rnd() * 3e9 : 3e7 + rnd() * 6e8) / 1e5) * 1e5;
+      const closedLongAgo = close < now - 10 * DAY;
+      const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:00:00`;
+      const rate = 85 + rnd() * 10;
+      out.push({
+        id: `R26BK${String(1e7 + i).slice(1)}-000`, no: `R26BK${String(1e7 + i).slice(1)}`, ord: "000",
+        type: isThing ? "물품" : "용역", title: `${org.replace(/^(경기도|경상남도) /, "")} ${title}`, org, demand: org, region,
+        noticeDt: fmt(notice), closeDt: fmt(close), budget, estPrice: Math.round(budget / 1.1),
+        method: isThing ? "일반경쟁" : pick(methods), url: "", firstSeen: fmt(new Date(+notice + DAY)).slice(0, 10), keywords: kws,
+        award: closedLongAgo && rnd() < .75 ? { winner: pick(winners), bizno: "", amount: Math.round(budget * rate / 100 / 1000) * 1000, rate: +rate.toFixed(3), openDt: fmt(close) } : null
+      });
+    }
+    return out;
+  }
+
+  // ───────── 시작 ─────────
+  try { const t = localStorage.getItem("g2b-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  load().then(({ meta, items, sample }) => {
+    state.meta = meta; state.sample = sample; state.all = prepare(items);
+    $("#updated").textContent = sample ? "샘플 데이터로 보는 중" :
+      `마지막 수집 ${meta.updated ? meta.updated.replace("T", " ").slice(0, 16) : "-"} · 전체 ${items.length.toLocaleString("ko-KR")}건`;
+    if (sample) { const b = $("#banner"); b.style.display = "block"; b.textContent = "⚠ 아직 수집된 데이터가 없어 가상의 샘플 데이터로 화면을 보여드리고 있습니다. 첫 수집이 끝나면 실제 공고로 바뀝니다."; }
+    else if (meta.errors && meta.errors.length) { const b = $("#banner"); b.style.display = "block"; b.textContent = `⚠ 마지막 수집에서 일부 호출(${meta.errors.length}건)이 실패했습니다. 다음 수집 때 다시 시도합니다.`; }
+    initControls(); render();
+  });
+})();
+</script>
+</body>
+</html>
