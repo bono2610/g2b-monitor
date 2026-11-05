@@ -39,7 +39,7 @@
   // ───────── 공통 도우미 ─────────
   const DEFAULT_RULES = {
     homeRegion: "제주",
-    regions: ["제주", "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "중앙·기타"],
+    regions: ["제주", "서울", "부산", "대구", "인천", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남광주", "경북", "경남", "중앙·기타"],
     fields: ["단가계약(통계제외)", "유지보수·운영", "교육·연수·행사", "감리·컨설팅·연구", "챗봇·민원상담", "생성형AI·LLM", "영상·CCTV 분석", "RPA·업무자동화", "디지털트윈", "데이터·빅데이터", "플랫폼·시스템 구축", "장비·물품 구매", "기타"],
     fieldRules: [],
     kinds: ["교육청·학교", "공공기관·출자출연", "지자체", "대학·연구기관", "기타"],
@@ -264,7 +264,7 @@
 
     // 3. 시도별비교
     const s3 = wb.addWorksheet("시도별비교", { views: [{ state: "frozen", ySplit: 4 }] });
-    title(s3, "시도별 AI 사업 비교", "공고목록 기준 수식. 금액 단위 백만원 · 건당 평균은 배정예산 기재 공고 기준 · 순위는 17개 시도 대상");
+    title(s3, "시도별 AI 사업 비교", `공고목록 기준 수식. 금액 단위 백만원 · 건당 평균은 배정예산 기재 공고 기준 · 순위는 ${A.sidos.length}개 시도 대상`);
     const H3 = ["시도", "공고 건수", "배정예산 합계(백만원)", "건당 평균(백만원)", "낙찰 건수", "낙찰금액 합계(백만원)", "평균 낙찰률(%)", "예산 순위", "건수 순위"];
     const top3 = 4, first3 = top3 + 1, lastSido = first3 + A.sidos.length - 1;
     const r3 = A.regionStats.map((s, i) => {
@@ -477,7 +477,7 @@
     c.push(K.P(`(자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: 240 }));
 
     c.push(K.H("1. 개요"));
-    c.push(K.B(`최근 ${periodText(A)}간 도내 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 17개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`최근 ${periodText(A)}간 도내 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 ${A.sidos.length}개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
     c.push(K.B(`같은 기간 전체 공고(중앙·기타 포함)는 ${total.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(total.budget)}억원이며, 도내 공고는 건수의 ${share(ht.n, total.n)}%, 예산의 ${share(ht.budget, total.budget)}%입니다.`));
     c.push(K.B(`도내 공고 ${ht.n}건 중 낙찰 ${ht.awards}건, 진행중 ${ht.open}건, 결과대기 ${ht.closed}건입니다.`));
 
@@ -498,7 +498,7 @@
       : [["", "도내 공고가 없습니다.", "", "", "", "", ""]]));
 
     c.push(K.H("3. 타 시도 비교"));
-    c.push(K.B(`17개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. ${josa(home, "은", "는")} 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`${A.sidos.length}개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. ${josa(home, "은", "는")} 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
     c.push(K.P("배정예산 순 · 지역은 수요기관명 기준 추정 · 중앙부처·전국 단위 기관(중앙·기타)은 순위에서 제외", { size: 18, color: "595959" }));
     const ranked = [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank || a.countRank - b.countRank);
     c.push(K.table([
