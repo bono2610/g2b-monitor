@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>나라장터 AI 사업 모니터</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
 <script src="assets/report.js" defer></script>
 <style>
@@ -38,7 +39,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
-  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
   font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1240px;margin:0 auto;padding:24px 16px 48px}
 header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
@@ -168,25 +169,70 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
 @media (max-width:520px){.kpi .value{font-size:22px}
   header>div:first-child{flex-basis:100%}.actions{width:100%;justify-content:stretch}
   .actions .btn{flex:1 1 calc(50% - 4px);padding:9px 8px}.actions #themeBtn{flex:0 0 auto}.hide-sm{display:none}td.title{min-width:170px}}
+
+/* ── 디자인 다듬기 ── */
+:root{--brand:#14315c;--brand-2:#1f4b8a;--accent:#2a78d6}
+header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;border-radius:16px;
+  padding:22px 24px;align-items:center;box-shadow:0 6px 20px rgba(20,49,92,.18)}
+header h1{font-size:26px;font-weight:800;letter-spacing:-.03em}
+header .eyebrow{font-size:12px;font-weight:600;color:#a9c6ef;letter-spacing:.02em;margin-bottom:4px}
+header .sub{color:#dbe7f8;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);
+  padding:4px 10px 4px 9px;border-radius:999px;margin-top:10px;font-size:12.5px}
+header .sub::before{content:"";width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25);animation:live 2s infinite}
+@keyframes live{50%{box-shadow:0 0 0 6px rgba(74,222,128,0)}}
+header .actions{align-items:center}
+header .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.22);color:#fff;font-weight:600}
+header .btn:hover{background:rgba(255,255,255,.18)}
+header .btn.primary{background:#fff;border-color:#fff;color:var(--brand)}
+header .btn.primary:hover{background:#eef4fd;filter:none}
+header .refresh .when{color:#a9c6ef}header .refresh .msg{color:#fff}
+header .refresh .msg.warn{color:#ffd88a}header .refresh .msg.ok{color:#86efac}
+.btn.ico{display:inline-flex;align-items:center;gap:6px}
+.btn.ico::before{content:"";width:15px;height:15px;background:currentColor;flex:0 0 auto;
+  -webkit-mask:var(--i) center/contain no-repeat;mask:var(--i) center/contain no-repeat}
+#refreshBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36'/%3E%3Cpath d='M21 3v6h-6'/%3E%3C/svg%3E")}
+#dlBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11m-5-5 5 5 5-5M5 20h14'/%3E%3C/svg%3E")}
+#themeBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18z' fill='black'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='black' stroke-width='2.2'/%3E%3C/svg%3E");padding:8px 10px}
+#refreshBtn:disabled::before{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.dl{position:relative}.dl summary{list-style:none}.dl summary::-webkit-details-marker{display:none}
+.dl summary::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-2px);margin-left:2px}
+.dl .menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:240px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.16)}
+.dl .mi{display:block;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 12px;font:inherit;color:var(--text);cursor:pointer}
+.dl .mi:hover{background:var(--surface-2)}.dl .mi b{display:block;font-size:13.5px}.dl .mi small{color:var(--muted);font-size:12px}
+.dl .mi:disabled{opacity:.6;cursor:progress}
+.kpi{position:relative;overflow:hidden;padding-left:20px}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.kpi:nth-child(2)::before{background:#0f9f8f}.kpi:nth-child(3)::before{background:#1a7f37}.kpi:nth-child(4)::before{background:#e8710a}
+.kpi .value{font-size:30px;font-weight:800;letter-spacing:-.03em}
+.card h2{font-size:15px;font-weight:700}
+tbody tr:hover{background:var(--surface-2)}
+@media (max-width:640px){header{padding:18px 16px}header .actions{width:100%}.dl .menu{left:0;right:auto}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
+      <div class="eyebrow">조달청 나라장터 OpenAPI · 매일 자동 수집</div>
       <h1>나라장터 AI 사업 모니터</h1>
       <div class="sub" id="updated">데이터 불러오는 중…</div>
     </div>
     <div class="actions">
-      <button class="btn" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환">🌓</button>
-      <button class="btn" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기">⬇ 엑셀 다운로드</button>
       <span class="refresh">
-        <button class="btn" id="refreshBtn" title="나라장터에서 지금 다시 수집합니다 (30분에 한 번)">🔄 갱신</button>
         <span class="when" id="refreshWhen"></span>
         <span class="msg" id="refreshMsg" role="status" aria-live="polite"></span>
+        <button class="btn primary ico" id="refreshBtn" title="나라장터에서 지금 다시 수집합니다 (30분에 한 번)">갱신</button>
       </span>
-      <button class="btn primary" id="anaBtn" title="필터와 무관하게 전체 데이터로 시도별·도내·사업비·업체 분석 시트를 만듭니다">📊 분석 엑셀 다운로드</button>
-      <button class="btn primary" id="repBtn" title="숫자만 채운 보고서 초안(.docx)을 받습니다">📝 보고서 초안 다운로드</button>
+      <details class="dl">
+        <summary class="btn ico" id="dlBtn">다운로드</summary>
+        <div class="menu">
+          <button class="mi" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기"><b>화면 목록 엑셀</b><small>지금 걸린 필터 그대로</small></button>
+          <button class="mi" id="anaBtn" title="필터와 무관하게 전체 데이터로 시도별·도내·사업비·업체 분석 시트를 만듭니다"><b>분석 엑셀</b><small>시도별·도내·사업비·업체 분석</small></button>
+          <button class="mi" id="repBtn" title="숫자만 채운 보고서 초안(.docx)을 받습니다"><b>보고서 초안 (.docx)</b><small>숫자만 채운 초안 2종</small></button>
+        </div>
+      </details>
+      <button class="btn ico" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환"></button>
     </div>
   </header>
 
@@ -1005,7 +1051,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     const m = $("#refreshMsg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : "");
     clearTimeout(msgTimer); if (ttl) msgTimer = setTimeout(() => { m.textContent = ""; }, ttl);
   };
-  const setBtn = (busy, label) => { const b = $("#refreshBtn"); b.disabled = busy; b.textContent = label || "🔄 갱신"; };
+  const setBtn = (busy, label) => { const b = $("#refreshBtn"); b.disabled = busy; b.textContent = label || "갱신"; };
 
   function showHeader() {
     const { meta, sample } = state;
@@ -1113,6 +1159,13 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     }));
   });
 })();
+</script>
+<script>
+// 다운로드 메뉴: 항목을 누르거나 바깥을 누르면 닫기
+document.addEventListener("click", e => {
+  const d = document.querySelector("details.dl");
+  if (d && d.open && (!d.contains(e.target) || e.target.closest(".mi"))) d.open = false;
+});
 </script>
 </body>
 </html>

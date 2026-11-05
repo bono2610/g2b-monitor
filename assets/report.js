@@ -675,11 +675,11 @@
   // ───────── 진입점 ─────────
   let ctx = null;   // { getItems, getMeta, statusLabel }
   async function withBusy(btn, label, fn) {
-    const old = btn.textContent;
+    const old = btn.innerHTML;
     btn.disabled = true; btn.textContent = label;
     try { await fn(); }
     catch (e) { console.error(e); alert("파일을 만들지 못했습니다: " + (e && e.message || e)); }
-    finally { btn.disabled = false; btn.textContent = old; }
+    finally { btn.disabled = false; btn.innerHTML = old; }
   }
 
   async function downloadAnalysis() {
