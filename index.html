@@ -861,7 +861,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => drawCharts(filtered()), 120); });
   }
 
-  // ───────── 갱신 (Apps Script 중계 → GitHub Actions 수집 → Pages 배포 → 자동 반영) ─────────
+  // ───────── 갱신 (중계 함수 → GitHub Actions 수집 → Pages 배포 → 자동 반영) ─────────
   const POLL_MS = 15e3, SLOW_MS = 5 * 60e3, GIVEUP_MS = 20 * 60e3;
   const fmtUpdated = u => {
     const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(u || "");
@@ -920,8 +920,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     setBtn(true, "요청 중…"); setMsg("");
     let j = {};
     try {
-      // text/plain 단순 요청: 사전 확인(preflight) 없이 보냄 — Apps Script 웹 앱은 preflight 를 받지 못함
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: "{}", redirect: "follow" });
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       j = await r.json().catch(() => ({}));
     } catch (e) { j = {}; }
     if (j.status === "started" || j.status === "running") {
