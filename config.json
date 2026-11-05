@@ -15,6 +15,9 @@
 
   "bid_types": ["용역", "물품"],
 
+  "_갱신_설명": "화면의 '갱신' 버튼이 부르는 중계 함수(Vercel) 주소입니다. 비워 두면 버튼을 눌러도 안내만 나옵니다. 예: https://g2b-relay.vercel.app/api/refresh",
+  "refresh_relay_url": "",
+
   "daily_lookback_days": 3,
   "backfill_days": 90,
 

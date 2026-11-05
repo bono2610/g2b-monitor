@@ -3,14 +3,22 @@
 조달청 나라장터 OpenAPI로 **AI·RPA·빅데이터 등 키워드 관련 입찰공고와 낙찰결과를 매일 자동 수집**하고, 대시보드로 보여주는 도구입니다.
 
 - 서버 없음: GitHub Actions가 매일 수집 → 저장소에 저장 → GitHub Pages가 화면 제공
+  (🔄 갱신 버튼을 쓰려면 Vercel 무료 중계 함수 1개만 추가 — 선택)
 - 외부 LLM 없음: 키워드·제외어·분류 규칙(정규식)으로만 처리
 - 공개 데이터만 다룸: 나라장터에 이미 공개된 공고·낙찰 정보
 
 ## 화면 구성
 - 요약: 공고 건수 / 사업 규모 합계 / 낙찰 완료(낙찰총액·평균 낙찰률) / 최근 7일 신규
-- 차트: 월별 공고 건수, 지역별 건수(누르면 지역 필터), 발주기관 TOP 10(누르면 기관 검색)
+- **시도별 지도**: 시도별 건수·배정예산 합계를 파란색 5단계로 칠한 지도. 시도를 누르면 페이지 전체(요약·산점도·구간 카드·목록)가 그 지역으로 걸러지고 지역 드롭다운과 함께 움직입니다. 다시 누르거나 빈 곳을 누르면 해제
+  - `전남광주`는 한 지역이라 광주·전남 경계를 같은 색으로 칠하고, 어느 쪽을 눌러도 `전남광주`가 선택됩니다
+  - `중앙·기타`(기관명에 지명이 없는 공고)는 지도 아래 칸으로 따로 표시하고, 누르면 시도처럼 선택됩니다. 색 단계 계산에서는 뺍니다
+  - 토글: **건수 / 금액**, **전체 / 지자체 사업만**(기관구분이 `지자체`인 공고만 — 페이지 전체 필터)
+- **배정예산 vs 낙찰금액 산점도**: 낙찰완료 건, 점선은 낙찰금액 = 배정예산(100%). 선택 지역은 주황으로 강조. 점을 누르면 나라장터 원문. 큰 금액 몇 건 때문에 점이 몰리면 자동으로 로그 축(일반 축/로그 축 토글)
+- **규모 구간별 평균 낙찰률**: 배정예산 1억 미만 / 1~5억 / 5~10억 / 10억 이상, 현재 필터 반영
+- 차트: 월별 공고 건수, 발주기관 TOP 10(누르면 기관 검색)
+- **🔄 갱신**: 누르면 바로 재수집(아래 "갱신 버튼 설정" 필요). 옆에 마지막 수집 시각 표시
 - 목록: 상태(진행중·결과대기·낙찰), 분야·기관구분, 원문 링크, 낙찰업체·금액·낙찰률, 정렬
-- **⬇ 엑셀 다운로드**: 현재 화면 필터 결과 목록 (기존 기능)
+- **⬇ 엑셀 다운로드**: 현재 화면 필터 결과 목록 + `규모구간별낙찰률` 시트(현재 필터 기준)
 - **📊 분석 엑셀 다운로드**: 필터와 무관하게 전체 데이터로 `나라장터_AI사업_분석자료_YYYYMMDD.xlsx` 생성
 - **📝 보고서 초안 다운로드**: 숫자만 채운 .docx 보고서 초안 2종 (한글에서 열림)
 - 데이터가 아직 없으면 가상의 샘플 데이터로 화면을 미리 보여줍니다.
@@ -24,6 +32,7 @@
 | 도내현황 | 기관구분별 소계(건수·예산·낙찰·진행중·결과대기) + 사업 목록 + 중복 검토(같은 분야를 도내 다른 기관이 발주하면 "유사사업 있음") + 담당 부서 입력칸 |
 | 사업비근거 | 분야별 건수·예산 기재 건수·평균·중앙값·최소·최대·낙찰 건수·평균 낙찰률(배정예산 0원 제외) + 챗봇·생성형AI·RPA 사례표 |
 | 업체현황 | 낙찰 건수 상위 40개사 (내부 참고용) |
+| 규모구간별낙찰률 | 배정예산 구간별 낙찰 건수·평균 낙찰률·예산/낙찰금액 합계, 지자체만 따로 (공고목록 참조 수식) |
 
 - 수식은 COUNTIFS·SUMIFS·AVERAGEIFS·RANK와 배열수식 `{=MEDIAN(IF(...))}`만 씁니다. XLOOKUP·FILTER·UNIQUE 같은 최신 함수는 쓰지 않아 구버전 엑셀·한셀에서도 열립니다.
 - 수식 결과값도 함께 저장되어 있어 재계산하지 않는 프로그램에서도 값이 보입니다.
@@ -63,6 +72,46 @@ Settings › Pages › Source: **Deploy from a branch** › Branch: `main` / `(r
 Actions 탭 › **나라장터 공고 수집** › Run workflow › backfill 칸에 `90` 입력 › 실행
 → 최근 90일 공고가 쌓입니다. 이후에는 매일 오전 6시 47분에 자동으로 최근 3일치를 갱신합니다.
 
+## 갱신 버튼 설정 (선택)
+화면의 **🔄 갱신** 버튼은 이렇게 동작합니다.
+
+```
+버튼 → Vercel 중계 함수(relay/api/refresh.js) → GitHub Actions '나라장터 공고 수집' 실행(workflow_dispatch)
+     → 수집·커밋 → GitHub Pages 배포 → 화면이 15초마다 data/bids.json 을 확인하다가 바뀌면 자동으로 다시 그림
+```
+
+- GitHub 토큰은 **Vercel 환경변수에만** 둡니다. 페이지·저장소에는 토큰이 없습니다.
+- 마지막 실행(매일 예약 실행 포함) 후 30분 안에는 다시 실행하지 않고 "N분 후 다시 가능"이라고 답합니다. 이미 수집 중이면 새로 실행하지 않습니다. (GitHub 실행 기록으로 판단, DB 없음)
+- 중계 함수는 `https://bono2610.github.io` 에서 온 요청만 받습니다(CORS).
+- 5분이 지나도 데이터가 안 바뀌면 "수집이 지연되고 있어요" 안내가 나옵니다. Actions 탭에서 실행 결과를 확인하세요.
+
+### 1) GitHub 토큰 발급 (fine-grained, 권한 최소)
+1. GitHub 오른쪽 위 프로필 › **Settings** › 맨 아래 **Developer settings** › **Personal access tokens** › **Fine-grained tokens** › **Generate new token**
+2. Token name: `g2b-relay` / Expiration: 원하는 기간(예: 1년 — 만료되면 새로 발급해 4)의 값만 바꾸면 됩니다)
+3. Resource owner: 본인 계정 / Repository access: **Only select repositories** › `g2b-monitor` 하나만 선택
+4. Permissions › Repository permissions › **Actions: Read and write** 하나만 켭니다 (Metadata: Read-only는 자동으로 붙음). 다른 권한은 모두 No access
+5. **Generate token** › 나온 값(`github_pat_…`)을 복사 (이 화면을 벗어나면 다시 볼 수 없음). 어디에도 붙여 넣지 말고 아래 Vercel에만 넣으세요
+
+### 2) Vercel에 relay 폴더 배포
+1. https://vercel.com 에 GitHub 계정으로 가입·로그인 (Hobby 무료)
+2. **Add New… › Project** › `g2b-monitor` 저장소 **Import**
+3. 설정 화면에서
+   - **Root Directory**: `Edit` 눌러 `relay` 선택 ← 중요
+   - Framework Preset: `Other` (그대로)
+   - **Environment Variables**: Name `GITHUB_TOKEN`, Value 에 1)에서 복사한 토큰 › Add
+4. **Deploy** › 끝나면 나오는 주소(예: `https://g2b-monitor-relay.vercel.app`)를 기억
+5. 확인: 브라우저 주소창에 `https://<주소>/api/refresh` 를 열면 `{"status":"ready",…}` 또는 `{"status":"cooldown",…}` 가 보이면 정상 (주소창으로 여는 건 상태만 보고 실행하지 않음)
+
+> 나중에 토큰을 바꾸면 Vercel › Project › Settings › Environment Variables 에서 `GITHUB_TOKEN` 을 고친 뒤 Deployments › 최신 배포 › **Redeploy** 해야 반영됩니다.
+> 선택 환경변수: `COOLDOWN_MIN`(기본 30), `GITHUB_REPO`(기본 `bono2610/g2b-monitor`), `WORKFLOW_FILE`(기본 `collect.yml`), `WORKFLOW_REF`(기본 `main`), `ALLOWED_ORIGIN`(기본 `https://bono2610.github.io`)
+
+### 3) 페이지에 중계 함수 주소 넣기
+`config.json` 의 `refresh_relay_url` 한 줄만 고쳐 커밋합니다.
+```json
+"refresh_relay_url": "https://g2b-monitor-relay.vercel.app/api/refresh",
+```
+1~2분 뒤 Pages 가 다시 배포되면 버튼이 동작합니다. 비워 두면 버튼을 눌러도 "아직 설정되지 않았어요" 안내만 나옵니다.
+
 ## 설정 바꾸기 (`config.json`)
 | 항목 | 의미 |
 |---|---|
@@ -79,6 +128,7 @@ Actions 탭 › **나라장터 공고 수집** › Run workflow › backfill 칸
 | `bid_types` | `용역`, `물품`, `공사` 중 선택 |
 | `daily_lookback_days` | 매일 다시 훑는 기간(정정공고·낙찰 반영용) |
 | `backfill_days` | 데이터가 비었을 때 처음 가져오는 기간 |
+| `refresh_relay_url` | 🔄 갱신 버튼이 부르는 중계 함수 주소 (위 "갱신 버튼 설정") |
 
 영문 약어 키워드(AI, RPA 등)는 앞뒤가 영문자일 때(MAIL, TRAIN, AIR 등) 자동으로 걸러집니다.
 
@@ -131,10 +181,28 @@ python -m http.server 8000                           # http://localhost:8000 에
 - 인증키 오류 등으로 **모든 호출이 실패하면 기존 데이터를 덮어쓰지 않고** 작업이 실패로 끝납니다. (Actions 탭에서 확인)
 - 활용신청 직후에는 키가 등록되기까지 1시간 정도 걸릴 수 있습니다 (`SERVICE_KEY_IS_NOT_REGISTERED_ERROR`).
 
+## 지도 데이터 (출처)
+`data/geo/sido.topo.json` (약 35KB)은 아래 행정동 경계를 시도별로 합치고 단순화한 TopoJSON입니다. 외부 CDN 없이 저장소 파일을 그대로 씁니다.
+
+- 원자료: **통계청 SGIS 행정구역 경계** (공공누리 제1유형, 출처표시)
+- 가공: **[vuski/admdongkor](https://github.com/vuski/admdongkor)** `ver20261001` 행정동 경계 (CC BY 4.0) — 2026.7.1. 전남광주통합특별시 출범, 2023.7.1. 군위군 대구 편입, 세종 포함
+- 이 저장소에서 한 가공: 시도 단위 병합(dissolve), 전남광주는 옛 광주광역시 5개 구(`part: 광주`)와 나머지(`part: 전남`) 두 도형으로 나눔(값·색은 `region: 전남광주` 하나로 같음), 2% 단순화([mapshaper](https://github.com/mbloch/mapshaper))
+
+다시 만들 때 (원본 GeoJSON 약 35MB를 받은 폴더에서):
+```bash
+npx mapshaper HangJeongDong_ver20261001.geojson \
+  -each 'var S={"11":"서울","26":"부산","27":"대구","28":"인천","30":"대전","31":"울산","36":"세종","41":"경기","51":"강원","43":"충북","44":"충남","52":"전북","12":"전남광주","47":"경북","48":"경남","50":"제주"}; region=S[sido]; part = sido=="12" ? (["동구","서구","남구","북구","광산구"].indexOf(sggnm)>=0 ? "광주" : "전남") : region' \
+  -dissolve2 part copy-fields=region name=sido -simplify 2% keep-shapes -filter-slivers \
+  -o format=topojson quantization=10000 data/geo/sido.topo.json
+```
+지도 속성 `region` 은 `config.json` 의 `region_rules.order` 시도명과 같아야 색이 칠해집니다. 시도를 합치거나 나누면 `region` 값도 맞춰 주세요.
+
 ## 파일 구조
 ```
 ├─ index.html                 대시보드 (GitHub Pages)
 ├─ assets/report.js           분석 엑셀·보고서 초안 생성 (브라우저)
+├─ data/geo/sido.topo.json    시도 경계 지도 (TopoJSON)
+├─ relay/api/refresh.js       갱신 버튼 중계 함수 (Vercel, 토큰은 Vercel 환경변수)
 ├─ config.json                키워드·수집 설정, 분류·제외·중복 규칙
 ├─ collector/collect.py       수집기
 ├─ collector/rules.py         분류·제외·중복 정리 규칙 엔진
