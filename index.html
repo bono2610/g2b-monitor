@@ -347,8 +347,9 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       return decodeTopo(await r.json());
     } catch (e) { return null; }   // 지도를 못 불러오면 막대 차트로 대체
   }
+  // ?t= : GitHub Pages CDN 캐시(최대 10분)를 피해 항상 최신 파일을 받음
   async function loadCfg() {
-    try { const r = await fetch("config.json", { cache: "no-store" }); return r.ok ? await r.json() : {}; } catch (e) { return {}; }
+    try { const r = await fetch(`config.json?t=${Date.now()}`, { cache: "no-store" }); return r.ok ? await r.json() : {}; } catch (e) { return {}; }
   }
 
   // TopoJSON → 시도별 폴리곤(경위도). 외부 라이브러리 없이 직접 해석
@@ -376,7 +377,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
 
   async function load() {
     try {
-      const r = await fetch("data/bids.json", { cache: "no-store" });
+      const r = await fetch(`data/bids.json?t=${Date.now()}`, { cache: "no-store" });
       if (!r.ok) throw new Error(r.status);
       const j = await r.json();
       if (!j.items || !j.items.length) throw new Error("empty");
