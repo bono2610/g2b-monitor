@@ -5,12 +5,14 @@
 - 조달청 나라장터 OpenAPI(공공데이터포털)에서 키워드별 입찰공고와 낙찰결과를 수집
 - 공고번호로 둘을 연결해 data/bids.json 에 누적 저장
 - 외부 LLM 없이 규칙(키워드/제외어)만으로 필터링
+- 지역·기관구분·분야 분류와 재공고 중복 정리도 config.json 규칙으로 수집 단계에서 계산
 
 사용법
   export G2B_SERVICE_KEY="공공데이터포털 일반 인증키(Decoding)"
   python collector/collect.py              # 평소: 최근 N일(daily_lookback_days) 수집
   python collector/collect.py --backfill 90  # 최초: 최근 90일 몰아서 수집
   python collector/collect.py --dry-run    # 저장하지 않고 결과만 출력
+  python collector/collect.py --reprocess  # API 호출 없이 기존 데이터에 분류·제외·중복 규칙만 다시 적용
 """
 from __future__ import annotations
 
@@ -26,6 +28,8 @@ from urllib.parse import unquote
 
 import requests
 
+from rules import OTHER_REGION, Rules, postprocess, rules_meta
+
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = ROOT / "config.json"
 DATA_PATH = ROOT / "data" / "bids.json"
@@ -35,28 +39,6 @@ NUM_ROWS = 100
 MAX_PAGES = 30          # 키워드·기간당 최대 3,000건
 CHUNK_DAYS = 28         # API 조회기간은 보통 1개월 이내만 허용
 REQUEST_GAP = 0.25      # 호출 간격(초) — 트래픽 제한 대비
-
-# 발주기관명 → 시도 추정 (중앙부처·공공기관은 '중앙·기타')
-REGION_RULES = [
-    ("제주", ["제주", "서귀포"]),
-    ("서울", ["서울"]),
-    ("부산", ["부산"]),
-    ("대구", ["대구"]),
-    ("인천", ["인천"]),
-    ("광주", ["광주광역시", "광주시"]),
-    ("대전", ["대전"]),
-    ("울산", ["울산"]),
-    ("세종", ["세종특별자치시", "세종시"]),
-    ("경기", ["경기", "수원", "성남", "고양", "용인", "부천", "안산", "안양", "화성", "평택", "의정부", "파주", "김포", "시흥", "남양주"]),
-    ("강원", ["강원", "춘천", "원주", "강릉"]),
-    ("충북", ["충청북도", "충북", "청주", "충주"]),
-    ("충남", ["충청남도", "충남", "천안", "아산", "공주"]),
-    ("전북", ["전북", "전라북도", "전주", "군산", "익산"]),
-    ("전남", ["전라남도", "전남", "목포", "여수", "순천"]),
-    ("경북", ["경상북도", "경북", "포항", "구미", "경주", "안동"]),
-    ("경남", ["경상남도", "경남", "창원", "김해", "진주", "양산"]),
-]
-
 
 # ───────────────────────── 유틸 ─────────────────────────
 def load_config() -> dict:
@@ -102,14 +84,6 @@ def date_chunks(start: datetime, end: datetime):
         nxt = min(cur + timedelta(days=CHUNK_DAYS), end)
         yield cur, nxt
         cur = nxt
-
-
-def guess_region(*names: str) -> str:
-    text = " ".join(n for n in names if n)
-    for region, pats in REGION_RULES:
-        if any(p in text for p in pats):
-            return region
-    return "중앙·기타"
 
 
 def keyword_pattern(kw: str) -> re.Pattern:
@@ -190,7 +164,7 @@ def norm_bid(raw: dict, bid_type: str, today: str) -> dict:
         "title": (raw.get("bidNtceNm") or "").strip(),
         "org": org,
         "demand": demand,
-        "region": guess_region(demand, org),
+        "region": OTHER_REGION,   # 분류는 postprocess()에서 config 규칙으로 계산
         "noticeDt": raw.get("bidNtceDt", ""),
         "closeDt": raw.get("bidClseDt", ""),
         "budget": to_int(raw.get("asignBdgtAmt")),
@@ -221,7 +195,7 @@ def collect(cfg: dict, key: str, days: int) -> tuple[list[dict], list[dict], lis
     today = now.strftime("%Y-%m-%d")
     base = cfg["api_base"].rstrip("/")
     kw_pats = {kw: keyword_pattern(kw) for kw in cfg["keywords"]}
-    excludes = [e.lower() for e in cfg.get("exclude_keywords", [])]
+    rules = Rules(cfg)
     errors: list[str] = []
 
     bids: dict[str, dict] = {}
@@ -239,8 +213,7 @@ def collect(cfg: dict, key: str, days: int) -> tuple[list[dict], list[dict], lis
                         b = norm_bid(raw, bid_type, today)
                         if not b["no"]:
                             continue
-                        title_l = b["title"].lower()
-                        if any(x in title_l for x in excludes):
+                        if rules.excluded(b["title"]):   # 취소공고, 조류인플루엔자(AI) 등
                             continue
                         matched = [k for k, p in kw_pats.items() if p.search(b["title"])]
                         if not matched:      # 서버는 부분일치라 오탐이 섞임 → 한 번 더 거름
@@ -266,6 +239,8 @@ def collect(cfg: dict, key: str, days: int) -> tuple[list[dict], list[dict], lis
 
 def merge(existing: list[dict], new_bids: list[dict], awards: list[dict]) -> tuple[list[dict], int, int]:
     by_id = {b["id"]: b for b in existing}
+    # 중복 정리로 대표 공고에 묶여 들어간 공고 id 도 '이미 아는 공고'로 본다
+    known = {i for b in existing for i in (b.get("dupIds") or [b["id"]])}
     added = 0
     for b in new_bids:
         old = by_id.get(b["id"])
@@ -273,40 +248,99 @@ def merge(existing: list[dict], new_bids: list[dict], awards: list[dict]) -> tup
             b["firstSeen"] = old.get("firstSeen", b["firstSeen"])
             b["award"] = old.get("award")
             b["keywords"] = sorted(set(old.get("keywords", [])) | set(b["keywords"]))
-        else:
+            if old.get("dupIds"):
+                b["dupIds"] = old["dupIds"]
+        elif b["id"] not in known:
             added += 1
         by_id[b["id"]] = b
 
-    # 낙찰은 공고번호 기준(차수 무관)으로 최신 차수 공고에 연결
+    # 낙찰은 공고번호 기준(차수 무관)으로 연결. 묶인 공고의 공고번호로 들어온 낙찰도 대표 공고에 붙인다
     award_by_no = {a["no"]: a for a in awards}
     linked = 0
     for b in by_id.values():
-        a = award_by_no.get(b["no"])
-        if a and b.get("award") != a:
-            b["award"] = {k: v for k, v in a.items() if k != "no"}
-            linked += 1
+        nos = [b["no"]] + sorted({i.rsplit("-", 1)[0] for i in (b.get("dupIds") or [])} - {b["no"]})
+        a = next((award_by_no[n] for n in nos if n in award_by_no), None)
+        if a:
+            a = {k: v for k, v in a.items() if k != "no"}
+            if b.get("award") != a:
+                b["award"] = a
+                linked += 1
     items = sorted(by_id.values(), key=lambda x: x.get("noticeDt", ""), reverse=True)
     return items, added, linked
+
+
+def save(cfg: dict, items: list[dict], stats: dict, errors: list[str], dry_run: bool):
+    out = {
+        "updated": datetime.now(KST).isoformat(timespec="minutes"),
+        "keywords": cfg["keywords"],
+        "rules": rules_meta(cfg),
+        "stats": {"total": len(items), **stats},
+        "errors": errors[:20],
+        "items": items,
+    }
+    if dry_run:
+        print(json.dumps(items[:3], ensure_ascii=False, indent=2))
+        return
+    DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DATA_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def print_summary(before: list[dict], after: list[dict], pstats: dict, rules: Rules):
+    from collections import Counter
+    print(f"  · 제외 패턴으로 뺀 공고 {pstats['excluded']}건")
+    print(f"  · 중복 정리 {pstats['beforeDedup']}건 → {pstats['afterDedup']}건 "
+          f"({pstats['beforeDedup'] - pstats['afterDedup']}건 묶음)")
+    kept = [b for b in before if not rules.excluded(b.get("title", ""))]
+    c0 = Counter(b.get("region") for b in kept)
+    c1 = Counter(rules.region(b.get("demand", ""), b.get("org", "")) for b in kept)
+    c2 = Counter(b.get("region") for b in after)
+    print("  · 지역별 건수   기존규칙 → 새규칙(중복정리 전) → 최종(중복정리 후)")
+    order = rules.region_order
+    for r in order + sorted((set(c0) | set(c1) | set(c2)) - set(order)):
+        if c0[r] or c1[r] or c2[r]:
+            print(f"      {r:<6} {c0[r]:>6} → {c1[r]:>6} ({c1[r] - c0[r]:+4d}) → {c2[r]:>6}")
 
 
 def main():
     ap = argparse.ArgumentParser(description="나라장터 공고 모니터링 수집기")
     ap.add_argument("--backfill", type=int, help="최근 N일을 몰아서 수집")
     ap.add_argument("--dry-run", action="store_true", help="파일 저장 없이 결과만 출력")
+    ap.add_argument("--reprocess", action="store_true",
+                    help="API 호출 없이 기존 data/bids.json 에 제외·분류·중복 규칙만 다시 적용")
     args = ap.parse_args()
 
     cfg = load_config()
-    key = get_service_key()
+    rules = Rules(cfg)
 
-    existing = []
+    existing, prev = [], {}
     if DATA_PATH.exists():
-        existing = json.loads(DATA_PATH.read_text(encoding="utf-8")).get("items", [])
+        prev = json.loads(DATA_PATH.read_text(encoding="utf-8"))
+        existing = prev.get("items", [])
 
+    if args.reprocess:
+        if not existing:
+            sys.exit("❌ 다시 처리할 data/bids.json 이 없습니다.")
+        print(f"▶ 기존 데이터 {len(existing)}건에 규칙 다시 적용 (API 호출 없음)")
+        before = [dict(b) for b in existing]
+        items, pstats = postprocess(existing, rules)
+        print_summary(before, items, pstats, rules)
+        stats = {**(prev.get("stats") or {}), **pstats}
+        stats.pop("total", None)
+        out_updated = prev.get("updated")
+        save(cfg, items, stats, prev.get("errors") or [], args.dry_run)
+        if not args.dry_run and out_updated:   # 수집 시각은 그대로 둔다
+            j = json.loads(DATA_PATH.read_text(encoding="utf-8"))
+            j["updated"] = out_updated
+            DATA_PATH.write_text(json.dumps(j, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"✔ 전체 {len(items)}건")
+        return
+
+    key = get_service_key()
     days = args.backfill or (cfg["backfill_days"] if not existing else cfg["daily_lookback_days"])
     print(f"▶ 최근 {days}일 수집 시작 — 키워드 {len(cfg['keywords'])}개, 유형 {cfg['bid_types']}")
 
     new_bids, awards, errors = collect(cfg, key, days)
-    items, added, linked = merge(existing, new_bids, awards)
+    merged, added, linked = merge(existing, new_bids, awards)
 
     total_calls = len(cfg["keywords"]) * len(cfg["bid_types"]) * 2 * max(1, -(-days // CHUNK_DAYS))
     if errors and len(errors) >= total_calls:
@@ -314,22 +348,12 @@ def main():
         print("\n".join(errors[:5]))
         sys.exit("❌ 모든 호출이 실패했습니다. 인증키 또는 API 활용신청 승인 상태를 확인하세요.")
 
-    out = {
-        "updated": datetime.now(KST).isoformat(timespec="minutes"),
-        "keywords": cfg["keywords"],
-        "stats": {"total": len(items), "addedThisRun": added, "awardsLinked": linked},
-        "errors": errors[:20],
-        "items": items,
-    }
+    items, pstats = postprocess(merged, rules)
     print(f"✔ 신규 {added}건, 낙찰 연결 {linked}건, 전체 {len(items)}건 (오류 {len(errors)}건)")
+    print(f"  · 제외 {pstats['excluded']}건, 중복 정리 {pstats['beforeDedup']}→{pstats['afterDedup']}건")
     for e in errors[:5]:
         print("  ⚠", e)
-
-    if args.dry_run:
-        print(json.dumps(items[:3], ensure_ascii=False, indent=2))
-        return
-    DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-    DATA_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    save(cfg, items, {"addedThisRun": added, "awardsLinked": linked, **pstats}, errors, args.dry_run)
 
 
 if __name__ == "__main__":
