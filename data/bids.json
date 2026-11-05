@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-05T09:45+09:00",
+ "updated": "2026-11-05T10:52+09:00",
  "keywords": [
   "인공지능",
   "AI",
@@ -11,12 +11,201 @@
   "LLM"
  ],
  "stats": {
-  "total": 2350,
-  "addedThisRun": 2148,
-  "awardsLinked": 771
+  "total": 2359,
+  "addedThisRun": 9,
+  "awardsLinked": 13
  },
  "errors": [],
  "items": [
+  {
+   "id": "R26BK01811714-000",
+   "no": "R26BK01811714",
+   "ord": "000",
+   "type": "물품",
+   "title": "국립한국교통대학교 AI최고급신진연구자지원사업 장비 구매의 건(공정 시계열·Digital Twin AI 학습용 고성능 GPU 서버)",
+   "org": "국립한국교통대학교 산학협력단",
+   "demand": "국립한국교통대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 10:47:07",
+   "closeDt": "2026-11-13 15:00:00",
+   "budget": 90464000,
+   "estPrice": 82240000,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811714&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811627-000",
+   "no": "R26BK01811627",
+   "ord": "000",
+   "type": "물품",
+   "title": "국립한국교통대학교 AI최고급신진연구자지원사업 장비 구매의 건(초기 상태추정 AI 학습용 자체 제작 서버)",
+   "org": "국립한국교통대학교 산학협력단",
+   "demand": "국립한국교통대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 10:41:00",
+   "closeDt": "2026-11-13 14:00:00",
+   "budget": 58195500,
+   "estPrice": 52905000,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811627&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811303-000",
+   "no": "R26BK01811303",
+   "ord": "000",
+   "type": "용역",
+   "title": "소부장넷 AI 고도화 사업",
+   "org": "한국산업기술기획평가원",
+   "demand": "한국산업기술기획평가원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 10:25:43",
+   "closeDt": "2026-11-16 11:00:00",
+   "budget": 174844000,
+   "estPrice": 158949091,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811303&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811385-000",
+   "no": "R26BK01811385",
+   "ord": "000",
+   "type": "용역",
+   "title": "인천형 AX(인공지능 전환) ISP 사업",
+   "org": "조달청 인천지방조달청",
+   "demand": "인천광역시교육청",
+   "region": "인천",
+   "noticeDt": "2026-11-05 10:22:27",
+   "closeDt": "2026-11-27 10:00:00",
+   "budget": 202013000,
+   "estPrice": 181818182,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811385&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "인공지능"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811468-000",
+   "no": "R26BK01811468",
+   "ord": "000",
+   "type": "용역",
+   "title": "[K-Health 국민의료 AI서비스] PACS 의료영상 일괄 추출 시스템",
+   "org": "조선대학교병원",
+   "demand": "조선대학교병원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 10:21:31",
+   "closeDt": "2026-11-16 12:00:00",
+   "budget": 201000000,
+   "estPrice": 182727273,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811468&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811555-000",
+   "no": "R26BK01811555",
+   "ord": "000",
+   "type": "용역",
+   "title": "[K-Health 국민의료 AI서비스] 거점병원 통합CDW 구축을 위한 임상 데이터 마이그레이션",
+   "org": "조선대학교병원",
+   "demand": "조선대학교병원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 10:19:34",
+   "closeDt": "2026-11-16 12:00:00",
+   "budget": 300000000,
+   "estPrice": 272727273,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811555&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811409-000",
+   "no": "R26BK01811409",
+   "ord": "000",
+   "type": "물품",
+   "title": "인공지능 투명페트병 무인회수기(파쇄형) 구입 및 설치(재공고)",
+   "org": "전남광주통합특별시 북구",
+   "demand": "전남광주통합특별시 북구",
+   "region": "전남",
+   "noticeDt": "2026-11-05 10:09:20",
+   "closeDt": "2026-11-11 10:00:00",
+   "budget": 25000000,
+   "estPrice": 22727273,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811409&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "인공지능"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811404-000",
+   "no": "R26BK01811404",
+   "ord": "000",
+   "type": "물품",
+   "title": "2026년 AI 기반 자동 취약점 진단 솔루션",
+   "org": "강원대학교 산학협력단",
+   "demand": "강원대학교 산학협력단",
+   "region": "강원",
+   "noticeDt": "2026-11-05 10:06:10",
+   "closeDt": "2026-11-13 10:30:00",
+   "budget": 49500000,
+   "estPrice": 45000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811404&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
+  {
+   "id": "R26BK01811263-000",
+   "no": "R26BK01811263",
+   "ord": "000",
+   "type": "물품",
+   "title": "[K-Health 국민의료 AI서비스] 파운데이션 모델 학습·운영용 고성능 데이터 스토리지 장비 구매",
+   "org": "조선대학교병원",
+   "demand": "조선대학교병원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-05 09:33:57",
+   "closeDt": "2026-11-16 12:00:00",
+   "budget": 99000000,
+   "estPrice": 90000000,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811263&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null
+  },
   {
    "id": "R26BK01809757-000",
    "no": "R26BK01809757",
@@ -668,7 +857,13 @@
    "keywords": [
     "인공지능"
    ],
-   "award": null
+   "award": {
+    "winner": "주식회사 온더레벨",
+    "bizno": "1138690122",
+    "amount": 21230000,
+    "rate": 96.984,
+    "openDt": "2026-11-05 10:48:28"
+   }
   },
   {
    "id": "R26BK01808665-000",
@@ -10522,7 +10717,13 @@
    "keywords": [
     "AI"
    ],
-   "award": null
+   "award": {
+    "winner": "인크루트 주식회사",
+    "bizno": "3208701210",
+    "amount": 36287900,
+    "rate": null,
+    "openDt": "2026-11-05 10:44:16"
+   }
   },
   {
    "id": "R26BK01774120-000",
