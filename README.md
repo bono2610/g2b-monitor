@@ -3,7 +3,7 @@
 조달청 나라장터 OpenAPI로 **AI·RPA·빅데이터 등 키워드 관련 입찰공고와 낙찰결과를 매일 자동 수집**하고, 대시보드로 보여주는 도구입니다.
 
 - 서버 없음: GitHub Actions가 매일 수집 → 저장소에 저장 → GitHub Pages가 화면 제공
-  (🔄 갱신 버튼을 쓰려면 Vercel 무료 중계 함수 1개만 추가 — 선택)
+  (🔄 갱신 버튼을 쓰려면 Google Apps Script 웹 앱 1개만 추가 — 선택, 무료)
 - 외부 LLM 없음: 키워드·제외어·분류 규칙(정규식)으로만 처리
 - 공개 데이터만 다룸: 나라장터에 이미 공개된 공고·낙찰 정보
 
@@ -76,41 +76,49 @@ Actions 탭 › **나라장터 공고 수집** › Run workflow › backfill 칸
 화면의 **🔄 갱신** 버튼은 이렇게 동작합니다.
 
 ```
-버튼 → Vercel 중계 함수(relay/api/refresh.js) → GitHub Actions '나라장터 공고 수집' 실행(workflow_dispatch)
+버튼 → Google Apps Script 웹 앱(relay/apps-script.gs) → GitHub Actions '나라장터 공고 수집' 실행(workflow_dispatch)
      → 수집·커밋 → GitHub Pages 배포 → 화면이 15초마다 data/bids.json 을 확인하다가 바뀌면 자동으로 다시 그림
 ```
 
-- GitHub 토큰은 **Vercel 환경변수에만** 둡니다. 페이지·저장소에는 토큰이 없습니다.
+- GitHub 토큰은 **Apps Script의 스크립트 속성에만** 둡니다. 페이지·저장소에는 토큰이 없습니다.
 - 마지막 실행(매일 예약 실행 포함) 후 30분 안에는 다시 실행하지 않고 "N분 후 다시 가능"이라고 답합니다. 이미 수집 중이면 새로 실행하지 않습니다. (GitHub 실행 기록으로 판단, DB 없음)
-- 중계 함수는 `https://bono2610.github.io` 에서 온 요청만 받습니다(CORS).
 - 5분이 지나도 데이터가 안 바뀌면 "수집이 지연되고 있어요" 안내가 나옵니다. Actions 탭에서 실행 결과를 확인하세요.
+- Apps Script 웹 앱은 응답 헤더를 정할 수 없어 **호출 출처(CORS) 제한은 걸 수 없습니다.** 주소를 아는 누구나 부를 수 있지만, 30분 쿨다운과 토큰 권한(이 저장소 Actions만)이 남용을 막습니다. 출처 제한이 꼭 필요하면 아래 "Vercel로 할 때"를 쓰세요.
 
 ### 1) GitHub 토큰 발급 (fine-grained, 권한 최소)
 1. GitHub 오른쪽 위 프로필 › **Settings** › 맨 아래 **Developer settings** › **Personal access tokens** › **Fine-grained tokens** › **Generate new token**
-2. Token name: `g2b-relay` / Expiration: 원하는 기간(예: 1년 — 만료되면 새로 발급해 4)의 값만 바꾸면 됩니다)
+2. Token name: `g2b-relay` / Expiration: 원하는 기간(예: 1년 — 만료되면 새로 발급해 스크립트 속성 값만 바꾸면 됩니다)
 3. Resource owner: 본인 계정 / Repository access: **Only select repositories** › `g2b-monitor` 하나만 선택
 4. Permissions › Repository permissions › **Actions: Read and write** 하나만 켭니다 (Metadata: Read-only는 자동으로 붙음). 다른 권한은 모두 No access
-5. **Generate token** › 나온 값(`github_pat_…`)을 복사 (이 화면을 벗어나면 다시 볼 수 없음). 어디에도 붙여 넣지 말고 아래 Vercel에만 넣으세요
+5. **Generate token** › 나온 값(`github_pat_…`)을 복사 (이 화면을 벗어나면 다시 볼 수 없음). 어디에도 붙여 넣지 말고 아래 스크립트 속성에만 넣으세요
 
-### 2) Vercel에 relay 폴더 배포
-1. https://vercel.com 에 GitHub 계정으로 가입·로그인 (Hobby 무료)
-2. **Add New… › Project** › `g2b-monitor` 저장소 **Import**
-3. 설정 화면에서
-   - **Root Directory**: `Edit` 눌러 `relay` 선택 ← 중요
-   - Framework Preset: `Other` (그대로)
-   - **Environment Variables**: Name `GITHUB_TOKEN`, Value 에 1)에서 복사한 토큰 › Add
-4. **Deploy** › 끝나면 나오는 주소(예: `https://g2b-monitor-relay.vercel.app`)를 기억
-5. 확인: 브라우저 주소창에 `https://<주소>/api/refresh` 를 열면 `{"status":"ready",…}` 또는 `{"status":"cooldown",…}` 가 보이면 정상 (주소창으로 여는 건 상태만 보고 실행하지 않음)
+### 2) Apps Script 웹 앱 만들기
+1. https://script.google.com › **새 프로젝트** › 위쪽 제목을 `g2b-relay` 로 변경
+2. `Code.gs` 내용을 모두 지우고 저장소의 [`relay/apps-script.gs`](relay/apps-script.gs) 내용을 그대로 붙여 넣기 › 💾 저장
+3. 왼쪽 **⚙ 프로젝트 설정** › 맨 아래 **스크립트 속성** › **스크립트 속성 추가**
+   - 속성: `GITHUB_TOKEN` / 값: 1)에서 복사한 토큰 › **스크립트 속성 저장**
+4. 왼쪽 **< > 편집기**로 돌아와 위쪽 함수 선택 칸에서 **`checkStatus`** 고르고 **▶ 실행**
+   - "승인 필요" › 권한 검토 › 본인 계정 › ("Google에서 확인하지 않은 앱" 이 나오면 **고급** › **g2b-relay(으)로 이동(안전하지 않음)**) › **허용**
+     (본인이 만든 스크립트라 나오는 경고입니다. 요청 권한은 "외부 서비스에 연결" 하나)
+   - 아래 실행 로그에 `{"status":"ready",…}` 또는 `{"status":"cooldown",…}` 이 나오면 정상
+5. 오른쪽 위 **배포** › **새 배포** › ⚙(유형 선택) › **웹 앱**
+   - 설명: `g2b-relay` / 다음 사용자 인증 정보로 실행: **나** / 액세스 권한이 있는 사용자: **모든 사용자**
+   - **배포** › 나온 **웹 앱 URL**(`https://script.google.com/macros/s/…/exec`) 복사
+6. 확인: 그 주소를 브라우저 주소창에 열면 상태 JSON이 보입니다 (주소창으로 여는 건 상태만 보고 실행하지 않음)
 
-> 나중에 토큰을 바꾸면 Vercel › Project › Settings › Environment Variables 에서 `GITHUB_TOKEN` 을 고친 뒤 Deployments › 최신 배포 › **Redeploy** 해야 반영됩니다.
-> 선택 환경변수: `COOLDOWN_MIN`(기본 30), `GITHUB_REPO`(기본 `bono2610/g2b-monitor`), `WORKFLOW_FILE`(기본 `collect.yml`), `WORKFLOW_REF`(기본 `main`), `ALLOWED_ORIGIN`(기본 `https://bono2610.github.io`)
+> 코드를 고친 뒤에는 **배포 › 배포 관리 › ✏ 수정 › 버전: 새 버전 › 배포** 로 올려야 같은 주소에 반영됩니다. (새 배포를 만들면 주소가 바뀜)
+> 저장소·쿨다운을 바꾸려면 코드 위쪽 `REPO`, `WORKFLOW`, `REF`, `COOLDOWN_MIN` 값을 고칩니다.
 
-### 3) 페이지에 중계 함수 주소 넣기
+### 3) 페이지에 중계 주소 넣기
 `config.json` 의 `refresh_relay_url` 한 줄만 고쳐 커밋합니다.
 ```json
-"refresh_relay_url": "https://g2b-monitor-relay.vercel.app/api/refresh",
+"refresh_relay_url": "https://script.google.com/macros/s/AKfy…/exec",
 ```
 1~2분 뒤 Pages 가 다시 배포되면 버튼이 동작합니다. 비워 두면 버튼을 눌러도 "아직 설정되지 않았어요" 안내만 나옵니다.
+
+### (대안) Vercel로 할 때
+`relay/api/refresh.js` 는 같은 동작을 하는 Vercel 서버리스 함수이며, `https://bono2610.github.io` 출처만 허용(CORS)합니다.
+Vercel › Add New › Project › 이 저장소 Import › **Root Directory: `relay`** › Environment Variables `GITHUB_TOKEN` › Deploy › `https://<주소>/api/refresh` 를 `refresh_relay_url` 에 넣으면 됩니다.
 
 ## 설정 바꾸기 (`config.json`)
 | 항목 | 의미 |
@@ -128,7 +136,7 @@ Actions 탭 › **나라장터 공고 수집** › Run workflow › backfill 칸
 | `bid_types` | `용역`, `물품`, `공사` 중 선택 |
 | `daily_lookback_days` | 매일 다시 훑는 기간(정정공고·낙찰 반영용) |
 | `backfill_days` | 데이터가 비었을 때 처음 가져오는 기간 |
-| `refresh_relay_url` | 🔄 갱신 버튼이 부르는 중계 함수 주소 (위 "갱신 버튼 설정") |
+| `refresh_relay_url` | 🔄 갱신 버튼이 부르는 중계 주소 — Apps Script 웹 앱 `/exec` 주소 (위 "갱신 버튼 설정") |
 
 영문 약어 키워드(AI, RPA 등)는 앞뒤가 영문자일 때(MAIL, TRAIN, AIR 등) 자동으로 걸러집니다.
 
@@ -202,7 +210,8 @@ npx mapshaper HangJeongDong_ver20261001.geojson \
 ├─ index.html                 대시보드 (GitHub Pages)
 ├─ assets/report.js           분석 엑셀·보고서 초안 생성 (브라우저)
 ├─ data/geo/sido.topo.json    시도 경계 지도 (TopoJSON)
-├─ relay/api/refresh.js       갱신 버튼 중계 함수 (Vercel, 토큰은 Vercel 환경변수)
+├─ relay/apps-script.gs       갱신 버튼 중계 (Google Apps Script 웹 앱, 토큰은 스크립트 속성)
+├─ relay/api/refresh.js       같은 중계의 Vercel 버전 (대안)
 ├─ config.json                키워드·수집 설정, 분류·제외·중복 규칙
 ├─ collector/collect.py       수집기
 ├─ collector/rules.py         분류·제외·중복 정리 규칙 엔진
