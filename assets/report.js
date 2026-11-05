@@ -51,6 +51,8 @@
   const CASE_FIELDS = ["챗봇·민원상담", "생성형AI·LLM", "RPA·업무자동화"];
   const KIND_ORDER = ["지자체", "공공기관·출자출연", "교육청·학교", "대학·연구기관", "기타"];
   const OTHER = "중앙·기타";
+  // 규모 구간 (배정예산 기준) — index.html 의 BANDS 와 같게 유지
+  const BANDS = [["1억 미만", 0, 1e8], ["1~5억", 1e8, 5e8], ["5~10억", 5e8, 1e9], ["10억 이상", 1e9, null]];
 
   const sum = a => a.reduce((s, v) => s + (v || 0), 0);
   const avg = a => a.length ? sum(a) / a.length : null;
@@ -140,7 +142,13 @@
     const dates = rows.map(b => b._notice).filter(Boolean).sort((a, b) => a - b);
     const from = dates[0] || null, to = dates[dates.length - 1] || null;
     const months = from ? Math.max(1, Math.round((to - from) / (30.44 * 864e5))) : 0;
-    return { R, home, rows, sidos, regionStats, sidoStats, total, homeRows, kinds, homeKinds, homeTotal,
+    const bandStats = BANDS.map(([name, lo, hi]) => {
+      const list = rows.filter(b => b.status === "award" && pos(b.budget) && b.budget >= lo && (hi == null || b.budget < hi) && pos(b.rate));
+      const local = list.filter(b => b._kind === "지자체");
+      return { name, lo, hi, n: list.length, avgRate: avg(list.map(b => b.rate)), budget: sum(list.map(b => b.budget)),
+        awardAmt: sum(list.map(b => b.awardAmt)), localN: local.length, localAvg: avg(local.map(b => b.rate)) };
+    });
+    return { R, home, rows, sidos, regionStats, bandStats, sidoStats, total, homeRows, kinds, homeKinds, homeTotal,
       statFields, fieldStats, fieldTotal, cases, winners, from, to, months,
       originalCount: sum(rows.map(b => b.dups || 1)) };
   }
@@ -239,7 +247,7 @@
       ["기관구분", "수요기관명 규칙으로 추정: " + A.kinds.join(" / ") + " ('기타'는 중앙행정기관·군·민간업체 등)"],
       ["분야(자동분류)", "공고명 키워드 규칙으로 자동 분류(위에서부터 먼저 걸리는 것). 해당 없으면 물품은 '장비·물품 구매', 나머지는 '기타'\n" + fieldRuleText],
       ["주의사항", "· 공고명에 키워드가 없으면 수집되지 않아 실제 사업보다 적을 수 있습니다.\n· 지역·기관구분·분야는 규칙 기반 추정값이라 오분류가 있을 수 있습니다. 보고 전 원문을 확인하세요.\n· '단가계약(통계제외)' 분야는 사업비 통계에서 뺍니다.\n· 시트 3~6의 집계는 '공고목록' 시트를 참조하는 수식입니다. 공고목록을 고치면 집계도 바뀝니다.\n· 업체현황은 공개된 낙찰 정보를 정리한 내부 참고용이며 업체 평가 자료가 아닙니다."],
-      ["시트 구성", "공고목록(전체 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사)"],
+      ["시트 구성", "공고목록(전체 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별낙찰률(1억 미만·1~5억·5~10억·10억 이상)"],
     ];
     guide.forEach(([k, v], i) => {
       const r = s1.getRow(4 + i);
@@ -395,7 +403,26 @@
     table(s6, top6, H6, r6, { fmt: { 2: NUM, 3: NUM, 4: PCT, 7: NUM, 8: NUM } });
     s6.columns.forEach((c, i) => { c.width = [6, 30, 10, 17, 13, 26, 34, 12, 12][i]; });
 
-    [s1, s2, s3, s4, s5, s6].forEach(applyFont);
+    // 7. 규모구간별 낙찰률
+    const s7 = wb.addWorksheet("규모구간별낙찰률");
+    title(s7, "규모 구간별 평균 낙찰률", "공고목록 기준 수식 · 상태가 '낙찰'이고 배정예산·낙찰률이 0보다 큰 공고 · 구간은 배정예산 기준(하한 이상, 상한 미만) · 낙찰률은 나라장터 제공값(예정가격 대비)");
+    const H7 = ["규모 구간(배정예산)", "하한(원)", "상한(원)", "낙찰 건수", "평균 낙찰률(%)", "배정예산 합계(원)", "낙찰금액 합계(원)", "지자체 낙찰 건수", "지자체 평균 낙찰률(%)"];
+    const top7 = 4, first7 = top7 + 1;
+    const r7 = A.bandStats.map((s, i) => {
+      const r = first7 + i;
+      const cond = `${C.st},"낙찰",${C.budget},">0",${C.rate},">0",${C.budget},">="&$B${r}` + (s.hi == null ? "" : `,${C.budget},"<"&$C${r}`);
+      return [s.name, s.lo, s.hi == null ? "" : s.hi,
+        F(`COUNTIFS(${cond})`, s.n),
+        F(`IFERROR(AVERAGEIFS(${C.rate},${cond}),"")`, s.avgRate),
+        F(`SUMIFS(${C.budget},${cond})`, s.budget),
+        F(`SUMIFS(${C.amt},${cond})`, s.awardAmt),
+        F(`COUNTIFS(${cond},${C.kind},"지자체")`, s.localN),
+        F(`IFERROR(AVERAGEIFS(${C.rate},${cond},${C.kind},"지자체"),"")`, s.localAvg)];
+    });
+    table(s7, top7, H7, r7, { fmt: { 1: NUM, 2: NUM, 3: NUM, 4: "0.0", 5: NUM, 6: NUM, 7: NUM, 8: "0.0" } });
+    s7.columns.forEach((c, i) => { c.width = [20, 15, 15, 11, 14, 18, 18, 14, 18][i]; });
+
+    [s1, s2, s3, s4, s5, s6, s7].forEach(applyFont);
     return wb;
   }
 

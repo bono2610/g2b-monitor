@@ -1,0 +1,6 @@
+{
+  "name": "g2b-monitor-relay",
+  "private": true,
+  "description": "나라장터 AI 사업 모니터 '갱신' 버튼 중계 함수 (Vercel). GitHub 토큰은 Vercel 환경변수 GITHUB_TOKEN 에만 보관",
+  "engines": { "node": ">=18" }
+}
