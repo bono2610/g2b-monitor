@@ -16,9 +16,9 @@
   "api_base": "https://apis.data.go.kr/1230000",
   "endpoints": {
     "bid": {
-      "용역": "ad/BidPublicInfoService/getBidPblancListInfoServcPPSSrch",
-      "물품": "ad/BidPublicInfoService/getBidPblancListInfoThngPPSSrch",
-      "공사": "ad/BidPublicInfoService/getBidPblancListInfoCnstwkPPSSrch"
+      "용역": "ad/BidPublicInfoService02/getBidPblancListInfoServcPPSSrch02",
+      "물품": "ad/BidPublicInfoService02/getBidPblancListInfoThngPPSSrch02",
+      "공사": "ad/BidPublicInfoService02/getBidPblancListInfoCnstwkPPSSrch02"
     },
     "award": {
       "용역": "as/ScsbidInfoService/getScsbidListSttusServcPPSSrch",
