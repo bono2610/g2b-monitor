@@ -50,6 +50,20 @@ h1{font-size:22px;margin:0;letter-spacing:-.02em}
 .btn:hover{background:var(--surface-2)}
 .btn:disabled{opacity:.6;cursor:progress}
 .actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+dialog.rep{border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);
+  padding:20px;width:min(440px,calc(100vw - 32px));box-shadow:0 10px 30px rgba(0,0,0,.18)}
+dialog.rep::backdrop{background:rgba(0,0,0,.35)}
+dialog.rep h2{font-size:16px;margin:0 0 4px}
+dialog.rep .desc{color:var(--muted);font-size:12px;margin-bottom:14px}
+dialog.rep label.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;margin-bottom:8px;cursor:pointer}
+dialog.rep label.opt:has(input:checked){border-color:var(--series-1);background:var(--surface-2)}
+dialog.rep label.opt input{margin-top:3px}
+dialog.rep label.opt small{display:block;color:var(--text-2);font-size:12px}
+dialog.rep .field{margin:4px 0 14px 26px}
+dialog.rep .field.off{opacity:.45}
+dialog.rep select{width:100%;font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
 .btn.primary{background:var(--series-1);border-color:var(--series-1);color:#fff}
 .btn.primary:hover{filter:brightness(1.07)}
 
@@ -120,6 +134,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       <button class="btn" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환">🌓</button>
       <button class="btn" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기">⬇ 엑셀 다운로드</button>
       <button class="btn primary" id="anaBtn" title="필터와 무관하게 전체 데이터로 시도별·도내·사업비·업체 분석 시트를 만듭니다">📊 분석 엑셀 다운로드</button>
+      <button class="btn primary" id="repBtn" title="숫자만 채운 보고서 초안(.docx)을 받습니다">📝 보고서 초안 다운로드</button>
     </div>
   </header>
 
@@ -199,6 +214,19 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
   </footer>
 </div>
 <div class="tip" id="tip"></div>
+<dialog class="rep" id="repDlg" aria-labelledby="repTitle">
+  <h2 id="repTitle">보고서 초안 다운로드</h2>
+  <div class="desc">전체 데이터 기준 · 고정 문장에 숫자만 채운 .docx (한글에서 열림) · 시사점·적정 범위는 빈칸</div>
+  <label class="opt"><input type="radio" name="repKind" value="home" checked>
+    <span>① 도내 AI 사업 추진현황<small>개요 · 도내 발주 현황 · 타 시도 비교 · 시사점(빈칸) · 자료 한계</small></span></label>
+  <label class="opt"><input type="radio" name="repKind" value="cost">
+    <span>② ○○사업 사업비 산정 근거<small>개요 · 분야별 사업비 분포 · 선택 분야 사례 · 적정 범위(빈칸) · 유의사항</small></span></label>
+  <div class="field" id="repFieldRow"><select id="repField" aria-label="사업비 근거 분야"></select></div>
+  <div class="row">
+    <button class="btn" id="repClose" type="button">닫기</button>
+    <button class="btn primary" id="repGo" type="button">⬇ 다운로드</button>
+  </div>
+</dialog>
 
 <script>
 (() => {
@@ -564,8 +592,12 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     if (sample) { const b = $("#banner"); b.style.display = "block"; b.textContent = "⚠ 아직 수집된 데이터가 없어 가상의 샘플 데이터로 화면을 보여드리고 있습니다. 첫 수집이 끝나면 실제 공고로 바뀝니다."; }
     else if (meta.errors && meta.errors.length) { const b = $("#banner"); b.style.display = "block"; b.textContent = `⚠ 마지막 수집에서 일부 호출(${meta.errors.length}건)이 실패했습니다. 다음 수집 때 다시 시도합니다.`; }
     initControls(); render();
-    if (window.G2BReport) window.G2BReport.init({ getItems: () => state.all, getMeta: () => state.meta, statusLabel: STATUS_LABEL });
-    else $("#anaBtn").addEventListener("click", () => alert("분석 모듈(assets/report.js)을 불러오지 못했습니다. 새로고침해 주세요."));
+    // assets/report.js(defer)와 데이터 중 어느 쪽이 먼저 준비돼도 연결되도록: 모듈이 있으면 바로, 없으면 설정을 남겨 두고 모듈이 가져감
+    const reportCfg = { getItems: () => state.all, getMeta: () => state.meta, statusLabel: STATUS_LABEL };
+    if (window.G2BReport) window.G2BReport.init(reportCfg); else window.__g2bReportCfg = reportCfg;
+    ["#anaBtn", "#repBtn"].forEach(s => $(s).addEventListener("click", () => {
+      if (!window.G2BReport) alert("분석 모듈(assets/report.js)을 불러오지 못했습니다. 새로고침해 주세요.");
+    }));
   });
 })();
 </script>
