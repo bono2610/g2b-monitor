@@ -137,7 +137,14 @@ def call_api(url: str, params: dict, retries: int = 3) -> tuple[list[dict], int]
                 msg = next((g for g in (m.groups() if m else []) if g), text[:200])
                 raise ApiError(f"API 오류 응답: {msg}")
             data = r.json()
-            resp = data.get("response", data)
+            # 인증키 미등록 등 게이트웨이 오류는 JSON(OpenAPI_ServiceResponse)으로도 옴
+            gw = data.get("OpenAPI_ServiceResponse")
+            if gw:
+                h = gw.get("cmmMsgHeader", {}) or {}
+                raise ApiError(f"API 오류 응답: {h.get('returnAuthMsg') or h.get('errMsg') or gw}")
+            if "response" not in data:
+                raise ApiError(f"알 수 없는 응답(HTTP {r.status_code}): {text[:200]}")
+            resp = data["response"]
             header = resp.get("header", {})
             code = str(header.get("resultCode", "00"))
             if code not in ("00", "0"):
