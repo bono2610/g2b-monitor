@@ -124,6 +124,9 @@ class ApiError(Exception):
     pass
 
 
+_DEBUG_LEFT = 6
+
+
 def call_api(url: str, params: dict, retries: int = 3) -> tuple[list[dict], int]:
     """한 페이지 호출 → (items, totalCount)"""
     last_err = None
@@ -131,6 +134,12 @@ def call_api(url: str, params: dict, retries: int = 3) -> tuple[list[dict], int]
         try:
             r = requests.get(url, params=params, timeout=30)
             text = r.text.strip()
+            if os.environ.get("G2B_DEBUG") and params.get("pageNo") == 1:
+                global _DEBUG_LEFT
+                if _DEBUG_LEFT > 0:
+                    _DEBUG_LEFT -= 1
+                    safe = r.url.split("ServiceKey=")[0] + "ServiceKey=***"
+                    print(f"[DEBUG] {r.status_code} {safe}\n[DEBUG] {text[:700]}")
             if text.startswith("<"):
                 # 인증키 오류 등은 XML로 옴
                 m = re.search(r"<returnAuthMsg>(.*?)</returnAuthMsg>|<resultMsg>(.*?)</resultMsg>", text)
@@ -228,7 +237,10 @@ def collect(cfg: dict, key: str, days: int) -> tuple[list[dict], list[dict], lis
                 rng = {"inqryBgnDt": fmt_dt(s), "inqryEndDt": fmt_dt(e), "bidNtceNm": kw, "ServiceKey": key}
                 # 입찰공고
                 try:
-                    for raw in fetch_all(bid_url, {**rng, "inqryDiv": "1"}):
+                    raws = fetch_all(bid_url, {**rng, "inqryDiv": "1"})
+                    if os.environ.get("G2B_DEBUG"):
+                        print(f"[DEBUG] 공고 원본 {bid_type}/{kw}/{fmt_dt(s)[:8]}: {len(raws)}건" + (f" 예: {raws[0].get('bidNtceNo')} {raws[0].get('bidNtceNm')}" if raws else ""))
+                    for raw in raws:
                         b = norm_bid(raw, bid_type, today)
                         if not b["no"]:
                             continue
