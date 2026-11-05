@@ -90,6 +90,7 @@ dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
 .card .desc{color:var(--muted);font-size:12px;margin-bottom:10px}
 .span2{grid-column:1/-1}
 .grid.even{grid-template-columns:1fr 1fr}
+.grid.mapfield{grid-template-columns:1fr 1.3fr}
 svg text{font-family:inherit}
 .chart{width:100%;display:block}
 .bar{fill:var(--series-1)}
@@ -121,26 +122,17 @@ svg text{font-family:inherit}
 .note{color:var(--muted);font-size:12px;margin-top:6px}
 .dot{cursor:pointer;stroke:var(--surface);stroke-width:.6}
 .dot:hover{stroke:var(--text);stroke-width:1.5}
-.xmark:hover path{stroke:var(--text-2)}
-.bands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
-.band{background:var(--surface-2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:1px}
-.band .label{color:var(--text-2);font-size:12px}
-.band .value{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.band .value small{font-size:11px;font-weight:600;letter-spacing:0;color:var(--warn);background:var(--warn-bg);border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:3px}
-.band.few .value>span,.band.few .hint{opacity:.5}
-.band .hint{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
-.band .cmp{font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums}
-.band .cmp b.up{color:var(--new)}.band .cmp b.down{color:var(--info)}
-.band .ref{color:var(--muted);font-size:11px;line-height:1.4;margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}
-.basis{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0 10px;font-size:12px;color:var(--text-2)}
 .term{border-bottom:1px dotted currentColor;cursor:help}
-.excl{margin-top:10px;border:1px dashed var(--border);background:transparent;color:var(--text-2);border-radius:8px;
-  padding:7px 10px;font:inherit;font-size:12px;cursor:pointer;text-align:left;width:100%}
-.excl:hover{border-color:var(--text-2);color:var(--text)}
-.excl.on{border-style:solid;border-color:var(--series-1);color:var(--text);background:var(--surface-2)}
-.excl b{font-variant-numeric:tabular-nums}
-.exclbar{display:inline-flex;align-items:center;gap:6px;margin-left:6px;color:var(--text);background:var(--surface-2);border-radius:6px;padding:1px 4px 1px 8px}
-.exclbar button{border:0;background:transparent;color:var(--text-2);font:inherit;font-size:12px;cursor:pointer;padding:0 4px}
+.fieldlab{cursor:pointer}
+.fieldlab:hover{text-decoration:underline}
+.flegend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:11px;margin:-4px 0 6px}
+.flegend i{display:inline-block;vertical-align:-1px;margin-right:4px}
+.execline{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 16px;margin:-4px 0 16px;
+  box-shadow:var(--shadow);font-size:13px;color:var(--text-2);line-height:1.6}
+.execline b{color:var(--text);font-variant-numeric:tabular-nums}
+.execline small{color:var(--muted);font-size:12px}
+.tblfilter{display:inline-flex;align-items:center;gap:6px;margin-left:6px;color:var(--text);background:var(--surface-2);border-radius:6px;padding:1px 4px 1px 8px}
+.tblfilter button{border:0;background:transparent;color:var(--text-2);font:inherit;font-size:12px;cursor:pointer;padding:0 4px}
 .b-excl{background:var(--surface-2);color:var(--text-2);margin-left:4px}
 .refresh{display:flex;align-items:center;gap:8px}
 .refresh .when{color:var(--muted);font-size:12px;white-space:nowrap}
@@ -170,7 +162,7 @@ td .meta{color:var(--muted);font-size:12px}
 .empty{color:var(--muted);text-align:center;padding:32px}
 footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
 
-@media (max-width:900px){.grid,.grid.even{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){.grid,.grid.even,.grid.mapfield{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:520px){.refresh{flex-basis:100%;flex-wrap:wrap}}
 @media (max-width:360px){.bands{grid-template-columns:1fr}}
 @media (max-width:520px){.kpi .value{font-size:22px}
@@ -226,8 +218,9 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     <div class="kpi"><div class="label">낙찰 완료</div><div class="value" id="kAward">-</div><div class="hint" id="kAwardHint">&nbsp;</div></div>
     <div class="kpi"><div class="label">최근 7일 신규</div><div class="value" id="kNew">-</div><div class="hint">수집일 기준</div></div>
   </section>
+  <div class="execline" id="execLine" role="status"></div>
 
-  <section class="grid even">
+  <section class="grid even mapfield">
     <div class="card">
       <div class="cardhead">
         <div><h2>시도별 공고</h2>
@@ -247,18 +240,16 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       <div class="note"><span id="unclassified"></span>지역은 수요기관명 기준 추정값입니다.</div>
     </div>
     <div class="card">
-      <div class="basis">
-        <span>비율 기준</span>
-        <div class="seg" id="basisSeg" role="group" aria-label="비율 기준 (차트·구간 카드 공통)">
-          <button data-v="exec" data-term="exec" class="on">예산 집행률</button><button data-v="rate" data-term="rate">낙찰률(예정가격 대비)</button></div>
+      <h2>분야별 사업비(배정예산) 분포</h2>
+      <div class="desc">배정예산 기재 공고 기준 · 단가계약 제외 · 점에 마우스를 올리면 공고 정보</div>
+      <div class="flegend" aria-hidden="true">
+        <span><i style="width:8px;height:8px;border-radius:50%;background:#2a78d6;opacity:.6"></i>공고</span>
+        <span><i style="width:18px;height:8px;border-radius:2px;background:#85B7EB"></i>보통 범위(하위25~상위25%)</span>
+        <span><i style="width:3px;height:12px;background:#eb6834"></i>중앙값</span>
+        <span>분야 이름을 누르면 목록 필터</span>
       </div>
-      <h2 id="scTitle">사업 규모별 예산 집행률</h2>
-      <div class="desc" id="scDesc">낙찰완료 건 · 점을 누르면 나라장터 원문</div>
-      <svg class="chart" id="cScatter" role="img" aria-label="사업 규모별 예산 집행률 산점도"></svg>
-      <h2 style="margin-top:14px" id="bandTitle">규모 구간별 평균 예산 집행률</h2>
-      <div class="desc" id="bandDesc" style="margin-bottom:0">배정예산 기준 · 현재 필터 반영</div>
-      <div class="bands" id="bands"></div>
-      <button type="button" class="excl" id="exclBtn" aria-pressed="false"></button>
+      <svg class="chart" id="cField" role="img" aria-label="분야별 배정예산 분포"></svg>
+      <div class="note" id="fieldNote"></div>
     </div>
   </section>
 
@@ -326,34 +317,28 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
   const DAY = 864e5;
   const PAGE = 30;
   const state = { all: [], kws: new Set(), sort: { k: "noticeDt", dir: -1 }, page: 1, org: "" , sample:false, meta:{},
-    localOnly: false, metric: "n", basis: "exec" /* exec=예산 집행률, rate=낙찰률(예정가격 대비) */, exclOnly: false, geo: null, cfg: {} };
+    localOnly: false, metric: "n", field: "" /* 공고 목록 분야 필터 */, geo: null, cfg: {} };
   const OTHER = "중앙·기타";
   const DEFAULT_ORDER = ["제주","서울","부산","대구","인천","대전","울산","세종","경기","강원","충북","충남","전북","전남광주","경북","경남",OTHER];
   const regionOrder = () => state.meta.rules?.regions || DEFAULT_ORDER;
   const SEL = "#eb6834", SEL_LINE = "#7a2a0c", GREY = "#b4b2a9", DOT = "#2a78d6";
   const BLUES = ["#E6F1FB", "#B5D4F4", "#85B7EB", "#378ADD", "#185FA5"];
-  // 규모 구간 (배정예산 기준) — assets/report.js 의 BANDS 와 같게 유지
-  const BANDS = [["1억 미만", 0, 1e8], ["1~5억", 1e8, 5e8], ["5~10억", 5e8, 1e9], ["10억 이상", 1e9, Infinity]];
 
-  // ───────── 비율 기준 (두 가지를 항상 이름으로 구분) ─────────
+  // ───────── 용어 (예산 집행률 / 낙찰률(예정가격 대비)은 항상 이름으로 구분) ─────────
   const BASIS = {
     exec: { name: "예산 집행률", ref: "배정예산", key: "_exec",
       def: "낙찰금액 ÷ 배정예산 × 100 — 배정한 예산 중 실제로 낙찰된 비율(예산 편성 근거용)" },
     rate: { name: "낙찰률(예정가격 대비)", ref: "예정가격", key: "rate",
       def: "낙찰금액 ÷ 예정가격 × 100 — 나라장터가 낙찰정보로 제공하는 공식 낙찰률" },
   };
-  const basis = () => BASIS[state.basis];
-  const valOf = (b, k = state.basis) => { const v = b[BASIS[k].key]; return typeof v === "number" && isFinite(v) && v > 0 ? v : null; };
   // 통계 제외 기준 (config.json rate_stats) — 숫자가 아니면 기본값 50 / 150
   const rateRule = () => {
     const c = state.cfg.rate_stats || {}, num = (v, d) => (typeof v === "number" && isFinite(v) ? v : d);
     return { lo: num(c.exclude_below_pct, 50), hi: num(c.exclude_above_pct, 150) };
   };
-  const EXCL_ORDER = ["단가계약", "예산 미기재", "비정상 비율"];
   // 단가계약 표시: 데이터에 전용 필드가 없어 분야('단가계약(통계제외)')·공고명으로 판단 (전용 필드가 생기면 함께 인정)
   const isUnitPrice = b => b.unitPrice === true || b.unitContract === true || /^(y|yes|true|1)$/i.test(String(b.untprcCntrctYn ?? "")) ||
     /단가/.test(b.field || "") || /제?\s*3\s*자\s*단가|단가\s*계약/.test(b.title || "");
-  const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
   const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
   const pctTxt = v => v == null ? "-" : v.toFixed(1) + "%";
 
@@ -656,165 +641,157 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     });
   }
 
-  // 사업 규모별 비율 산점도 (가로: 배정예산 로그 눈금 고정, 세로: 선택한 기준의 비율)
-  const Y_LO = 70, Y_HI = 110;
-  function drawScatter(rowsAll) {
-    const svg = $("#cScatter"); svg.innerHTML = "";
-    const B = basis(), sel = $("#fRegion").value;
-    $("#scTitle").innerHTML = `사업 규모별 <span class="term" data-term="${state.basis}">${esc(B.name)}</span>`;
-    svg.setAttribute("aria-label", `사업 규모별 ${B.name} 산점도`);
-    const pts = rowsAll.filter(b => b.award).map(b => ({ b, x: b.budget > 0 ? b.budget / 1e8 : null, y: valOf(b), ex: !!b._excl }));
-    const shown = pts.filter(p => p.ex || p.y != null);
-    const noVal = pts.filter(p => !p.ex && p.y == null).length;
-    const nEx = pts.filter(p => p.ex).length;
-    $("#scDesc").textContent = `낙찰완료 건 · 가로 배정예산(로그 눈금) · 세로 ${B.name} · 회색 X는 통계 제외 ${nEx.toLocaleString("ko-KR")}건` +
-      (noVal ? ` · ${B.name} 값이 없는 ${noVal.toLocaleString("ko-KR")}건은 표시 안 함` : "") + " · 점을 누르면 나라장터 원문";
-    const W = svg.clientWidth || 480, H = Math.round(Math.min(360, Math.max(240, W * 0.62)));
-    const L = 44, R = 12, T = 18, Bm = 38;
+  // ───────── 분야별 사업비(배정예산) 분포 ─────────
+  // 사분위수: 선형 보간 (엑셀 QUARTILE.INC 와 같은 방식). a 는 오름차순 정렬된 배열
+  const quant = (a, p) => { if (!a.length) return null; const i = (a.length - 1) * p, lo = Math.floor(i);
+    return a[lo] + (a[Math.min(lo + 1, a.length - 1)] - a[lo]) * (i - lo); };
+  const fieldOf = b => b.field || "기타";
+  // 분야 목록: bids.json rules.fields(=config.json field_rules 순서 + 기본 분야) — 단가계약 등 통계 제외 분야는 뺌
+  function fieldList(rows) {
+    const R = state.meta.rules || {};
+    const ex = new Set(R.statsExcludeFields || ["단가계약(통계제외)"]);
+    const base = R.fields || [...(state.cfg.field_rules || []).map(r => r[0]), ...Object.values(state.cfg.field_default || {}), "기타"];
+    return [...new Set([...base, ...rows.map(fieldOf)])].filter(f => !ex.has(f) && !/단가/.test(f));
+  }
+  // 차트·엑셀 공통 대상: 배정예산 기재(0원·미기재 제외), 단가계약 제외
+  const budgetOk = b => typeof b.budget === "number" && isFinite(b.budget) && b.budget > 0 && !isUnitPrice(b);
+  function fieldStats(rows, fields = fieldList(rows)) {
+    const by = new Map(fields.map(f => [f, []]));
+    rows.forEach(b => { if (budgetOk(b) && by.has(fieldOf(b))) by.get(fieldOf(b)).push(b); });
+    return fields.map(f => {
+      const list = by.get(f), v = list.map(b => b.budget).sort((x, y) => x - y);
+      const ex = list.filter(b => b.award && !b._excl && b._exec > 0).map(b => b._exec).sort((x, y) => x - y);
+      return { field: f, list, n: v.length, min: v[0] ?? null, q1: quant(v, .25), med: quant(v, .5), q3: quant(v, .75), max: v[v.length - 1] ?? null,
+        avg: mean(v), execN: ex.length, execMed: quant(ex, .5) };
+    });
+  }
+  // 정렬: 중앙값 큰 순(값 없는 분야는 뒤), '기타'는 항상 맨 아래
+  const sortFields = stats => [...stats].sort((a, b) =>
+    (a.field === "기타") - (b.field === "기타") || (b.med ?? -1) - (a.med ?? -1));
+  // 금액 라벨: 1억 미만은 만원 단위(5천만·100만), 1억 이상은 억
+  const amtLabel = v => {
+    if (v >= 1e8) { const e = v / 1e8; return (e >= 10 ? Math.round(e).toLocaleString("ko-KR") : +e.toFixed(1)) + "억"; }
+    const m = Math.round(v / 1e4);
+    return m >= 1000 && m % 1000 === 0 ? (m / 1000) + "천만" : m.toLocaleString("ko-KR") + "만";
+  };
+  // 공고 id 로 고정한 흩뿌림 (-1 ~ 1): 다시 그려도 같은 자리
+  const jitter = id => { let h = 2166136261; for (const c of String(id)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+    return ((h >>> 0) % 10000) / 5000 - 1; };
+
+  function drawFields(rows, rowsAll) {
+    const svg = $("#cField"); svg.innerHTML = "";
+    const sel = $("#fRegion").value;
+    const fields = fieldList(rowsAll);
+    const all = fieldStats(rowsAll, fields), cur = sel ? fieldStats(rows, fields) : all;
+    const allBy = new Map(all.map(s => [s.field, s]));
+    // 정렬은 지역과 무관한 전체 중앙값 기준 (지역을 바꿔도 줄 순서가 그대로)
+    const order = sortFields(all).map(s => s.field), curBy = new Map(cur.map(s => [s.field, s]));
+    const W = svg.clientWidth || 560, mobile = W < 520;
+    const labW = mobile ? 0 : 150, sumW = mobile ? 0 : (sel ? 128 : 112);
+    const rowH = mobile ? 58 : 32, T = 6, Bm = 24;
+    const x0 = mobile ? 10 : labW, x1 = W - sumW - (mobile ? 12 : 10);
+    const H = T + order.length * rowH + Bm;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H);
-    if (!shown.length) {
-      svg.append(el("text", { x: W/2, y: H/2, "text-anchor": "middle", fill: "var(--muted)", "font-size": 13 }, "낙찰완료 건이 없습니다"));
-      return;
-    }
-    // 배정예산 미기재 건은 왼쪽 '미기재' 띠에 모음
-    const strip = shown.some(p => p.x == null) ? 30 : 0;
-    const x0 = L + strip, iw = W - x0 - R, ih = H - T - Bm;
-    // 가로 범위: 통계 대상 점 기준 10의 거듭제곱으로 맞추고 구간 경계(1·5·10억)는 항상 포함. 제외 점이 범위 밖이면 끝에 붙임
-    const xs = pts.filter(p => !p.ex && p.x != null).map(p => p.x);
-    const xLo = Math.pow(10, Math.floor(Math.log10(Math.min(1, ...xs))));
-    const xHi = Math.pow(10, Math.ceil(Math.log10(Math.max(10, ...xs))));
-    const fx = v => Math.min(1, Math.max(0, (Math.log10(v) - Math.log10(xLo)) / (Math.log10(xHi) - Math.log10(xLo))));
-    const sx = v => x0 + iw * fx(v);
-    const sy = v => T + ih - ih * (Math.min(Y_HI, Math.max(Y_LO, v)) - Y_LO) / (Y_HI - Y_LO);
-    // 눈금
-    for (let v = Y_LO; v <= Y_HI; v += 10) {
-      svg.append(el("line", { x1: x0, x2: W - R, y1: sy(v), y2: sy(v), stroke: "var(--grid)", "stroke-width": 1 }));
-      svg.append(el("text", { x: L - 6, y: sy(v) + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11 }, v + "%"));
-    }
-    const tl = v => v >= 1 ? v.toLocaleString("ko-KR") : String(+v.toPrecision(1));
-    // 10의 거듭제곱마다 눈금 (좁은 화면에서는 라벨을 건너뜀)
-    const dec = Math.round(Math.log10(xHi / xLo)), every = Math.max(1, Math.ceil(46 / (iw / dec)));
-    for (let i = 0, v = xLo; i <= dec; i++, v *= 10) {
-      svg.append(el("line", { x1: sx(v), x2: sx(v), y1: T, y2: T + ih, stroke: "var(--grid)", "stroke-width": 1 }));
-      if ((dec - i) % every === 0)
-        svg.append(el("text", { x: sx(v), y: T + ih + 15, "text-anchor": i === dec ? "end" : i === 0 ? "start" : "middle", fill: "var(--muted)", "font-size": 11 }, tl(v)));
-    }
-    // 구간 경계 (아래 카드와 같은 1억·5억·10억). 서로 가까우면 라벨을 좌우로 벌림
-    const edges = BANDS.slice(1).map(([, lo]) => lo / 1e8), tight = sx(edges[2]) - sx(edges[1]) < 34;
-    edges.forEach((v, i) => {
-      const x = sx(v), anchor = tight && i === 1 ? "end" : tight && i === 2 ? "start" : "middle";
-      svg.append(el("line", { x1: x, x2: x, y1: T, y2: T + ih, stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "2 3", "stroke-opacity": .55 }));
-      svg.append(el("text", { x: x + (anchor === "end" ? -2 : anchor === "start" ? 2 : 0), y: T - 5, "text-anchor": anchor, fill: "var(--muted)", "font-size": 10 }, tl(v) + "억"));
+    const pts = rowsAll.filter(budgetOk);
+    if (!pts.length) { svg.append(el("text", { x: W/2, y: H/2, "text-anchor": "middle", fill: "var(--muted)", "font-size": 13 }, "배정예산이 기재된 공고가 없습니다")); return; }
+    // 가로 범위: 1천만~100억 기본, 데이터가 넘치면 10의 거듭제곱 단위로 넓힘 (1백만 미만은 왼쪽 끝에 붙임)
+    const bmin = Math.min(...pts.map(b => b.budget)), bmax = Math.max(...pts.map(b => b.budget));
+    const lo = bmin < 1e7 ? 1e6 : 1e7, hi = Math.max(1e10, bmax * 1.25);
+    const sx = v => x0 + (x1 - x0) * Math.min(1, Math.max(0, (Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))));
+    const ticks = [1e7, 5e7, 1e8, 5e8, 1e9, 5e9, 1e10];
+    if (lo < 1e7) ticks.unshift(lo);
+    for (let v = 5e10; v <= hi; v *= v % 1e11 ? 2 : 5) ticks.push(v);
+    const plotB = T + order.length * rowH;
+    // 라벨이 겹치면 1·10·100 계열을 먼저 남기고 5·50 계열을 뺌
+    const minGap = 36, placed = [];
+    const isPow = v => Math.abs(Math.log10(v) - Math.round(Math.log10(v))) < 1e-9;
+    ticks.forEach(v => svg.append(el("line", { x1: sx(v), x2: sx(v), y1: T, y2: plotB, stroke: "var(--grid)", "stroke-width": 1 })));
+    [...ticks.filter(isPow), ...ticks.filter(v => !isPow(v))].forEach(v => {
+      const x = sx(v);
+      if (placed.some(p => Math.abs(p - x) < minGap)) return;
+      placed.push(x);
+      svg.append(el("text", { x, y: plotB + 15, "text-anchor": x > W - 20 ? "end" : x < 14 ? "start" : "middle", fill: "var(--muted)", "font-size": 11 }, amtLabel(v)));
     });
-    if (strip) {
-      svg.append(el("rect", { x: L, y: T, width: strip - 6, height: ih, fill: "var(--surface-2)", rx: 3 }));
-      svg.append(el("text", { x: L + (strip - 6) / 2, y: T - 5, "text-anchor": "middle", fill: "var(--muted)", "font-size": 10 }, "미기재"));
-    }
-    svg.append(el("text", { x: x0 + iw / 2, y: H - 4, "text-anchor": "middle", fill: "var(--text-2)", "font-size": 11 }, "배정예산 (억원, 로그 눈금)"));
-    const yl = el("text", { x: 11, y: T + ih / 2, "text-anchor": "middle", fill: "var(--text-2)", "font-size": 11,
-      transform: `rotate(-90 11 ${T + ih / 2})`, "data-term": state.basis, class: "term" }, `${B.name} (%)`);
-    svg.append(yl);
-    // 100% 기준선
-    svg.append(el("line", { x1: x0, x2: W - R, y1: sy(100), y2: sy(100), stroke: "var(--text-2)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
-    const label100 = el("text", { x: W - R - 2, y: sy(100) - 5, "text-anchor": "end", fill: "var(--text-2)", "font-size": 11, "font-weight": 600,
-      stroke: "var(--surface)", "stroke-width": 3, "paint-order": "stroke", "stroke-linejoin": "round" },
-      state.basis === "exec" ? "예산 전액" : "예정가격 전액");
 
-    const hl = p => sel && p.b.region === sel;
-    const rank = p => p.ex ? 0 : hl(p) ? 3 : sel ? 1 : 2;
-    const fmtV = (b, k) => { const v = valOf(b, k); return v == null ? "-" : v.toFixed(1) + "%"; };
-    const tipHtml = p => {
-      const b = p.b, out = p.y != null && (p.y < Y_LO || p.y > Y_HI);
-      const line = k => `${k === state.basis ? "<b>" : ""}${BASIS[k].name} ${fmtV(b, k)}${k === state.basis ? "</b>" : ""}`;
-      return `<div class="wrap-line"><b>${esc(b.title)}</b></div>${esc(b.demand || b.org || "")}<br>` +
-        `배정예산 ${b.budget > 0 ? won(b.budget) + "원" : "미기재"} · 낙찰금액 ${b.awardAmt > 0 ? won(b.awardAmt) + "원" : "-"}<br>` +
-        `${line("exec")}<br>${line("rate")}` +
-        (out ? `<br>세로축 범위(${Y_LO}~${Y_HI}%) 밖 — 실제 값 ${p.y.toFixed(1)}%` : "") +
-        (p.ex ? `<br>통계 제외: ${esc(b._excl)}` : "") +
-        (b.url ? `<br><span style="opacity:.7">눌러서 원문 열기</span>` : "");
-    };
-    [...shown].sort((a, b) => rank(a) - rank(b)).forEach(p => {
-      const on = hl(p), b = p.b;
-      const cx = p.x == null ? L + (strip - 6) / 2 : sx(p.x);
-      const cy = p.y == null ? T + ih : sy(p.y);
-      let node;
-      if (p.ex) {
-        const s = on ? 4.5 : 3.5;
-        // 얇은 X 는 잡기 어려워 투명한 원을 겹쳐 둠
-        node = el("g", { class: "dot xmark" });
-        node.append(el("path", { d: `M${cx - s},${cy - s}L${cx + s},${cy + s}M${cx - s},${cy + s}L${cx + s},${cy - s}`,
-          stroke: GREY, "stroke-width": on ? 2.2 : 1.6, "stroke-linecap": "round", fill: "none" }),
-          el("circle", { cx, cy, r: s + 2.5, fill: "transparent", stroke: "none" }));
-      } else {
-        const fill = on ? SEL : sel ? GREY : DOT, op = on ? .9 : sel ? .55 : .7;
-        if (p.y < Y_LO || p.y > Y_HI) {
-          const s = on ? 6 : 4.5, up = p.y > Y_HI, ty = up ? T + s * .2 : T + ih - s * .2;
-          node = el("path", { class: "dot", fill, "fill-opacity": Math.min(1, op + .15),
-            d: up ? `M${cx},${ty}L${cx - s},${ty + s * 1.5}L${cx + s},${ty + s * 1.5}Z` : `M${cx},${ty}L${cx - s},${ty - s * 1.5}L${cx + s},${ty - s * 1.5}Z` });
-        } else {
-          node = el("circle", { class: "dot", cx: cx.toFixed(1), cy: cy.toFixed(1), r: on ? 5 : sel ? 3 : 3.6, fill, "fill-opacity": op });
-        }
+    const statusName = b => STATUS_LABEL[b.status] || "";
+    order.forEach((f, i) => {
+      const s = curBy.get(f), a = allBy.get(f), y = T + i * rowH;
+      const cy = mobile ? y + 30 : y + rowH / 2, band = mobile ? 7 : 8;
+      const few = s.n < 5, fo = few ? .4 : 1;
+      if (i) svg.append(el("line", { x1: mobile ? 0 : 0, x2: W, y1: y, y2: y, stroke: "var(--grid)", "stroke-width": 1, "stroke-opacity": .6 }));
+      // 분야 이름 (누르면 목록 필터)
+      const on = state.field === f;
+      const lab = el("text", { class: "fieldlab", x: mobile ? 2 : labW - 10, y: mobile ? y + 14 : cy + 4, "text-anchor": mobile ? "start" : "end",
+        fill: on ? "var(--series-1)" : "var(--text)", "font-size": 12, "font-weight": on ? 700 : 500, role: "button", tabindex: 0,
+        "aria-label": `${f} 분야로 공고 목록 거르기` }, (on ? "▸ " : "") + f + (few ? " (적음)" : ""));
+      if (few) lab.setAttribute("opacity", .55);
+      const pick = () => { state.field = state.field === f ? "" : f; state.page = 1; hideTip(); render(); };
+      lab.addEventListener("click", pick);
+      lab.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+      lab.addEventListener("mousemove", e => showTip(e, on ? "다시 누르면 목록 필터 해제" : `눌러서 공고 목록을 '${esc(f)}'로 거르기`));
+      lab.addEventListener("mouseleave", hideTip);
+      // 보통 범위(하위25~상위25%)
+      if (s.n) svg.append(el("rect", { x: sx(s.q1), y: cy - 4, width: Math.max(2, sx(s.q3) - sx(s.q1)), height: 8, rx: 2, fill: "#85B7EB", "fill-opacity": .85, opacity: fo }));
+      // 점: 지역 선택 시 그 지역만 주황, 나머지는 회색으로 옅게
+      const dots = a.list;
+      const hl = b => sel && b.region === sel;
+      [...dots].sort((p, q) => hl(p) - hl(q)).forEach(b => {
+        const h = hl(b);
+        const c = el("circle", { class: "dot", cx: sx(b.budget).toFixed(1), cy: (cy + jitter(b.id) * band).toFixed(1),
+          r: h ? 3.4 : sel ? 2.2 : 2.6, fill: h ? SEL : sel ? GREY : DOT, "fill-opacity": h ? .9 : sel ? .35 : .45, "stroke-width": h ? .8 : 0 });
+        if (few && !h) c.setAttribute("opacity", .45);
+        c.addEventListener("mousemove", e => showTip(e, `<div class="wrap-line"><b>${esc(b.title)}</b></div>${esc(b.demand || b.org || "")}<br>` +
+          `배정예산 ${won(b.budget)}원 · ${statusName(b)}` + (b.url ? `<br><span style="opacity:.7">눌러서 원문 열기</span>` : "")));
+        c.addEventListener("mouseleave", hideTip);
+        if (b.url) c.addEventListener("click", () => window.open(b.url, "_blank", "noopener"));
+        else c.style.cursor = "default";
+        svg.append(c);
+      });
+      // 중앙값 막대 (점 위에)
+      if (s.n) {
+        const m = el("rect", { x: sx(s.med) - 1.5, y: cy - 9, width: 3, height: 18, rx: 1, fill: SEL, stroke: "var(--surface)", "stroke-width": .8, opacity: few ? .55 : 1 });
+        m.addEventListener("mousemove", e => showTip(e, `<b>${esc(f)}${sel ? ` · ${esc(sel)}` : ""}</b><br>중앙값 ${won(s.med)}원 · 보통 범위 ${won(s.q1)}~${won(s.q3)}원<br>${s.n}건 (최소 ${won(s.min)} · 최대 ${won(s.max)})`));
+        m.addEventListener("mouseleave", hideTip);
+        svg.append(m);
       }
-      node.addEventListener("mousemove", e => showTip(e, tipHtml(p)));
-      node.addEventListener("mouseleave", hideTip);
-      if (b.url) node.addEventListener("click", () => window.open(b.url, "_blank", "noopener"));
-      else node.style.cursor = "default";
-      svg.append(node);
+      // 오른쪽 요약 (모바일은 줄 아래)
+      const main = s.n ? `중앙 ${amtLabel(s.med)} · ${s.n.toLocaleString("ko-KR")}건` : "0건";
+      const ref = sel && a.n ? `(전체 중앙 ${amtLabel(a.med)})` : "";
+      if (mobile) {
+        const t = el("text", { x: 2, y: y + 51, fill: "var(--text-2)", "font-size": 11, "font-variant-numeric": "tabular-nums", opacity: few ? .55 : 1 }, main);
+        if (ref) t.append(el("tspan", { fill: "var(--muted)", "font-size": 10, dx: 6 }, ref));
+        svg.append(t);
+      } else {
+        svg.append(el("text", { x: x1 + 10, y: ref ? cy - 1 : cy + 4, fill: "var(--text-2)", "font-size": 12, "font-variant-numeric": "tabular-nums", opacity: few ? .55 : 1 }, main));
+        if (ref) svg.append(el("text", { x: x1 + 10, y: cy + 12, fill: "var(--muted)", "font-size": 10, "font-variant-numeric": "tabular-nums" }, ref));
+      }
+      svg.append(lab);
     });
-    label100.style.pointerEvents = "none";
-    svg.append(label100);
+    const skipped = rowsAll.filter(b => !budgetOk(b));
+    const unit = skipped.filter(isUnitPrice).length;
+    $("#fieldNote").textContent = `가로축 배정예산(로그 눈금) · 정렬은 전체 중앙값 큰 순('기타'는 맨 아래) · 5건 미만 분야는 흐리게` +
+      (sel ? ` · 중앙값·범위·건수는 ${sel} 기준, 회색 점은 다른 지역` : "") +
+      ` · 제외: 배정예산 미기재·0원 ${(skipped.length - unit).toLocaleString("ko-KR")}건, 단가계약 ${unit}건`;
   }
 
-  // 규모 구간별 통계 (통계 제외 건 빼고 계산). k: 비율 기준
-  function bandStats(rows, k = state.basis) {
-    return BANDS.map(([label, lo, hi]) => {
-      const inBand = b => b.budget > 0 && b.budget >= lo && b.budget < hi;
-      const list = rows.filter(b => b.award && !b._excl && inBand(b) && valOf(b, k) != null);
-      const vals = list.map(b => valOf(b, k));
-      const ex = rows.filter(b => b.award && b._excl && inBand(b));
-      return { label, lo, hi, n: vals.length, avg: mean(vals), med: median(vals),
-        budget: list.reduce((s, b) => s + b.budget, 0), amt: list.reduce((s, b) => s + (b.awardAmt || 0), 0),
-        exN: ex.length, ex: exclCounts(ex) };
-    });
-  }
-  const exclCounts = list => { const c = Object.fromEntries(EXCL_ORDER.map(r => [r, 0])); list.forEach(b => { if (b._excl) c[b._excl]++; }); return c; };
-  const exclText = c => EXCL_ORDER.map(r => `${r} ${c[r]}`).join(" · ");
-
-  function drawBands(rows, rowsAll) {
-    const B = basis(), sel = $("#fRegion").value;
-    $("#bandTitle").innerHTML = `규모 구간별 평균 <span class="term" data-term="${state.basis}">${esc(B.name)}</span>`;
-    const noVal = rows.filter(b => b.award && !b._excl && valOf(b) == null).length;
-    $("#bandDesc").textContent = `배정예산 기준 구간 · 통계 제외 건 빼고 계산 · 현재 필터 반영${sel ? ` (${sel})` : ""}${state.localOnly ? " · 지자체 사업만" : ""}` +
-      (noVal ? ` · ${B.name} 값이 없는 ${noVal.toLocaleString("ko-KR")}건 제외` : "");
-    const nat = sel ? bandStats(rowsAll) : null;
-    $("#bands").innerHTML = bandStats(rows).map((s, i) => {
-      const few = s.n > 0 && s.n < 5;
-      const n0 = nat && nat[i];
-      let cmp = "";
-      if (sel && s.avg != null && n0 && n0.avg != null) {
-        const d = s.avg - n0.avg, t = (d >= 0 ? "+" : "−") + Math.abs(d).toFixed(1) + "%p";
-        cmp = `<div class="cmp">전국 평균(${pctTxt(n0.avg)}) 대비 <b class="${d > 0.05 ? "up" : d < -0.05 ? "down" : ""}">${t}</b></div>`;
-      } else if (sel && s.avg != null) cmp = `<div class="cmp">전국 평균 없음</div>`;
-      return `<div class="band${few ? " few" : ""}"><div class="label">${esc(s.label)}</div>
-        <div class="value"><span>${pctTxt(s.avg)}</span>${few ? "<small>표본 적음</small>" : ""}</div>
-        <div class="hint">중앙값 ${pctTxt(s.med)} · ${s.n.toLocaleString("ko-KR")}건</div>${cmp}
-        <div class="ref">${s.avg != null ? `예산 편성 시 참고: 이 규모 사업은 평균적으로 ${B.ref}의 ${s.avg.toFixed(1)}%에 낙찰` : "이 규모의 통계 대상 낙찰 건이 없습니다"}</div></div>`;
-    }).join("");
-    const ex = rows.filter(b => b.award && b._excl), c = exclCounts(ex), btn = $("#exclBtn");
-    btn.innerHTML = `통계 제외 <b>${ex.length.toLocaleString("ko-KR")}건</b> (${exclText(c)})` +
-      (ex.length ? ` — ${state.exclOnly ? "목록 필터 해제" : "눌러서 공고 목록 보기"}` : "");
-    btn.disabled = !ex.length && !state.exclOnly;
-    btn.classList.toggle("on", state.exclOnly);
-    btn.setAttribute("aria-pressed", state.exclOnly);
+  // 예산 집행률 한 줄 요약 (현재 필터, 통계 제외 규칙 적용)
+  function drawExecLine(rows) {
+    const aw = rows.filter(b => b.award), ex = aw.filter(b => b._excl);
+    const v = aw.filter(b => !b._excl && b._exec > 0).map(b => b._exec).sort((a, b) => a - b);
     const r = rateRule();
-    btn.title = `단가계약 · 배정예산 미기재·0원 · 예산 집행률 ${r.lo}% 미만 또는 ${r.hi}% 초과(데이터 오류 가능성)는 차트에 회색 X로 남기고 평균·중앙값에서 뺍니다. 기준 숫자는 config.json의 rate_stats에서 바꿀 수 있습니다.`;
+    const term = `<span class="term" data-term="exec">예산 집행률</span>(낙찰금액÷배정예산)`;
+    const exTxt = ex.length ? ` · 통계 제외 ${ex.length}건(단가계약·예산 미기재·${r.lo}% 미만/${r.hi}% 초과)` : "";
+    $("#execLine").innerHTML = !v.length
+      ? `현재 조건에서 ${term}을 계산할 낙찰 완료 건이 없습니다.<small>${exTxt}</small>`
+      : `낙찰 완료 <b>${v.length.toLocaleString("ko-KR")}건</b>의 ${term} 중앙값 <b>${quant(v, .5).toFixed(1)}%</b> — ` +
+        `AI 사업은 대체로 예산의 <b>${Math.round(quant(v, .25))}~${Math.round(quant(v, .75))}%</b>에 낙찰됩니다 ` +
+        `<small>(가운데 50% 범위${v.length < 5 ? " · 표본 적음" : ""}${exTxt})</small>`;
   }
 
   function drawCharts(rows, rowsAll = filtered({ noRegion: true })) {
     drawMonth(rows);
     drawMap(rowsAll);
-    drawScatter(rowsAll);
-    drawBands(rows, rowsAll);
+    drawFields(rows, rowsAll);
     const org = new Map();
     rows.forEach(b => { const k = b.demand || b.org || "미상"; const o = org.get(k) || { n: 0, amt: 0 }; o.n++; o.amt += b.budget || 0; org.set(k, o); });
     drawHBar("#cOrg", [...org].map(([label, o]) => ({ label, v: o.amt, n: o.n })).filter(d => d.v > 0).sort((a, b) => b.v - a.v), {
@@ -859,7 +836,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     state.page = Math.min(state.page, pages);
     const slice = sorted.slice((state.page - 1) * PAGE, state.page * PAGE);
     $("#tblDesc").innerHTML = `${rows.length.toLocaleString("ko-KR")}건 · 열 제목을 누르면 정렬` +
-      (state.exclOnly ? `<span class="exclbar">통계 제외 공고만 보는 중<button type="button" id="exclOff" aria-label="통계 제외 필터 해제">✕ 해제</button></span>` : "");
+      (state.field ? `<span class="tblfilter">분야: ${esc(state.field)}<button type="button" id="fieldOff" aria-label="분야 필터 해제">✕ 해제</button></span>` : "");
     $("#tbody").innerHTML = slice.length ? slice.map(b => `
       <tr>
         <td><span class="badge ${STATUS_CLASS[b.status]}">${STATUS_LABEL[b.status]}</span></td>
@@ -897,24 +874,15 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     return parts.join(" / ");
   }
 
-  // 엑셀 시트 상단에 적는 용어 정의·제외 기준
-  function termRows() {
-    const r = rateRule();
-    return [
-      ["용어 정의"],
-      ["예산 집행률", `${BASIS.exec.def}. 화면 기본 기준`],
-      ["낙찰률(예정가격 대비)", `${BASIS.rate.def}. 나라장터 미제공 건은 빈칸`],
-      ["통계 제외 기준", `단가계약(분야 '단가계약(통계제외)' 또는 공고명에 3자단가·단가계약) / 배정예산 미기재·0원 / 예산 집행률 ${r.lo}% 미만 또는 ${r.hi}% 초과(데이터 오류 가능성, 낙찰금액 미기재 포함) — 평균·중앙값에서 뺌. 기준 숫자는 config.json의 rate_stats`],
-    ];
-  }
   const r1 = v => v == null ? "" : +v.toFixed(1);
   const r2 = v => v == null ? "" : +v.toFixed(2);
+  const wonInt = v => v == null ? "" : Math.round(v);
 
   function exportXlsx() {
     const cur = filtered(), shown = tableRows(cur);
     const rows = sortRows(shown).map(b => ({
       "상태": STATUS_LABEL[b.status], "공고번호": b.no, "차수": b.ord, "유형": b.type, "공고명": b.title,
-      "공고기관": b.org, "수요기관": b.demand, "지역(추정)": b.region, "기관구분": b.kind || "", "계약방법": b.method,
+      "공고기관": b.org, "수요기관": b.demand, "지역(추정)": b.region, "기관구분": b.kind || "", "분야": fieldOf(b), "계약방법": b.method,
       "공고일": ymd(b._notice), "마감일": ymd(b._close), "배정예산(원)": b.budget ?? "", "추정가격(원)": b.estPrice ?? "",
       "낙찰업체": b.winner, "낙찰금액(원)": b.awardAmt ?? "", "예산 집행률(%)": r2(b._exec), "낙찰률(예정가격 대비, %)": b.rate ?? "",
       "통계 제외 사유": b._excl || "", "키워드": (b.keywords || []).join(", "), "원문": b.url
@@ -922,44 +890,33 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     if (window.XLSX) {
       const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ "결과": "조건에 맞는 공고가 없습니다." }]);
-      ws["!cols"] = [8,16,5,6,50,22,22,10,14,14,11,11,14,14,20,14,12,14,14,20,30].map(w => ({ wch: w }));
-      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, state.exclOnly ? "공고목록(통계제외)" : "공고목록");
+      ws["!cols"] = [8,16,5,6,50,22,22,10,14,16,14,11,11,14,14,20,14,12,14,14,20,30].map(w => ({ wch: w }));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, (state.field ? `공고목록(${state.field})` : "공고목록").replace(/[:\\/?*\[\]]/g, "").slice(0, 31));
 
-      // 구간별 통계: 두 기준을 함께
-      const be = bandStats(cur, "exec"), br = bandStats(cur, "rate");
-      const exAll = cur.filter(b => b.award && b._excl), noBud = exAll.filter(b => !(b.budget > 0));
-      const included = cur.filter(b => b.award && !b._excl);
-      const vE = included.map(b => valOf(b, "exec")).filter(v => v != null), vR = included.map(b => valOf(b, "rate")).filter(v => v != null);
-      const HEAD = ["규모 구간(배정예산)", "통계 대상 건수(예산 집행률)", "평균 예산 집행률(%)", "중앙값 예산 집행률(%)",
-        "통계 대상 건수(낙찰률)", "평균 낙찰률(예정가격 대비, %)", "중앙값 낙찰률(예정가격 대비, %)",
-        "배정예산 합계(원)", "낙찰금액 합계(원)", "통계 제외 건수", "제외 사유"];
-      const body = be.map((e, i) => [e.label, e.n, r1(e.avg), r1(e.med), br[i].n, r1(br[i].avg), r1(br[i].med), e.budget, e.amt, e.exN, exclText(e.ex)]);
-      body.push(["구간 없음(배정예산 미기재·0원)", 0, "", "", 0, "", "", "", "", noBud.length, exclText(exclCounts(noBud))]);
-      body.push(["전체", vE.length, r1(mean(vE)), r1(median(vE)), vR.length, r1(mean(vR)), r1(median(vR)),
-        be.reduce((s, x) => s + x.budget, 0), be.reduce((s, x) => s + x.amt, 0), exAll.length, exclText(exclCounts(exAll))]);
+      // 분야별 사업비 (현재 필터 기준, 화면 차트와 같은 순서)
+      const r = rateRule();
+      const fs = sortFields(fieldStats(cur));
+      const allList = cur.filter(b => budgetOk(b) && fs.some(s => s.field === fieldOf(b)));
+      const v = allList.map(b => b.budget).sort((a, b) => a - b);
+      const ev = allList.filter(b => b.award && !b._excl && b._exec > 0).map(b => b._exec).sort((a, b) => a - b);
+      const line = s => [s.field, s.n, wonInt(s.min), wonInt(s.q1), wonInt(s.med), wonInt(s.q3), wonInt(s.max), wonInt(s.avg), r1(s.execMed), s.execN];
       const ws2 = XLSX.utils.aoa_to_sheet([
-        ["규모 구간별 통계 — 예산 집행률 · 낙찰률(예정가격 대비)"],
+        ["분야별 사업비(배정예산) 분포"],
+        ["적용 필터", filterSummary() || "없음 (전체)"],
+        ["대상", "배정예산 기재 공고(미기재·0원 제외) · 단가계약 제외 · 금액 단위 원 · 하위25%·상위25%는 사분위수(엑셀 QUARTILE.INC와 같은 방식)"],
+        ["예산 집행률", `낙찰금액 ÷ 배정예산 × 100. 낙찰 완료 건 중 통계 제외(단가계약 · 배정예산 미기재·0원 · ${r.lo}% 미만 또는 ${r.hi}% 초과) 뺀 값의 중앙값`],
         [],
-        ...termRows(),
-        ["적용 필터", `${filterSummary() || "없음"} · 낙찰완료 공고 · 구간은 배정예산 기준(하한 이상, 상한 미만) · 배정예산·낙찰금액 합계는 예산 집행률 통계 대상 기준`],
+        ["분야", "건수", "최솟값(원)", "하위25%(원)", "중앙값(원)", "상위25%(원)", "최댓값(원)", "평균(참고, 원)", "예산 집행률 중앙값(%)", "예산 집행률 대상 건수"],
+        ...fs.map(line),
+        line({ field: "전체", n: v.length, min: v[0] ?? null, q1: quant(v, .25), med: quant(v, .5), q3: quant(v, .75), max: v[v.length - 1] ?? null,
+          avg: mean(v), execMed: quant(ev, .5), execN: ev.length }),
         [],
-        HEAD, ...body,
+        ["※ 중앙값과 보통 범위(하위25~상위25%)를 우선 참고. 평균은 소수의 대형 사업 때문에 크게 왜곡될 수 있음"],
+        ["※ 건수 5건 미만 분야는 표본이 적어 참고만 하세요"],
       ]);
-      ws2["!cols"] = [26, 14, 14, 14, 14, 16, 16, 18, 18, 12, 44].map(w => ({ wch: w }));
-      ws2["!merges"] = [3, 4, 5, 6].map(r => ({ s: { r, c: 1 }, e: { r, c: 10 } }));
-      XLSX.utils.book_append_sheet(wb, ws2, "규모구간별통계");
-
-      // 통계 제외 공고 목록
-      const ws3 = XLSX.utils.aoa_to_sheet([
-        ["통계 제외 공고 (규모 구간별 평균·중앙값에서 뺀 낙찰 건)"],
-        [`적용 필터: ${filterSummary() || "없음"} · ${exclText(exclCounts(exAll))}`],
-        [],
-        ["제외 사유", "공고번호", "공고명", "수요기관", "지역(추정)", "분야", "배정예산(원)", "낙찰금액(원)", "예산 집행률(%)", "낙찰률(예정가격 대비, %)", "원문"],
-        ...exAll.sort((a, b) => EXCL_ORDER.indexOf(a._excl) - EXCL_ORDER.indexOf(b._excl))
-          .map(b => [b._excl, b.no, b.title, b.demand, b.region, b.field || "", b.budget ?? "", b.awardAmt ?? "", r2(b._exec), b.rate ?? "", b.url || ""]),
-      ]);
-      ws3["!cols"] = [12, 16, 50, 24, 10, 16, 14, 14, 12, 14, 30].map(w => ({ wch: w }));
-      XLSX.utils.book_append_sheet(wb, ws3, "통계제외공고");
+      ws2["!cols"] = [20, 8, 14, 14, 14, 14, 16, 16, 14, 12].map(w => ({ wch: w }));
+      ws2["!merges"] = [1, 2, 3].map(r => ({ s: { r, c: 1 }, e: { r, c: 9 } }));
+      XLSX.utils.book_append_sheet(wb, ws2, "분야별사업비");
       XLSX.writeFile(wb, `나라장터_AI사업_${stamp}.xlsx`);
     } else { // 라이브러리를 못 불러온 경우 CSV로 대체
       const head = Object.keys(rows[0] || { "결과": "" });
@@ -974,10 +931,10 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
   function render() {
     const rows = filtered(), rowsAll = filtered({ noRegion: true });
     if (state.org && $("#q").value !== state.org) state.org = "";
-    drawKpis(rows); drawCharts(rows, rowsAll); drawTable(tableRows(rows));
+    drawKpis(rows); drawExecLine(rows); drawCharts(rows, rowsAll); drawTable(tableRows(rows));
   }
-  // 표에 보일 공고: '통계 제외' 버튼을 누르면 현재 필터 결과 중 제외된 낙찰 건만
-  const tableRows = rows => state.exclOnly ? rows.filter(b => b.award && b._excl) : rows;
+  // 표에 보일 공고: 분야 이름을 누르면 그 분야만
+  const tableRows = rows => state.field ? rows.filter(b => fieldOf(b) === state.field) : rows;
 
   // 데이터에 따라 바뀌는 선택지 (처음 + 갱신 후 다시 채움, 고른 값은 유지)
   function fillOptions() {
@@ -1002,7 +959,6 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     const seg = (id, fn) => $(id).addEventListener("click", e => { const b = e.target.closest("button"); if (b) { fn(b.dataset.v); render(); } });
     seg("#mapMetric", v => { state.metric = v; $("#mapMetric").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.v === v)); });
     seg("#localOnly", v => { state.localOnly = !!v; state.page = 1; $("#localOnly").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.v === v)); });
-    seg("#basisSeg", v => { state.basis = BASIS[v] ? v : "exec"; $("#basisSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.v === state.basis)); });
     $("#otherBox").addEventListener("click", () => selectRegion(OTHER));
     $("#refreshBtn").addEventListener("click", refresh);
     $("#kwChips").addEventListener("click", e => {
@@ -1020,11 +976,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       render();
     }));
     $("#pager").addEventListener("click", e => { const b = e.target.closest("[data-p]"); if (b) { state.page += +b.dataset.p; drawTable(tableRows(filtered())); } });
-    $("#exclBtn").addEventListener("click", () => {
-      state.exclOnly = !state.exclOnly; state.page = 1; hideTip(); render();
-      if (state.exclOnly) $("#tbody").closest(".card").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    $("#tblDesc").addEventListener("click", e => { if (e.target.closest("#exclOff")) { state.exclOnly = false; state.page = 1; render(); } });
+    $("#tblDesc").addEventListener("click", e => { if (e.target.closest("#fieldOff")) { state.field = ""; state.page = 1; render(); } });
     // 용어 설명: data-term 이 붙은 글자에 마우스를 올리면 한 줄 설명
     let termOn = false;
     document.addEventListener("mousemove", e => {
