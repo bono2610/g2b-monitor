@@ -142,13 +142,27 @@
     const dates = rows.map(b => b._notice).filter(Boolean).sort((a, b) => a - b);
     const from = dates[0] || null, to = dates[dates.length - 1] || null;
     const months = from ? Math.max(1, Math.round((to - from) / (30.44 * 864e5))) : 0;
+    // 규모 구간별 통계: index.html 이 계산해 둔 b._exec(예산 집행률)·b._excl(통계 제외 사유) 사용
+    const EX = ["단가계약", "예산 미기재", "비정상 비율"];
+    const exCount = list => Object.fromEntries(EX.map(r => [r, list.filter(b => b._excl === r).length]));
+    const awarded = rows.filter(b => b.status === "award");
+    const bandOf = (list, k) => {
+      const vals = list.map(b => b[k]).filter(pos);
+      return { n: vals.length, avg: avg(vals), med: median(vals) };
+    };
     const bandStats = BANDS.map(([name, lo, hi]) => {
-      const list = rows.filter(b => b.status === "award" && pos(b.budget) && b.budget >= lo && (hi == null || b.budget < hi) && pos(b.rate));
-      const local = list.filter(b => b._kind === "지자체");
-      return { name, lo, hi, n: list.length, avgRate: avg(list.map(b => b.rate)), budget: sum(list.map(b => b.budget)),
-        awardAmt: sum(list.map(b => b.awardAmt)), localN: local.length, localAvg: avg(local.map(b => b.rate)) };
+      const inBand = b => pos(b.budget) && b.budget >= lo && (hi == null || b.budget < hi);
+      const list = awarded.filter(b => !b._excl && inBand(b));
+      const execList = list.filter(b => pos(b._exec));
+      const ex = awarded.filter(b => b._excl && inBand(b));
+      return { name, lo, hi, exec: bandOf(list, "_exec"), rate: bandOf(list, "rate"),
+        budget: sum(execList.map(b => b.budget)), awardAmt: sum(execList.map(b => b.awardAmt)), exN: ex.length, ex: exCount(ex) };
     });
-    return { R, home, rows, sidos, regionStats, bandStats, sidoStats, total, homeRows, kinds, homeKinds, homeTotal,
+    const exAll = awarded.filter(b => b._excl), inc = awarded.filter(b => !b._excl);
+    const bandTotal = { exec: bandOf(inc, "_exec"), rate: bandOf(inc, "rate"), exN: exAll.length, ex: exCount(exAll),
+      noBudget: exCount(exAll.filter(b => !pos(b.budget))), noBudgetN: exAll.filter(b => !pos(b.budget)).length,
+      budget: sum(inc.filter(b => pos(b._exec)).map(b => b.budget)), awardAmt: sum(inc.filter(b => pos(b._exec)).map(b => b.awardAmt)) };
+    return { R, home, rows, sidos, regionStats, bandStats, bandTotal, EX, sidoStats, total, homeRows, kinds, homeKinds, homeTotal,
       statFields, fieldStats, fieldTotal, cases, winners, from, to, months,
       originalCount: sum(rows.map(b => b.dups || 1)) };
   }
@@ -224,8 +238,9 @@
     const last = Math.max(2, rows.length + 1);
     const col = c => `'공고목록'!$${c}$2:$${c}$${last}`;
     const C = { st: col("A"), demand: col("F"), region: col("G"), kind: col("H"), field: col("I"),
-      budget: col("N"), winner: col("P"), amt: col("Q"), rate: col("R") };
+      budget: col("N"), winner: col("P"), amt: col("Q"), rate: col("R"), exec: col("U"), excl: col("V") };
     const updated = meta && meta.updated ? String(meta.updated).replace("T", " ").slice(0, 16) : "-";
+    const rr = (ctx && ctx.getRateRule && ctx.getRateRule()) || { lo: 50, hi: 150 };
 
     // 1. 안내
     const s1 = wb.addWorksheet("안내", { properties: { tabColor: { argb: NAVY } } });
@@ -241,13 +256,15 @@
       ["중복 정리 기준", R.dedup + ". 묶인 건수는 '공고목록'의 '묶인 공고 수' 열"],
       ["배정예산", "발주기관이 공고에 적은 사업 예산(원, 부가세 포함). 미기재·0원은 평균·중앙값 등 통계에서 제외"],
       ["추정가격", "공고에 적힌 추정가격(원, 부가세 제외)"],
-      ["낙찰률", "낙찰금액 ÷ 예정가격 × 100 (나라장터 낙찰정보 제공값, %). 낙찰 정보가 연결된 공고만 표시"],
+      ["낙찰률(예정가격 대비)", "낙찰금액 ÷ 예정가격 × 100 (나라장터 낙찰정보 제공값, %). 낙찰 정보가 연결된 공고만 표시. 다른 시트의 '낙찰률'도 이 값"],
+      ["예산 집행률", "낙찰금액 ÷ 배정예산 × 100 (%) — 배정한 예산 중 실제로 낙찰된 비율(예산 편성 근거용). '공고목록' U열"],
+      ["통계 제외", `규모구간별통계에서 평균·중앙값을 낼 때 빼는 낙찰 건('공고목록' V열): 단가계약 / 배정예산 미기재·0원 / 예산 집행률 ${rr.lo}% 미만 또는 ${rr.hi}% 초과(데이터 오류 가능성). 기준 숫자는 config.json의 rate_stats`],
       ["상태", "진행중: 마감 전 / 결과대기: 마감 후 낙찰 정보 없음 / 낙찰: 낙찰 정보 연결됨"],
       ["지역(추정)", "수요기관명으로 추정한 시도. 시도 정식명칭으로 시작하면 그 시도, 아니면 기관명에서 처음 나오는 지명. 중앙부처·전국 단위 기관은 '중앙·기타'"],
       ["기관구분", "수요기관명 규칙으로 추정: " + A.kinds.join(" / ") + " ('기타'는 중앙행정기관·군·민간업체 등)"],
       ["분야(자동분류)", "공고명 키워드 규칙으로 자동 분류(위에서부터 먼저 걸리는 것). 해당 없으면 물품은 '장비·물품 구매', 나머지는 '기타'\n" + fieldRuleText],
       ["주의사항", "· 공고명에 키워드가 없으면 수집되지 않아 실제 사업보다 적을 수 있습니다.\n· 지역·기관구분·분야는 규칙 기반 추정값이라 오분류가 있을 수 있습니다. 보고 전 원문을 확인하세요.\n· '단가계약(통계제외)' 분야는 사업비 통계에서 뺍니다.\n· 시트 3~6의 집계는 '공고목록' 시트를 참조하는 수식입니다. 공고목록을 고치면 집계도 바뀝니다.\n· 업체현황은 공개된 낙찰 정보를 정리한 내부 참고용이며 업체 평가 자료가 아닙니다."],
-      ["시트 구성", "공고목록(전체 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별낙찰률(1억 미만·1~5억·5~10억·10억 이상)"],
+      ["시트 구성", "공고목록(전체 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
     ];
     guide.forEach(([k, v], i) => {
       const r = s1.getRow(4 + i);
@@ -261,14 +278,16 @@
     // 2. 공고목록
     const s2 = wb.addWorksheet("공고목록", { views: [{ state: "frozen", xSplit: 0, ySplit: 1 }] });
     const H2 = ["상태", "공고번호", "유형", "공고명", "공고기관", "수요기관", "지역(추정)", "기관구분", "분야", "계약방법",
-      "공고일", "마감일", "공고월", "배정예산(원)", "추정가격(원)", "낙찰업체", "낙찰금액(원)", "낙찰률(%)", "묶인 공고 수", "원문링크"];
+      "공고일", "마감일", "공고월", "배정예산(원)", "추정가격(원)", "낙찰업체", "낙찰금액(원)", "낙찰률(예정가격 대비, %)", "묶인 공고 수", "원문링크",
+      "예산 집행률(%)", "통계 제외 사유"];
     table(s2, 1, H2, rows.map(b => [
       b._st, b.no, b.type, b.title, b.org, b.demand, b.region, b._kind, b._field, b.method || "",
       xlDate(b._notice), xlDate(b._close), b._notice ? `${b._notice.getFullYear()}-${pad(b._notice.getMonth() + 1)}` : "",
       b.budget ?? null, b.estPrice ?? null, b.winner || "", b.awardAmt ?? null, b.rate ?? null, b.dups || 1, link(b.url),
-    ]), { fmt: { 10: DATE, 11: DATE, 13: NUM, 14: NUM, 16: NUM, 17: PCT } });
-    s2.autoFilter = { from: "A1", to: `T${last}` };
-    s2.columns.forEach((c, i) => { c.width = [8, 16, 6, 50, 24, 26, 10, 14, 16, 14, 11, 11, 9, 15, 15, 22, 15, 9, 8, 8][i]; });
+      pos(b._exec) ? b._exec : null, b._excl || "",
+    ]), { fmt: { 10: DATE, 11: DATE, 13: NUM, 14: NUM, 16: NUM, 17: PCT, 20: PCT } });
+    s2.autoFilter = { from: "A1", to: `V${last}` };
+    s2.columns.forEach((c, i) => { c.width = [8, 16, 6, 50, 24, 26, 10, 14, 16, 14, 11, 11, 9, 15, 15, 22, 15, 11, 8, 8, 11, 13][i]; });
 
     // 3. 시도별비교
     const s3 = wb.addWorksheet("시도별비교", { views: [{ state: "frozen", ySplit: 4 }] });
@@ -403,24 +422,68 @@
     table(s6, top6, H6, r6, { fmt: { 2: NUM, 3: NUM, 4: PCT, 7: NUM, 8: NUM } });
     s6.columns.forEach((c, i) => { c.width = [6, 30, 10, 17, 13, 26, 34, 12, 12][i]; });
 
-    // 7. 규모구간별 낙찰률
-    const s7 = wb.addWorksheet("규모구간별낙찰률");
-    title(s7, "규모 구간별 평균 낙찰률", "공고목록 기준 수식 · 상태가 '낙찰'이고 배정예산·낙찰률이 0보다 큰 공고 · 구간은 배정예산 기준(하한 이상, 상한 미만) · 낙찰률은 나라장터 제공값(예정가격 대비)");
-    const H7 = ["규모 구간(배정예산)", "하한(원)", "상한(원)", "낙찰 건수", "평균 낙찰률(%)", "배정예산 합계(원)", "낙찰금액 합계(원)", "지자체 낙찰 건수", "지자체 평균 낙찰률(%)"];
-    const top7 = 4, first7 = top7 + 1;
+    // 7. 규모구간별 통계 (예산 집행률 · 낙찰률(예정가격 대비))
+    const s7 = wb.addWorksheet("규모구간별통계");
+    title(s7, "규모 구간별 평균 예산 집행률 · 낙찰률(예정가격 대비)", "공고목록 기준 수식 · 상태가 '낙찰'이고 통계 제외 사유(V열)가 없는 공고 · 구간은 배정예산 기준(하한 이상, 상한 미만) · 중앙값은 배열수식");
+    const defs = [
+      ["예산 집행률", "낙찰금액 ÷ 배정예산 × 100 — 배정한 예산 중 실제로 낙찰된 비율(예산 편성 근거용, 화면 기본 기준)"],
+      ["낙찰률(예정가격 대비)", "낙찰금액 ÷ 예정가격 × 100 — 나라장터가 낙찰정보로 제공하는 공식 낙찰률(미제공 건은 계산에서 빠짐)"],
+      ["통계 제외 기준", `단가계약 / 배정예산 미기재·0원 / 예산 집행률 ${rr.lo}% 미만 또는 ${rr.hi}% 초과(데이터 오류 가능성) — config.json의 rate_stats에서 변경`],
+    ];
+    defs.forEach(([k, v], i) => {
+      const r = s7.getRow(4 + i);
+      r.getCell(1).value = k; r.getCell(2).value = v;
+      r.getCell(1).font = { name: FONT, size: 10, bold: true };
+      r.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: GRAY } };
+      s7.mergeCells(4 + i, 2, 4 + i, 13);
+      [1, 2].forEach(c => { r.getCell(c).border = BORDER; r.getCell(c).alignment = { vertical: "top", wrapText: true }; });
+    });
+    const H7 = ["규모 구간(배정예산)", "하한(원)", "상한(원)", "통계 대상 건수(예산 집행률)", "평균 예산 집행률(%)", "중앙값 예산 집행률(%)",
+      "통계 대상 건수(낙찰률)", "평균 낙찰률(예정가격 대비, %)", "중앙값 낙찰률(예정가격 대비, %)", "배정예산 합계(원)", "낙찰금액 합계(원)", "통계 제외 건수", "제외 사유"];
+    const top7 = 8, first7 = top7 + 1;
+    const exText = (extra) => A.EX.map((r, j) => `"${j ? " · " : ""}${r} "&COUNTIFS(${C.st},"낙찰",${C.excl},${q(r)}${extra})`).join("&");
+    const exVal = c => A.EX.map(r => `${r} ${c[r]}`).join(" · ");
     const r7 = A.bandStats.map((s, i) => {
       const r = first7 + i;
-      const cond = `${C.st},"낙찰",${C.budget},">0",${C.rate},">0",${C.budget},">="&$B${r}` + (s.hi == null ? "" : `,${C.budget},"<"&$C${r}`);
+      const band = `,${C.budget},">0",${C.budget},">="&$B${r}` + (s.hi == null ? "" : `,${C.budget},"<"&$C${r}`);
+      const cond = `${C.st},"낙찰",${C.excl},""${band}`;
+      const arr = `(${C.st}="낙찰")*(${C.excl}="")*(${C.budget}>0)*(${C.budget}>=$B${r})` + (s.hi == null ? "" : `*(${C.budget}<$C${r})`);
       return [s.name, s.lo, s.hi == null ? "" : s.hi,
-        F(`COUNTIFS(${cond})`, s.n),
-        F(`IFERROR(AVERAGEIFS(${C.rate},${cond}),"")`, s.avgRate),
-        F(`SUMIFS(${C.budget},${cond})`, s.budget),
-        F(`SUMIFS(${C.amt},${cond})`, s.awardAmt),
-        F(`COUNTIFS(${cond},${C.kind},"지자체")`, s.localN),
-        F(`IFERROR(AVERAGEIFS(${C.rate},${cond},${C.kind},"지자체"),"")`, s.localAvg)];
+        F(`COUNTIFS(${cond},${C.exec},">0")`, s.exec.n),
+        F(`IFERROR(AVERAGEIFS(${C.exec},${cond},${C.exec},">0"),"")`, s.exec.avg),
+        AF(`IF($D${r}=0,"",MEDIAN(IF(${arr}*(${C.exec}>0),${C.exec})))`, s.exec.med, `F${r}`),
+        F(`COUNTIFS(${cond},${C.rate},">0")`, s.rate.n),
+        F(`IFERROR(AVERAGEIFS(${C.rate},${cond},${C.rate},">0"),"")`, s.rate.avg),
+        AF(`IF($G${r}=0,"",MEDIAN(IF(${arr}*(${C.rate}>0),${C.rate})))`, s.rate.med, `I${r}`),
+        F(`SUMIFS(${C.budget},${cond},${C.exec},">0")`, s.budget),
+        F(`SUMIFS(${C.amt},${cond},${C.exec},">0")`, s.awardAmt),
+        F(`COUNTIFS(${C.st},"낙찰",${C.excl},"?*"${band})`, s.exN),
+        F(exText(band), exVal(s.ex))];
     });
-    table(s7, top7, H7, r7, { fmt: { 1: NUM, 2: NUM, 3: NUM, 4: "0.0", 5: NUM, 6: NUM, 7: NUM, 8: "0.0" } });
-    s7.columns.forEach((c, i) => { c.width = [20, 15, 15, 11, 14, 18, 18, 14, 18][i]; });
+    {
+      const r = first7 + r7.length, T7 = A.bandTotal;
+      const nb = `,${C.budget},"<=0"`;
+      r7.push(["구간 없음(배정예산 미기재·0원)", "", "", 0, "", "", 0, "", "", "", "",
+        F(`COUNTIFS(${C.st},"낙찰",${C.excl},"?*"${nb})+COUNTIFS(${C.st},"낙찰",${C.excl},"?*",${C.budget},"")`, T7.noBudgetN),
+        exVal(T7.noBudget)]);
+      const tc = `${C.st},"낙찰",${C.excl},""`, arr = `(${C.st}="낙찰")*(${C.excl}="")`;
+      r7.push(["전체", "", "",
+        F(`COUNTIFS(${tc},${C.exec},">0")`, T7.exec.n),
+        F(`IFERROR(AVERAGEIFS(${C.exec},${tc},${C.exec},">0"),"")`, T7.exec.avg),
+        AF(`IF($D${r + 1}=0,"",MEDIAN(IF(${arr}*(${C.exec}>0),${C.exec})))`, T7.exec.med, `F${r + 1}`),
+        F(`COUNTIFS(${tc},${C.rate},">0")`, T7.rate.n),
+        F(`IFERROR(AVERAGEIFS(${C.rate},${tc},${C.rate},">0"),"")`, T7.rate.avg),
+        AF(`IF($G${r + 1}=0,"",MEDIAN(IF(${arr}*(${C.rate}>0),${C.rate})))`, T7.rate.med, `I${r + 1}`),
+        F(`SUMIFS(${C.budget},${tc},${C.exec},">0")`, T7.budget),
+        F(`SUMIFS(${C.amt},${tc},${C.exec},">0")`, T7.awardAmt),
+        F(`COUNTIFS(${C.st},"낙찰",${C.excl},"?*")`, T7.exN),
+        F(exText(""), exVal(T7.ex))]);
+    }
+    table(s7, top7, H7, r7, {
+      fmt: { 1: NUM, 2: NUM, 3: NUM, 4: "0.0", 5: "0.0", 6: NUM, 7: "0.0", 8: "0.0", 9: NUM, 10: NUM, 11: NUM },
+      rowStyle: (row, i) => { if (i === r7.length - 1) { fill(row, 1, 13, GRAY); row.eachCell(c => { c.font = { name: FONT, size: 10, bold: true }; }); } },
+    });
+    s7.columns.forEach((c, i) => { c.width = [26, 14, 14, 12, 12, 12, 12, 14, 14, 17, 17, 10, 40][i]; });
 
     [s1, s2, s3, s4, s5, s6, s7].forEach(applyFont);
     return wb;
