@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>나라장터 AI 사업 모니터</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="assets/report.js" defer></script>
 <style>
 :root{
   color-scheme: light;
@@ -47,6 +48,22 @@ h1{font-size:22px;margin:0;letter-spacing:-.02em}
 .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:8px;
   padding:8px 14px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
 .btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.6;cursor:progress}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+dialog.rep{border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);
+  padding:20px;width:min(440px,calc(100vw - 32px));box-shadow:0 10px 30px rgba(0,0,0,.18)}
+dialog.rep::backdrop{background:rgba(0,0,0,.35)}
+dialog.rep h2{font-size:16px;margin:0 0 4px}
+dialog.rep .desc{color:var(--muted);font-size:12px;margin-bottom:14px}
+dialog.rep label.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;margin-bottom:8px;cursor:pointer}
+dialog.rep label.opt:has(input:checked){border-color:var(--series-1);background:var(--surface-2)}
+dialog.rep label.opt input{margin-top:3px}
+dialog.rep label.opt small{display:block;color:var(--text-2);font-size:12px}
+dialog.rep .field{margin:4px 0 14px 26px}
+dialog.rep .field.off{opacity:.45}
+dialog.rep select{width:100%;font:inherit;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 10px}
+dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
 .btn.primary{background:var(--series-1);border-color:var(--series-1);color:#fff}
 .btn.primary:hover{filter:brightness(1.07)}
 
@@ -101,7 +118,9 @@ td .meta{color:var(--muted);font-size:12px}
 footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
 
 @media (max-width:900px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:520px){.kpi .value{font-size:22px}.hide-sm{display:none}td.title{min-width:170px}}
+@media (max-width:520px){.kpi .value{font-size:22px}
+  header>div:first-child{flex-basis:100%}.actions{width:100%;justify-content:stretch}
+  .actions .btn{flex:1 1 calc(50% - 4px);padding:9px 8px}.actions #themeBtn{flex:0 0 auto}.hide-sm{display:none}td.title{min-width:170px}}
 </style>
 </head>
 <body>
@@ -111,9 +130,11 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       <h1>나라장터 AI 사업 모니터</h1>
       <div class="sub" id="updated">데이터 불러오는 중…</div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn" id="themeBtn" title="화면 테마 전환">🌓</button>
-      <button class="btn primary" id="xlsxBtn">⬇ 엑셀 다운로드</button>
+    <div class="actions">
+      <button class="btn" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환">🌓</button>
+      <button class="btn" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기">⬇ 엑셀 다운로드</button>
+      <button class="btn primary" id="anaBtn" title="필터와 무관하게 전체 데이터로 시도별·도내·사업비·업체 분석 시트를 만듭니다">📊 분석 엑셀 다운로드</button>
+      <button class="btn primary" id="repBtn" title="숫자만 채운 보고서 초안(.docx)을 받습니다">📝 보고서 초안 다운로드</button>
     </div>
   </header>
 
@@ -193,6 +214,19 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
   </footer>
 </div>
 <div class="tip" id="tip"></div>
+<dialog class="rep" id="repDlg" aria-labelledby="repTitle">
+  <h2 id="repTitle">보고서 초안 다운로드</h2>
+  <div class="desc">전체 데이터 기준 · 고정 문장에 숫자만 채운 .docx (한글에서 열림) · 시사점·적정 범위는 빈칸</div>
+  <label class="opt"><input type="radio" name="repKind" value="home" checked>
+    <span>① 도내 AI 사업 추진현황<small>개요 · 도내 발주 현황 · 타 시도 비교 · 시사점(빈칸) · 자료 한계</small></span></label>
+  <label class="opt"><input type="radio" name="repKind" value="cost">
+    <span>② ○○사업 사업비 산정 근거<small>개요 · 분야별 사업비 분포 · 선택 분야 사례 · 적정 범위(빈칸) · 유의사항</small></span></label>
+  <div class="field" id="repFieldRow"><select id="repField" aria-label="사업비 근거 분야"></select></div>
+  <div class="row">
+    <button class="btn" id="repClose" type="button">닫기</button>
+    <button class="btn primary" id="repGo" type="button">⬇ 다운로드</button>
+  </div>
+</dialog>
 
 <script>
 (() => {
@@ -434,10 +468,10 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
         <td class="title">
           ${b.isNew ? '<span class="badge b-new">NEW</span>' : ""}
           ${b.url ? `<a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.title)}</a>` : esc(b.title)}
-          <div class="meta">${esc(b.type)} · ${esc(b.method || "계약방법 미기재")} · ${esc(b.no)}</div>
+          <div class="meta">${esc(b.type)} · ${esc(b.field || "분야 미분류")} · ${esc(b.method || "계약방법 미기재")} · ${esc(b.no)}${b.dups > 1 ? ` · 재공고 등 ${b.dups}건 묶음` : ""}</div>
           <div>${(b.keywords || []).map(k => `<span class="kw">${esc(k)}</span>`).join("")}</div>
         </td>
-        <td class="hide-sm">${esc(b.demand)}<div class="meta">${esc(b.region)}</div></td>
+        <td class="hide-sm">${esc(b.demand)}<div class="meta">${esc(b.region)}${b.kind ? " · " + esc(b.kind) : ""}</div></td>
         <td class="num hide-sm">${ymd(b._notice)}</td>
         <td class="num hide-sm">${ymd(b._close)}</td>
         <td class="num">${won(b.budget)}</td>
@@ -523,13 +557,13 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
   function makeSample() {
     let seed = 20261104; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     const pick = a => a[Math.floor(rnd() * a.length)];
-    const orgs = [["제주특별자치도","제주"],["서귀포시","제주"],["제주시","제주"],["서울특별시","서울"],["부산광역시","부산"],["경기도","경기"],["경기도 수원시","경기"],["인천광역시","인천"],["대구광역시","대구"],["전라남도","전남"],["충청남도","충남"],["경상남도 창원시","경남"],["행정안전부","중앙·기타"],["한국지능정보사회진흥원","중앙·기타"],["과학기술정보통신부","중앙·기타"],["국토교통부","중앙·기타"],["강원특별자치도","강원"],["대전광역시","대전"]];
-    const tpl = [["AI 기반 민원 상담 챗봇 구축 용역",["AI","챗봇"]],["생성형 AI 행정업무 지원 플랫폼 구축",["생성형","AI"]],["RPA 업무자동화 확대 구축 사업",["RPA"]],["빅데이터 분석 플랫폼 고도화 용역",["빅데이터"]],["디지털트윈 기반 도시관리 시스템 구축",["디지털트윈"]],["인공지능 CCTV 선별관제 시스템 구축",["인공지능"]],["LLM 기반 내부 문서검색 시스템 구축",["LLM"]],["AI 재난안전 예측 모델 개발 용역",["AI"]],["AI 학습데이터 구축 사업",["AI"]],["인공지능 교통신호 최적화 시스템 구축",["인공지능"]],["행정 빅데이터 통합 분석 용역",["빅데이터"]],["AI 기반 해양쓰레기 탐지 시스템",["AI"]],["RPA 솔루션 라이선스 구매",["RPA"]],["AI 서버(GPU) 구매",["AI"]]];
+    const orgs = [["제주특별자치도","제주"],["서귀포시","제주"],["제주시","제주"],["(재)제주테크노파크","제주","공공기관·출자출연"],["서울특별시","서울"],["부산광역시","부산"],["경기도","경기"],["경기도 수원시","경기"],["인천광역시","인천"],["대구광역시","대구"],["전라남도","전남"],["충청남도","충남"],["경상남도 창원시","경남"],["행정안전부","중앙·기타","기타"],["한국지능정보사회진흥원","중앙·기타","공공기관·출자출연"],["과학기술정보통신부","중앙·기타","기타"],["국토교통부","중앙·기타","기타"],["강원특별자치도","강원"],["대전광역시","대전"]];
+    const tpl = [["AI 기반 민원 상담 챗봇 구축 용역",["AI","챗봇"],"챗봇·민원상담"],["생성형 AI 행정업무 지원 플랫폼 구축",["생성형","AI"],"생성형AI·LLM"],["RPA 업무자동화 확대 구축 사업",["RPA"],"RPA·업무자동화"],["빅데이터 분석 플랫폼 고도화 용역",["빅데이터"],"데이터·빅데이터"],["디지털트윈 기반 도시관리 시스템 구축",["디지털트윈"],"디지털트윈"],["인공지능 CCTV 선별관제 시스템 구축",["인공지능"],"영상·CCTV 분석"],["LLM 기반 내부 문서검색 시스템 구축",["LLM"],"생성형AI·LLM"],["AI 재난안전 예측 모델 개발 용역",["AI"],"플랫폼·시스템 구축"],["AI 학습데이터 구축 사업",["AI"],"데이터·빅데이터"],["인공지능 교통신호 최적화 시스템 구축",["인공지능"],"플랫폼·시스템 구축"],["행정 빅데이터 통합 분석 용역",["빅데이터"],"데이터·빅데이터"],["AI 기반 해양쓰레기 탐지 시스템",["AI"],"플랫폼·시스템 구축"],["RPA 솔루션 라이선스 구매",["RPA"],"RPA·업무자동화"],["AI 서버(GPU) 구매",["AI"],"장비·물품 구매"]];
     const methods = ["협상에의한계약","제한경쟁","일반경쟁","수의계약"];
     const winners = ["(주)한빛데이터","(주)제주AI랩","(주)누리소프트","(주)마루정보","(주)바른시스템","(주)온새미로테크","(주)다온아이엔씨"];
     const now = Date.now(), out = [];
     for (let i = 0; i < 140; i++) {
-      const [org, region] = pick(orgs), [title, kws] = pick(tpl);
+      const [org, region, kind] = pick(orgs), [title, kws, field] = pick(tpl);
       const isThing = /구매/.test(title);
       const notice = new Date(now - Math.floor(rnd() * 170 + 1) * DAY - Math.floor(rnd() * 8) * 36e5);
       const close = new Date(+notice + (10 + Math.floor(rnd() * 15)) * DAY);
@@ -540,6 +574,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
       out.push({
         id: `R26BK${String(1e7 + i).slice(1)}-000`, no: `R26BK${String(1e7 + i).slice(1)}`, ord: "000",
         type: isThing ? "물품" : "용역", title: `${org.replace(/^(경기도|경상남도) /, "")} ${title}`, org, demand: org, region,
+        kind: kind || "지자체", field, dups: 1,
         noticeDt: fmt(notice), closeDt: fmt(close), budget, estPrice: Math.round(budget / 1.1),
         method: isThing ? "일반경쟁" : pick(methods), url: "", firstSeen: fmt(new Date(+notice + DAY)).slice(0, 10), keywords: kws,
         award: closedLongAgo && rnd() < .75 ? { winner: pick(winners), bizno: "", amount: Math.round(budget * rate / 100 / 1000) * 1000, rate: +rate.toFixed(3), openDt: fmt(close) } : null
@@ -557,6 +592,12 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
     if (sample) { const b = $("#banner"); b.style.display = "block"; b.textContent = "⚠ 아직 수집된 데이터가 없어 가상의 샘플 데이터로 화면을 보여드리고 있습니다. 첫 수집이 끝나면 실제 공고로 바뀝니다."; }
     else if (meta.errors && meta.errors.length) { const b = $("#banner"); b.style.display = "block"; b.textContent = `⚠ 마지막 수집에서 일부 호출(${meta.errors.length}건)이 실패했습니다. 다음 수집 때 다시 시도합니다.`; }
     initControls(); render();
+    // assets/report.js(defer)와 데이터 중 어느 쪽이 먼저 준비돼도 연결되도록: 모듈이 있으면 바로, 없으면 설정을 남겨 두고 모듈이 가져감
+    const reportCfg = { getItems: () => state.all, getMeta: () => state.meta, statusLabel: STATUS_LABEL };
+    if (window.G2BReport) window.G2BReport.init(reportCfg); else window.__g2bReportCfg = reportCfg;
+    ["#anaBtn", "#repBtn"].forEach(s => $(s).addEventListener("click", () => {
+      if (!window.G2BReport) alert("분석 모듈(assets/report.js)을 불러오지 못했습니다. 새로고침해 주세요.");
+    }));
   });
 })();
 </script>
