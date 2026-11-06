@@ -187,7 +187,9 @@
 
   // ───────── 패널 UI ─────────
   const CSS = `
-  .aip{position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--surface);border-left:1px solid var(--border);
+  body{transition:padding-right .2s ease}
+  @media (min-width:1000px){html.ai-open body{padding-right:400px}}
+  .aip{position:fixed;top:0;right:0;bottom:0;width:min(400px,100vw);background:var(--surface);border-left:1px solid var(--border);
     box-shadow:-12px 0 32px rgba(0,0,0,.14);z-index:40;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .2s ease}
   .aip.on{transform:none}
   .aip .hd{display:flex;align-items:center;gap:8px;padding:14px 14px 12px;border-bottom:1px solid var(--border);
@@ -323,6 +325,13 @@
     }
   }
 
+  // 패널 열기/닫기: 넓은 화면에서는 대시보드를 옆으로 밀어 가리지 않게 함 (좁은 화면은 위에 덮음)
+  let rz;
+  function setOpen(on) {
+    panel.classList.toggle("on", on);
+    document.documentElement.classList.toggle("ai-open", on);
+    clearTimeout(rz); rz = setTimeout(() => dispatchEvent(new Event("resize")), 240);   // 차트를 새 폭에 맞게 다시 그림
+  }
   function toggleSet(on) {
     setBox.classList.toggle("on", on == null ? !setBox.classList.contains("on") : on);
     if (setBox.classList.contains("on")) {
@@ -368,7 +377,7 @@
     document.body.append(panel);
     log = panel.querySelector("#aiLog"); ta = panel.querySelector("#aiIn"); sendBtn = panel.querySelector("#aiSend"); setBox = panel.querySelector("#aiSet");
     const stEl = setBox.querySelector(".st");
-    panel.querySelector("#aiClose").addEventListener("click", () => panel.classList.remove("on"));
+    panel.querySelector("#aiClose").addEventListener("click", () => setOpen(false));
     panel.querySelector("#aiSetBtn").addEventListener("click", () => toggleSet());
     panel.querySelector("#aiNew").addEventListener("click", () => { if (!busy) { history = []; intro(); } });
     panel.querySelector("#aiForm").addEventListener("submit", e => { e.preventDefault(); send(ta.value); });
@@ -390,11 +399,11 @@
       catch (e) { stEl.textContent = "⚠ " + e.message; }
     });
     const btn = document.getElementById("aiBtn");
-    if (btn) btn.addEventListener("click", () => { panel.classList.toggle("on"); if (panel.classList.contains("on")) (hasKey() ? ta : panel.querySelector("#aiSetBtn")).focus(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape" && panel.classList.contains("on") && !document.querySelector("dialog[open]")) panel.classList.remove("on"); });
+    if (btn) btn.addEventListener("click", () => { setOpen(!panel.classList.contains("on")); if (panel.classList.contains("on")) (hasKey() ? ta : panel.querySelector("#aiSetBtn")).focus(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && panel.classList.contains("on") && !document.querySelector("dialog[open]")) setOpen(false); });
     refreshState(); intro();
   }
 
-  window.G2BAI = { hasKey, call, reportInsights, open: () => panel && panel.classList.add("on") };
+  window.G2BAI = { hasKey, call, reportInsights, open: () => panel && setOpen(true) };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", build); else build();
 })();

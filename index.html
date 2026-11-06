@@ -82,7 +82,7 @@ dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
   padding:4px 11px;font-size:12px;cursor:pointer;user-select:none}
 .chip.on{background:var(--series-1);border-color:var(--series-1);color:#fff}
 
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
 .kpi .label{color:var(--text-2);font-size:12px}
 .kpi .value{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -166,7 +166,8 @@ td .meta{color:var(--muted);font-size:12px}
 .empty{color:var(--muted);text-align:center;padding:32px}
 footer{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}
 
-@media (max-width:900px){.grid,.grid.even,.grid.mapfield{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){.grid,.grid.even,.grid.mapfield{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr}}
 @media (max-width:520px){.refresh{flex-basis:100%;flex-wrap:wrap}}
 @media (max-width:360px){.bands{grid-template-columns:1fr}}
 @media (max-width:520px){.kpi .value{font-size:22px}
@@ -215,7 +216,7 @@ dialog.rep label.aichk:has(input:disabled){opacity:.6;cursor:default}
 .dl .mi:disabled{opacity:.6;cursor:progress}
 .kpi{position:relative;overflow:hidden;padding-left:20px}
 .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
-.kpi:nth-child(2)::before{background:#0f9f8f}.kpi:nth-child(3)::before{background:#1a7f37}.kpi:nth-child(4)::before{background:#e8710a}
+.kpi:nth-child(2)::before{background:#0f9f8f}.kpi:nth-child(3)::before{background:#1a7f37}
 .kpi .value{font-size:30px;font-weight:800;letter-spacing:-.03em}
 .card h2{font-size:15px;font-weight:700}
 tbody tr:hover{background:var(--surface-2)}
@@ -277,7 +278,6 @@ tbody tr:hover{background:var(--surface-2)}
     <div class="kpi"><div class="label">공고 건수</div><div class="value" id="kCount">-</div><div class="hint" id="kCountHint">&nbsp;</div></div>
     <div class="kpi"><div class="label">사업 규모 합계 (배정예산)</div><div class="value" id="kBudget">-</div><div class="hint" id="kBudgetHint">&nbsp;</div></div>
     <div class="kpi"><div class="label">낙찰 완료</div><div class="value" id="kAward">-</div><div class="hint" id="kAwardHint">&nbsp;</div></div>
-    <div class="kpi"><div class="label">최근 7일 신규</div><div class="value" id="kNew">-</div><div class="hint">수집일 기준</div></div>
   </section>
   <div class="execline" id="execLine" role="status"></div>
 
@@ -911,7 +911,6 @@ tbody tr:hover{background:var(--surface-2)}
     $("#kAward").textContent = awards.length.toLocaleString("ko-KR") + "건";
     $("#kAwardHint").innerHTML = awards.length ? `낙찰총액 ${won(awardAmt)}원` +
       (rates.length ? ` · 평균 <span class="term" data-term="rate">낙찰률(예정가격 대비)</span> ${pctTxt(mean(rates))}` : "") : "아직 없음";
-    $("#kNew").textContent = rows.filter(b => b.isNew).length.toLocaleString("ko-KR") + "건";
   }
 
   // ───────── 표 ─────────
