@@ -6,9 +6,9 @@
 <title>나라장터 AI 사업 모니터</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-<script src="assets/hwpx.js?v=20261106c" defer></script>
-<script src="assets/report.js?v=20261106c" defer></script>
-<script src="assets/ai.js?v=20261106c" defer></script>
+<script src="assets/hwpx.js?v=20261106d" defer></script>
+<script src="assets/report.js?v=20261106d" defer></script>
+<script src="assets/ai.js?v=20261106d" defer></script>
 <style>
 :root{
   color-scheme: light;
@@ -378,6 +378,7 @@ tbody tr:hover{background:var(--surface-2)}
   </div>
   <div class="grp">AI 초안 (선택)</div>
   <label class="aichk"><input type="checkbox" id="repAi" checked> <span>빈칸을 AI(Claude) 초안으로 채우기<div class="mini" id="repAiNote"></div></span></label>
+  <div class="field" id="repModelRow" hidden style="margin-top:8px"><select id="repModel" aria-label="AI 초안에 쓸 Claude 모델"></select></div>
   <div class="row" style="margin-top:16px">
     <button class="btn" id="repClose" type="button">닫기</button>
     <button class="btn primary" id="repGo" type="button">⬇ 다운로드</button>

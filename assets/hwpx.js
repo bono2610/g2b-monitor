@@ -140,7 +140,7 @@
         ...items.map(t => pXml([run("○ " + t, { size: 21 })], { after: 60, line: 160, hang: 290 }))].join("");
       const w = 9600 * TW;
       return `<hp:p id="${++pid}" paraPrIDRef="${paraId({ after: 160 })}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">` +
-        `<hp:tbl id="${1000 + (++tid)}" zOrder="${tid}" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="1" colCnt="1" cellSpacing="0" borderFillIDRef="${fillId("")}" noAdjust="0">` +
+        `<hp:tbl id="${1000 + (++tid)}" zOrder="${tid}" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="TABLE" repeatHeader="0" rowCnt="1" colCnt="1" cellSpacing="0" borderFillIDRef="${fillId("")}" noAdjust="0">` +
         `<hp:sz width="${w}" widthRelTo="ABSOLUTE" height="${(items.length + 1) * 1800}" heightRelTo="ABSOLUTE" protect="0"/>` +
         `<hp:pos treatAsChar="0" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>` +
         `<hp:outMargin left="0" right="0" top="0" bottom="400"/><hp:inMargin left="850" right="850" top="400" bottom="400"/>` +
