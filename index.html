@@ -76,6 +76,7 @@ dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
   border:1px solid var(--border);border-radius:8px;padding:7px 10px;min-width:0}
 .filters input[type=search]{flex:1 1 220px}
 .filters select{flex:0 1 auto}
+.filters .range{display:inline-flex;align-items:center;gap:6px;color:var(--text-2)}.filters .range[hidden]{display:none}
 .chips{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%}
 .chip{border:1px solid var(--border);background:var(--bg);color:var(--text-2);border-radius:999px;
   padding:4px 11px;font-size:12px;cursor:pointer;user-select:none}
@@ -261,8 +262,9 @@ tbody tr:hover{background:var(--surface-2)}
     </select>
     <select id="fPeriod">
       <option value="30">최근 30일</option><option value="90" selected>최근 90일</option>
-      <option value="180">최근 180일</option><option value="0">전체 기간</option>
+      <option value="180">최근 180일</option><option value="0">전체 기간</option><option value="custom">기간 직접 지정…</option>
     </select>
+    <span class="range" id="customRange" hidden><input type="date" id="fFrom" aria-label="공고일 시작"><span>~</span><input type="date" id="fTo" aria-label="공고일 끝"></span>
     <select id="fAmount">
       <option value="0">금액 전체</option><option value="50000000">5천만원 이상</option>
       <option value="100000000">1억 이상</option><option value="500000000">5억 이상</option>
@@ -510,12 +512,32 @@ tbody tr:hover{background:var(--surface-2)}
   }
 
   // ───────── 필터 ─────────
+  // 공고일 범위 [시작, 끝) (ms). 0 = 제한 없음. '기간 직접 지정'이면 날짜 입력칸 값 (끝 날짜는 그날 하루 포함)
+  const dayStart = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? +new Date(+m[1], +m[2] - 1, +m[3]) : 0; };
+  function periodRange() {
+    const v = $("#fPeriod").value;
+    if (v === "custom") { const f = dayStart($("#fFrom").value), t = dayStart($("#fTo").value); return [f, t ? t + DAY : 0]; }
+    return [+v ? Date.now() - +v * DAY : 0, 0];
+  }
+  const isoDay = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  function periodLabel() {
+    if ($("#fPeriod").value !== "custom") return $("#fPeriod").selectedOptions[0].textContent;
+    const f = $("#fFrom").value, t = $("#fTo").value, dot = s => s.replace(/-/g, ".");
+    return f || t ? `공고일 ${f ? dot(f) : "처음"} ~ ${t ? dot(t) : "오늘"}` : "전체 기간";
+  }
+  // '기간 직접 지정'을 고르면 날짜칸을 보여 주고, 비어 있으면 최근 90일로 채워 둠
+  function showRange(fill = true) {
+    const on = $("#fPeriod").value === "custom";
+    $("#customRange").hidden = !on;
+    if (on && fill && !$("#fFrom").value && !$("#fTo").value) {
+      $("#fFrom").value = isoDay(new Date(Date.now() - 90 * DAY)); $("#fTo").value = isoDay(new Date());
+    }
+  }
   // noRegion: 지역 선택만 빼고 거른 결과 (지도 색칠·산점도 강조용)
   function filtered({ noRegion = false } = {}) {
     const q = $("#q").value.trim().toLowerCase();
     const type = $("#fType").value, region = $("#fRegion").value, st = $("#fStatus").value;
-    const period = +$("#fPeriod").value, amt = +$("#fAmount").value;
-    const since = period ? Date.now() - period*DAY : 0;
+    const amt = +$("#fAmount").value, [since, until] = periodRange();
     return state.all.filter(b =>
       (!q || b._hay.includes(q)) &&
       (!type || b.type === type) &&
@@ -523,6 +545,7 @@ tbody tr:hover{background:var(--surface-2)}
       (!state.localOnly || b.kind === "지자체") &&
       (!st || b.status === st) &&
       (!since || (b._notice && +b._notice >= since)) &&
+      (!until || (b._notice && +b._notice < until)) &&
       (!amt || (b.budget || 0) >= amt) &&
       (!state.kws.size || (b.keywords || []).some(k => state.kws.has(k)))
     );
@@ -940,7 +963,7 @@ tbody tr:hover{background:var(--surface-2)}
   // 엑셀에 적어 둘 현재 필터 설명
   function filterSummary({ noRegion = false, includeField = true } = {}) {
     const opt = s => { const o = $(s).selectedOptions[0]; return o && o.value ? o.textContent : ""; };
-    const parts = [opt("#fType"), noRegion ? "" : $("#fRegion").value, opt("#fStatus"), $("#fPeriod").selectedOptions[0].textContent, opt("#fAmount"),
+    const parts = [opt("#fType"), noRegion ? "" : $("#fRegion").value, opt("#fStatus"), periodLabel(), opt("#fAmount"),
       state.localOnly ? "지자체 사업만" : "", $("#q").value.trim() ? `검색 "${$("#q").value.trim()}"` : "",
       state.kws.size ? `키워드 ${[...state.kws].join("·")}` : "", includeField && state.field ? `분야 ${state.field}` : ""].filter(Boolean);
     return parts.join(" / ");
@@ -1044,7 +1067,7 @@ tbody tr:hover{background:var(--surface-2)}
       state.page = 1; render();
     });
     let t; $("#q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { state.page = 1; render(); }, 150); });
-    ["#fType", "#fRegion", "#fStatus", "#fPeriod", "#fAmount"].forEach(s => $(s).addEventListener("change", () => { state.page = 1; render(); }));
+    ["#fType", "#fRegion", "#fStatus", "#fPeriod", "#fAmount", "#fFrom", "#fTo"].forEach(s => $(s).addEventListener("change", () => { state.page = 1; showRange(); render(); }));
     document.querySelectorAll("th[data-k]").forEach(th => th.addEventListener("click", () => {
       const k = th.dataset.k;
       state.sort = state.sort.k === k ? { k, dir: -state.sort.dir } : { k, dir: ["title", "demand", "winner", "status"].includes(k) ? 1 : -1 };
@@ -1177,7 +1200,11 @@ tbody tr:hover{background:var(--surface-2)}
     }
     if (f.region !== undefined) { const r = normRegion(f.region); if (r == null) warn.push(`지역 '${f.region}'을 찾지 못해 적용하지 않음`); else $("#fRegion").value = r; }
     if (f.status !== undefined) { if (["", "open", "closed", "award"].includes(f.status || "")) $("#fStatus").value = f.status || ""; else warn.push(`상태 '${f.status}' 무시`); }
-    if (f.period_days !== undefined) { const d = Math.max(0, Math.round(+f.period_days || 0)); setSel("#fPeriod", d, `최근 ${d}일`); }
+    if (f.date_from || f.date_to) {
+      const ok = v => !v || dayStart(v);
+      if (!ok(f.date_from) || !ok(f.date_to)) warn.push("날짜는 YYYY-MM-DD 형식이어야 해서 기간을 바꾸지 않음");
+      else { $("#fPeriod").value = "custom"; $("#fFrom").value = f.date_from || ""; $("#fTo").value = f.date_to || ""; showRange(false); }
+    } else if (f.period_days !== undefined) { const d = Math.max(0, Math.round(+f.period_days || 0)); setSel("#fPeriod", d, `최근 ${d}일`); showRange(); }
     if (f.min_amount !== undefined) { const a = Math.max(0, Math.round(+f.min_amount || 0)); setSel("#fAmount", a, `${amtLabel(a)} 이상`); }
     if (f.keywords !== undefined) {
       const all = state.meta.keywords || [...new Set(state.all.flatMap(b => b.keywords || []))];
@@ -1194,7 +1221,7 @@ tbody tr:hover{background:var(--surface-2)}
   }
   function resetFilters() {
     $("#q").value = ""; ["#fType", "#fRegion", "#fStatus"].forEach(s => { $(s).value = ""; });
-    $("#fPeriod").value = "90"; $("#fAmount").value = "0";
+    $("#fPeriod").value = "90"; $("#fAmount").value = "0"; $("#fFrom").value = ""; $("#fTo").value = ""; showRange();
     state.kws.clear(); state.localOnly = false; state.field = ""; state.org = ""; syncChips(); syncSeg();
     return afterFilter();
   }

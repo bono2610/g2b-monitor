@@ -267,7 +267,7 @@
       ["기관구분", "수요기관명 규칙으로 추정: " + A.kinds.join(" / ") + " ('기타'는 중앙행정기관·군·민간업체 등)"],
       ["분야(자동분류)", "공고명 키워드 규칙으로 자동 분류(위에서부터 먼저 걸리는 것). 해당 없으면 물품은 '장비·물품 구매', 나머지는 '기타'\n" + fieldRuleText],
       ["주의사항", "· 공고명에 키워드가 없으면 수집되지 않아 실제 사업보다 적을 수 있습니다.\n· 지역·기관구분·분야는 규칙 기반 추정값이라 오분류가 있을 수 있습니다. 보고 전 원문을 확인하세요.\n· '단가계약(통계제외)' 분야는 사업비 통계에서 뺍니다.\n· 시트 3~6의 집계는 '공고목록' 시트를 참조하는 수식입니다. 공고목록을 고치면 집계도 바뀝니다.\n· 업체현황은 공개된 낙찰 정보를 정리한 내부 참고용이며 업체 평가 자료가 아닙니다."],
-      ["시트 구성", "공고목록(자료 범위의 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
+      ["시트 구성", "공고목록(자료 범위의 공고) / 시도별비교 / 도내현황 / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
     ];
     guide.forEach(([k, v], i) => {
       const r = s1.getRow(4 + i);
@@ -326,7 +326,7 @@
 
     // 4. 도내현황
     const s4 = wb.addWorksheet("도내현황", { properties: { tabColor: { argb: "FFFFC000" } } });
-    title(s4, `${home} 도내 AI 사업 현황`, `지역(추정)이 '${home}'인 공고 · 기관구분별 소계는 공고목록 기준 수식`);
+    title(s4, `도내 AI 사업 현황`, `지역(추정)이 '${home}'인 공고 · 기관구분별 소계는 공고목록 기준 수식`);
     subtitle(s4, 4, "1. 기관구분별 소계");
     const top4 = 5, first4 = top4 + 1;
     const H4a = ["기관구분", "공고 건수", "배정예산 합계(원)", "낙찰 건수", "진행중", "결과대기"];
@@ -355,7 +355,7 @@
       return [i + 1, b._st, b.title, b.demand, b._kind, b._field, xlDate(b._notice), xlDate(b._close), b.budget ?? null,
         b.winner || "", b.awardAmt ?? null, b.rate ?? null, b.dups || 1, F(sim, b._similar), "", link(b.url)];
     });
-    if (!hl.length) hl.push(["", "", `${home} 지역 공고가 없습니다.`, "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    if (!hl.length) hl.push(["", "", `도내 공고가 없습니다.`, "", "", "", "", "", "", "", "", "", "", "", "", ""]);
     table(s4, top4b, H4b, hl, {
       fmt: { 6: DATE, 7: DATE, 8: NUM, 10: NUM, 11: PCT },
       rowStyle: row => { row.getCell(15).fill = { type: "pattern", pattern: "solid", fgColor: { argb: INPUT } }; row.getCell(3).alignment = { wrapText: true, vertical: "top" }; },
@@ -412,7 +412,7 @@
     const s6 = wb.addWorksheet("업체현황");
     title(s6, "낙찰 업체 현황 (상위 40개사)", "※ 내부 참고용 — 나라장터에 공개된 낙찰 정보를 정리한 것이며 업체 평가·추천 자료가 아닙니다. 건수·금액·낙찰률·지자체·도내 건수는 공고목록 기준 수식");
     s6.getCell("A2").font = { name: FONT, size: 10, bold: true, color: { argb: "FFC00000" } };
-    const H6 = ["순위", "업체명", "낙찰 건수", "낙찰금액 합계(원)", "평균 낙찰률(%)", "주요 분야", "주요 발주기관", "지자체 수행 건수", `${home} 수행 건수`];
+    const H6 = ["순위", "업체명", "낙찰 건수", "낙찰금액 합계(원)", "평균 낙찰률(%)", "주요 분야", "주요 발주기관", "지자체 수행 건수", "도내 수행 건수"];
     const top6 = 4, first6 = top6 + 1;
     const r6 = A.winners.map((w, i) => {
       const r = first6 + i, b = crit(`$B${r}`, w.name);
@@ -496,7 +496,7 @@
   // 한글(HWP)에서도 열리도록 단순 구조만 사용: 굵은 글씨 문단, 고정폭(DXA) 표, 맑은 고딕
   const mil = n => n == null ? "-" : (n / 1e6).toLocaleString("ko-KR", { maximumFractionDigits: 1 });
   const pct1 = n => n == null ? "-" : n.toFixed(1);
-  const periodText = A => A.from ? `최근 약 ${A.months}개월(${ymd(A.from)}~${ymd(A.to)})간` : "해당 기간";
+  const periodText = A => A.from ? `${ymd(A.from)}~${ymd(A.to)}(약 ${A.months}개월)간` : "해당 기간";
   const fileSafe = s => String(s).replace(/[\\/:*?"<>|\s]+/g, "_");
   // 받침 유무로 조사 선택: josa("서울", "이", "가") → "서울이"
   const josa = (word, withB, without) => {
@@ -570,7 +570,7 @@
     const share = (a, b) => b ? (a / b * 100).toFixed(1) : "0.0";
     const updated = meta && meta.updated ? String(meta.updated).slice(0, 10).replace(/-/g, ".") : ymd(new Date());
     const c = [];
-    c.push(K.P(`${home} 도내 AI 사업 추진현황`, { bold: true, size: 32, align: "center", after: 80 }));
+    c.push(K.P(`도내 AI 사업 추진현황`, { bold: true, size: 32, align: "center", after: 80 }));
     c.push(K.P(`(자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: x.scopeText ? 60 : 240 }));
     const sl = scopeLine(K, x); if (sl) c.push(sl);
 
@@ -596,7 +596,7 @@
       : [["", "도내 공고가 없습니다.", "", "", "", "", ""]]));
 
     c.push(K.H("3. 타 시도 비교"));
-    c.push(K.B(`${A.sidos.length}개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. ${josa(home, "은", "는")} 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`${A.sidos.length}개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. 도내는 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
     c.push(K.P("배정예산 순 · 지역은 수요기관명 기준 추정 · 중앙부처·전국 단위 기관(중앙·기타)은 순위에서 제외", { size: 18, color: "595959" }));
     const ranked = [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank || a.countRank - b.countRank);
     c.push(K.table([
@@ -689,14 +689,14 @@
       const hs = A.regionStats.find(s => s.name === A.home) || {};
       const fieldCnt = {}; A.homeRows.forEach(b => { fieldCnt[b._field] = (fieldCnt[b._field] || 0) + 1; });
       return {
-        보고서: `${A.home} 도내 AI 사업 추진현황`, 기간: periodText(A), 도: A.home,
+        보고서: "도내 AI 사업 추진현황", 기간: periodText(A), 안내: "시도별 목록 중 도내 시도는 도내_순위로만 표시 (이름 비공개)",
         도내: { 공고: A.homeTotal.n, 배정예산_백만원: m(A.homeTotal.budget), 낙찰: A.homeTotal.awards, 진행중: A.homeTotal.open, 결과대기: A.homeTotal.closed,
           건수순위: hs.countRank, 예산순위: hs.budgetRank, 시도수: A.sidos.length },
         전체: { 공고: A.total.n, 배정예산_백만원: m(A.total.budget) },
         도내_기관구분별: A.homeKinds.filter(k => k.n).map(k => ({ 구분: k.name, 공고: k.n, 배정예산_백만원: m(k.budget) })),
         도내_분야별_건수: fieldCnt,
         도내_사업_예시: A.homeRows.slice(0, 15).map(b => ({ 공고명: b.title, 기관: b.demand, 분야: b._field, 배정예산_백만원: m(b.budget), 상태: b._st })),
-        시도별_예산상위: [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank).slice(0, 6)
+        시도별_예산상위: [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank).filter(s => s.name !== A.home).slice(0, 6)
           .map(s => ({ 시도: s.name, 공고: s.n, 배정예산_백만원: m(s.budget), 건당평균_백만원: m(s.avgBudget) })),
       };
     }
@@ -732,10 +732,10 @@
     const K = (opts.format || "hwpx") === "docx" ? docKit(await loadLib("docx")) : window.G2BHwpx.kit();
     const x = { scopeText: sc.text, ai };
     const doc = kind === "cost" ? costReport(K, A, meta, field, x) : homeReport(K, A, meta, x);
-    if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : `${A.home} AI 사업 추진현황`;
+    if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : "도내 AI 사업 추진현황";
     const blob = await K.toBlob(doc);
     const tag = sc.text.startsWith("전체") ? "" : "_필터";
-    const name = (kind === "cost" ? `사업비_산정근거_${fileSafe(field)}` : `${A.home}_AI사업_추진현황`) + `${tag}_초안_${stamp()}.${K.ext}`;
+    const name = (kind === "cost" ? `사업비_산정근거_${fileSafe(field)}` : "도내_AI사업_추진현황") + `${tag}_초안_${stamp()}.${K.ext}`;
     download(blob, name);
     return { name, n: sc.rows.length, ai: !!ai, aiError, scope: sc.text, field };
   }

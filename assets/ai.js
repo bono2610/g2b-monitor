@@ -65,7 +65,7 @@
       ? "'적정 범위(안)' 아래 '추가 근거' 칸에 들어갈 문장. 유사 사례의 분포(중앙값·보통 범위 하위25~상위25%)를 근거로 이 분야 사업비를 어느 범위에서 검토하면 좋을지, 사업 범위·기간·장비 포함 여부에 따라 달라질 수 있다는 점, 사례 비교 시 유의점"
       : "'4. 시사점' 칸에 들어갈 문장. 도내 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항";
     const system = "당신은 지방자치단체 행정 보고서 초안 작성을 돕는 보조자입니다. 주어진 JSON 숫자만 근거로 쓰고, JSON 에 없는 숫자·사실·사업명은 절대 만들지 마세요. " +
-      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다.";
+      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다. 보고 대상 지역은 이름을 쓰지 말고 '도내'라고만 씁니다.";
     const prompt = `아래는 나라장터 공고 자동 수집 자료를 코드로 집계한 결과입니다.\n자료 범위: ${scopeText}\n\n${JSON.stringify(payload)}\n\n` +
       `${what}을 4~6개 작성하세요. 각 문장은 80자 안팎, 앞에 기호(○, -, 숫자)를 붙이지 마세요.\n` +
       `반드시 JSON 문자열 배열 하나만 출력하세요. 예: ["…", "…"]`;
@@ -88,7 +88,9 @@
         type: { type: "string", description: "유형 (용역/물품 등, 목록 참고)" },
         region: { type: "string", description: "지역(시도) — 목록의 이름 그대로" },
         status: { type: "string", enum: ["", "open", "closed", "award"], description: "open=진행중, closed=마감(결과대기), award=낙찰완료" },
-        period_days: { type: "integer", description: "최근 N일 공고만. 0=전체 기간" },
+        period_days: { type: "integer", description: "최근 N일 공고만. 0=전체 기간 (date_from/date_to 를 쓰면 무시)" },
+        date_from: { type: "string", description: "공고일 시작일 YYYY-MM-DD (기간 직접 지정)" },
+        date_to: { type: "string", description: "공고일 종료일 YYYY-MM-DD (기간 직접 지정, 비우면 오늘까지)" },
         min_amount: { type: "integer", description: "배정예산 하한(원). 0=제한 없음. 예: 1억=100000000" },
         keywords: { type: "array", items: { type: "string" }, description: "수집 키워드 칩 (목록 참고, 여러 개면 OR)" },
         local_only: { type: "boolean", description: "true=지자체 사업만" },
@@ -159,13 +161,13 @@
   function systemPrompt() {
     const A = window.G2BApp, v = A.vocab(), meta = A.meta();
     return [
-      "당신은 '나라장터 AI 사업 모니터' 대시보드의 AI 도우미입니다. 사용자는 지방자치단체(제주) 공무원입니다.",
+      "당신은 '나라장터 AI 사업 모니터' 대시보드의 AI 도우미입니다. 사용자는 지방자치단체 공무원입니다.",
       `오늘: ${new Date().toISOString().slice(0, 10)} · 데이터: 조달청 나라장터 OpenAPI에서 공고명에 AI 관련 키워드가 든 입찰공고·낙찰정보를 하루 1회 수집 (마지막 수집 ${meta.updated || "-"}, 전체 ${v.total}건, 공고일 ${v.from}~${v.to})`,
       "",
       "## 규칙",
       "- 숫자(건수·금액·비율·순위)는 반드시 도구 결과에 있는 값만 씁니다. 직접 계산·추정하거나 기억으로 말하지 않습니다. 필요하면 도구를 먼저 부르세요.",
-      "- 필터를 바꿔 달라는 말(예: '제주만', '최근 3개월', '1억 이상')은 set_filters 로 화면을 실제로 바꾼 뒤 결과 건수를 알려줍니다. 질문에 답하려고 필터가 필요할 때도 set_filters 를 쓰고, 바꿨다고 알려줍니다.",
-      "- '최근 N개월'은 period_days=N×30. 금액은 원 단위 정수(1억=100000000).",
+      "- 필터를 바꿔 달라는 말(예: '서울만', '최근 3개월', '8월부터 10월까지', '1억 이상')은 set_filters 로 화면을 실제로 바꾼 뒤 결과 건수를 알려줍니다. 질문에 답하려고 필터가 필요할 때도 set_filters 를 쓰고, 바꿨다고 알려줍니다.",
+      "- '최근 N개월'은 period_days=N×30. 특정 날짜·월 범위(예: '8월~10월', '2026년 상반기')는 date_from/date_to(YYYY-MM-DD, 공고일 기준)를 씁니다. 금액은 원 단위 정수(1억=100000000).",
       "- 사업비 적정성·유사사업 질문은 find_similar 로 비교하고 중앙값과 보통 범위(하위25~상위25%)를 제시합니다. 사업 범위·기간이 달라 단순 비교는 어렵다는 점을 덧붙이고, 판단은 참고용이라고 밝힙니다.",
       "- 업체 관련 답은 공개 낙찰 정보를 정리한 참고용이며 업체 평가가 아니라고 짧게 밝힙니다.",
       "- 공고 세부 내용(과업지시서·첨부파일)은 이 데이터에 없습니다. 모르면 모른다고 하고 나라장터 원문 확인을 권합니다.",
@@ -254,7 +256,7 @@
     return `📐 ${ACT_LABEL[name] || name}`;
   };
 
-  const SUGG = ["제주 최근 3개월 1억 이상 사업만 보여줘", "민원 챗봇 구축 3억이면 적정한 수준이야?", "지금 조건에서 낙찰 많이 받은 업체 TOP 5",
+  const SUGG = ["최근 3개월 1억 이상 사업만 보여줘", "민원 챗봇 구축 3억이면 적정한 수준이야?", "지금 조건에서 낙찰 많이 받은 업체 TOP 5",
     "시도별로 사업 규모 비교해줘", "지금 조건으로 도내 현황 보고서 만들어줘"];
 
   function intro() {
@@ -334,7 +336,7 @@
   function refreshState() {
     const on = hasKey();
     ta.disabled = !on; sendBtn.disabled = !on || busy;
-    ta.placeholder = on ? "예: 제주 빼고 최근 3개월 챗봇 사업 보여줘" : "API 키를 넣으면 쓸 수 있어요";
+    ta.placeholder = on ? "예: 8월부터 10월까지 챗봇 사업 보여줘" : "API 키를 넣으면 쓸 수 있어요";
     const b = document.getElementById("aiBtn"); if (b) b.classList.toggle("has", on);
     document.dispatchEvent(new CustomEvent("g2b-ai-key"));
   }
