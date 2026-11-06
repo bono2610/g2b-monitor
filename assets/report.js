@@ -513,10 +513,10 @@
     const P = (text, o = {}) => new D.Paragraph({
       children: Array.isArray(text) ? text : [run(text, o)],
       alignment: o.align === "center" ? D.AlignmentType.CENTER : o.align === "right" ? D.AlignmentType.RIGHT : D.AlignmentType.LEFT,
-      spacing: { before: o.before ?? 0, after: o.after ?? 120, line: 300 }, indent: o.indent ? { left: o.indent } : undefined,
+      spacing: { before: o.before ?? 0, after: o.after ?? 120, line: 300 }, indent: o.indent || o.hang ? { left: (o.indent || 0) + (o.hang || 0), hanging: o.hang || 0 } : undefined,
     });
     const H = (text, lvl = 1) => P(text, { bold: true, size: lvl === 1 ? 26 : 22, before: lvl === 1 ? 300 : 160, after: 120, color: lvl === 1 ? "1F3864" : undefined });
-    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, ...o });
+    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, hang: 290, ...o });
     const cell = (text, w, o = {}) => new D.TableCell({
       width: { size: w, type: D.WidthType.DXA },
       shading: o.fill ? { type: D.ShadingType.CLEAR, color: "auto", fill: o.fill } : undefined,
@@ -590,8 +590,8 @@
     c.push(K.H("나. 사업 목록", 2));
     c.push(K.P(`공고일 최근순 · 금액 단위 백만원 · 재공고 등 중복 공고는 1건으로 정리`, { size: 18, color: "595959" }));
     c.push(K.table([
-      { h: "No", w: 450, align: "center" }, { h: "공고명", w: 2700 }, { h: "수요기관", w: 1650 }, { h: "분야", w: 1300 },
-      { h: "공고일", w: 1300, align: "center" }, { h: "배정예산", w: 900, align: "right" }, { h: "상태(낙찰업체)", w: 1300 },
+      { h: "No", w: 400, align: "center" }, { h: "공고명", w: 3000 }, { h: "수요기관", w: 1650 }, { h: "분야", w: 1250 },
+      { h: "공고일", w: 1100, align: "center" }, { h: "배정예산", w: 950, align: "right" }, { h: "상태(낙찰업체)", w: 1250 },
     ], A.homeRows.length ? A.homeRows.map((b, i) => [i + 1, b.title, b.demand, b._field, ymd(b._notice), mil(b.budget), b._st + (b.winner ? `\n(${b.winner})` : "")])
       : [["", "도내 공고가 없습니다.", "", "", "", "", ""]]));
 
@@ -640,25 +640,29 @@
     c.push(K.P(`금액 단위 백만원 · 배정예산 0원·미기재 제외 · '${A.R.statsExcludeFields.join(", ")}' 분야 제외 · 분야는 공고명 키워드 자동 분류`, { size: 18, color: "595959" }));
     const all = [...A.fieldStats, A.fieldTotal];
     c.push(K.table([
-      { h: "분야", w: 2000 }, { h: "공고 건수", w: 900, align: "right" }, { h: "예산 기재", w: 900, align: "right" },
-      { h: "평균", w: 1100, align: "right" }, { h: "중앙값", w: 1100, align: "right" }, { h: "최소", w: 1000, align: "right" },
-      { h: "최대", w: 1200, align: "right" }, { h: "평균 낙찰률(%)", w: 1300, align: "right" },
+      { h: "분야", w: 1950 }, { h: "공고", w: 750, align: "right" }, { h: "예산 기재", w: 950, align: "right" },
+      { h: "평균", w: 1150, align: "right" }, { h: "중앙값", w: 1150, align: "right" }, { h: "최소", w: 1000, align: "right" },
+      { h: "최대", w: 1250, align: "right" }, { h: "평균 낙찰률(%)", w: 1400, align: "right" },
     ], all.map(s => [s.name === A.fieldTotal.name ? "전체" : s.name, s.n, s.budgetN, mil(s.avgBudget), mil(s.median), mil(s.min), mil(s.max), pct1(s.avgRate)]),
     { highlight: i => all[i].name === field, bold: i => i === all.length - 1 }));
 
     c.push(K.H(`3. '${field}' 분야 사례 (배정예산순)`));
     c.push(K.P(list.length > LIMIT ? `상위 ${LIMIT}건 (전체 ${list.length}건은 분석 엑셀의 공고목록 참고) · 금액 단위 백만원` : `${list.length}건 · 금액 단위 백만원`, { size: 18, color: "595959" }));
     c.push(K.table([
-      { h: "No", w: 450, align: "center" }, { h: "공고명", w: 2600 }, { h: "수요기관", w: 1600 }, { h: "지역", w: 950, align: "center" },
-      { h: "공고일", w: 1300, align: "center" }, { h: "배정예산", w: 900, align: "right" }, { h: "낙찰금액", w: 900, align: "right" },
-      { h: "낙찰률(%)", w: 900, align: "right" },
+      { h: "No", w: 400, align: "center" }, { h: "공고명", w: 2950 }, { h: "수요기관", w: 1550 }, { h: "지역", w: 850, align: "center" },
+      { h: "공고일", w: 1100, align: "center" }, { h: "배정예산", w: 950, align: "right" }, { h: "낙찰금액", w: 950, align: "right" },
+      { h: "낙찰률(%)", w: 850, align: "right" },
     ], list.length ? list.slice(0, LIMIT).map((b, i) => [i + 1, b.title, b.demand, b.region, ymd(b._notice), mil(b.budget), b.awardAmt ? mil(b.awardAmt) : "-", b.rate ? b.rate.toFixed(1) : "-"])
       : [["", "해당 분야 사례가 없습니다.", "", "", "", "", "", ""]]));
 
     c.push(K.H("4. 적정 범위(안)"));
-    c.push(K.P("※ 담당자 작성 — 위 분포와 사례를 참고해 사업 범위·규모에 맞게 직접 작성하세요. (자동 생성하지 않음)", { size: 18, color: "808080", italics: true }));
+    c.push(K.P(x.range ? `※ AI(Claude) 초안 — 금액은 '${field}' 사례 ${x.range.n}건의 하위25%·중앙값·상위25%(코드 계산), 근거 문장은 AI 작성. 사업 범위에 맞게 반드시 검토·수정하세요.`
+      : "※ 담당자 작성 — 위 분포와 사례를 참고해 사업 범위·규모에 맞게 직접 작성하세요. (자동 생성하지 않음)", { size: 18, color: "808080", italics: true }));
     c.push(K.table([{ h: "구분", w: 1600, align: "center" }, { h: "금액(백만원)", w: 2000, align: "right" }, { h: "산정 근거·비고", w: 6000 }],
-      [["하한", "", ""], ["적정", "", ""], ["상한", "", ""]]));
+      x.range ? [["하한", mil(x.range.low), x.range.basis.하한 || `유사 사례 ${x.range.n}건 하위 25%`],
+        ["적정", mil(x.range.mid), x.range.basis.적정 || `유사 사례 ${x.range.n}건 중앙값`],
+        ["상한", mil(x.range.high), x.range.basis.상한 || `유사 사례 ${x.range.n}건 상위 25%`]]
+        : [["하한", "", ""], ["적정", "", ""], ["상한", "", ""]]));
     c.push(x.ai && x.ai.length ? K.box(0, AI_HINT, x.ai) : K.box(4, "※ 담당자 작성 — 사업 범위 비교, 단가·인력 산정 등 추가 근거"));
 
     c.push(K.H("5. 유의사항"));
@@ -725,12 +729,19 @@
     if (opts.ai && window.G2BAI && window.G2BAI.hasKey()) {
       try {
         opts.onStatus && opts.onStatus("AI가 시사점 작성 중…");
-        ai = await window.G2BAI.reportInsights(kind, aiPayload(kind, A, field), sc.text);
+        ai = await window.G2BAI.reportInsights(kind, aiPayload(kind, A, field), sc.text, { model: opts.model });
       } catch (e) { aiError = e && e.message || String(e); ai = null; }
     }
     opts.onStatus && opts.onStatus("파일 만드는 중…");
     const K = (opts.format || "hwpx") === "docx" ? docKit(await loadLib("docx")) : window.G2BHwpx.kit();
-    const x = { scopeText: sc.text, ai };
+    // 사업비 보고서 적정 범위 표: AI 를 쓸 때만 금액칸을 유사 사례 하위25%·중앙값·상위25%(코드 계산)로 채우고, 근거 문장은 AI
+    let range = null;
+    if (kind === "cost" && ai) {
+      const v = A.cases(field).map(b => b.budget).sort((a, b) => a - b);
+      const qt = p => { if (!v.length) return null; const i = (v.length - 1) * p, lo = Math.floor(i); return v[lo] + (v[Math.min(lo + 1, v.length - 1)] - v[lo]) * (i - lo); };
+      if (v.length) range = { low: qt(.25), mid: qt(.5), high: qt(.75), n: v.length, basis: ai.basis || {} };
+    }
+    const x = { scopeText: sc.text, ai: ai && ai.bullets, range };
     const doc = kind === "cost" ? costReport(K, A, meta, field, x) : homeReport(K, A, meta, x);
     if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : "도내 AI 사업 추진현황";
     const blob = await K.toBlob(doc);
@@ -785,17 +796,24 @@
       sel.disabled = !cost; dlg.querySelector("#repFieldRow").classList.toggle("off", !cost);
       const sc = scopeRows(val("repScope"), val("repKind"));
       dlg.querySelector("#repScopeNote").textContent = `${sc.rows.length.toLocaleString("ko-KR")}건 · ${sc.text}`;
-      const has = !!(window.G2BAI && window.G2BAI.hasKey()), aiBox = dlg.querySelector("#repAi");
+      const has = !!(window.G2BAI && window.G2BAI.hasKey()), aiBox = dlg.querySelector("#repAi"), ms = dlg.querySelector("#repModel");
+      if (has && aiBox.disabled) aiBox.checked = true;   // 키가 생기면 기본으로 켬
       aiBox.disabled = !has; if (!has) aiBox.checked = false;
+      if (has && !ms.options.length) ms.innerHTML = window.G2BAI.MODELS.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
+      if (has) ms.value = window.G2BAI.reportModel();
+      dlg.querySelector("#repModelRow").hidden = !(has && aiBox.checked);
       dlg.querySelector("#repAiNote").textContent = has ? (cost ? "'적정 범위 근거' 칸을 AI 초안으로 채움" : "'시사점' 칸을 AI 초안으로 채움") + " · 숫자는 코드 계산값만 사용"
         : "Claude API 키를 넣으면 쓸 수 있어요 (AI 도우미 › ⚙ 설정). 키가 없으면 빈칸으로 둡니다";
+      if (has && cost) dlg.querySelector("#repAiNote").textContent = "'적정 범위' 표(금액은 사례 분포로 코드 계산, 근거 문장은 AI)와 '추가 근거' 칸을 채움";
     };
     dlg.querySelectorAll("input[name=repKind],input[name=repScope]").forEach(r => r.addEventListener("change", () => { fillFields(); sync(); }));
+    dlg.querySelector("#repAi").addEventListener("change", sync);
+    dlg.querySelector("#repModel").addEventListener("change", e => window.G2BAI && window.G2BAI.setReportModel(e.target.value));
     rb.addEventListener("click", () => { fillFields(); sync(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); });
     dlg.querySelector("#repClose").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
     const go = dlg.querySelector("#repGo");
     go.addEventListener("click", () => withBusy(go, "생성 중…", async status => {
-      const r = await buildReport(val("repKind"), sel.value, { scope: val("repScope"), format: val("repFmt"), ai: dlg.querySelector("#repAi").checked, onStatus: status });
+      const r = await buildReport(val("repKind"), sel.value, { scope: val("repScope"), format: val("repFmt"), ai: dlg.querySelector("#repAi").checked, model: dlg.querySelector("#repModel").value || undefined, onStatus: status });
       if (r && r.aiError) alert("AI 초안은 만들지 못해 해당 칸을 빈칸으로 두었습니다.\n사유: " + r.aiError);
       if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
     }));

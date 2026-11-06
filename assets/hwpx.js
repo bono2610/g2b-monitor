@@ -79,9 +79,9 @@
     };
     const paraId = (o = {}) => {
       const align = o.align === "center" ? "CENTER" : o.align === "right" ? "RIGHT" : o.align === "justify" ? "JUSTIFY" : "LEFT";
-      const k = [align, o.indent || 0, o.before || 0, o.after || 0, o.line || 160].join("|");
+      const k = [align, o.indent || 0, o.hang || 0, o.before || 0, o.after || 0, o.line || 160].join("|");
       let i = paraPrs.findIndex(p => p.k === k);
-      if (i < 0) { paraPrs.push({ k, align, left: (o.indent || 0) * TW, prev: (o.before || 0) * TW, next: (o.after || 0) * TW, line: o.line || 160 }); i = paraPrs.length - 1; }
+      if (i < 0) { paraPrs.push({ k, align, left: ((o.indent || 0) + (o.hang || 0)) * TW, intent: -(o.hang || 0) * TW, prev: (o.before || 0) * TW, next: (o.after || 0) * TW, line: o.line || 160 }); i = paraPrs.length - 1; }
       return i;
     };
     // 테두리/배경: 1 = 쪽 테두리(없음), 2 = 글자 테두리(없음), 3~ = 표 칸(실선 + 배경색)
@@ -100,29 +100,29 @@
       return `<hp:p id="${++pid}" paraPrIDRef="${paraId(o)}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0">${body || '<hp:run charPrIDRef="0"/>'}</hp:p>`;
     };
     const P = (text, o = {}) => pXml(Array.isArray(text) ? text : [run(text, o)], {
-      align: o.align, indent: o.indent, before: o.before ?? 0, after: o.after ?? 120,
+      align: o.align, indent: o.indent, hang: o.hang, before: o.before ?? 0, after: o.after ?? 120,
     });
     const H = (text, lvl = 1) => P(text, { bold: true, size: lvl === 1 ? 26 : 22, before: lvl === 1 ? 300 : 160, after: 120, color: lvl === 1 ? "1F3864" : undefined });
-    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, ...o });
+    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, hang: 290, ...o });
 
-    const CM = { l: 510, r: 510, t: 141, b: 141 };
+    const CM = { l: 280, r: 280, t: 120, b: 120 };
     const cellXml = (text, w, row, col, o = {}) => {
       const paras = String(text ?? "").split("\n").map(line =>
-        pXml([run(line, { size: o.size || 18, bold: o.bold, color: o.color })], { align: o.align, after: 0, line: 130 })).join("");
+        pXml([run(line, { size: o.size || 17, bold: o.bold, color: o.color })], { align: o.align, after: 0, line: 130 })).join("");
       return `<hp:tc name="" header="${o.header ? 1 : 0}" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="${fillId(o.fill)}">` +
         `<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">${paras}</hp:subList>` +
         `<hp:cellAddr colAddr="${col}" rowAddr="${row}"/><hp:cellSpan colSpan="1" rowSpan="1"/>` +
-        `<hp:cellSz width="${w}" height="${o.h || 1300}"/><hp:cellMargin left="${CM.l}" right="${CM.r}" top="${CM.t}" bottom="${CM.b}"/></hp:tc>`;
+        `<hp:cellSz width="${w}" height="${o.h || 1100}"/><hp:cellMargin left="${CM.l}" right="${CM.r}" top="${CM.t}" bottom="${CM.b}"/></hp:tc>`;
     };
     const tblXml = (widths, rowsCells, o = {}) => {
-      const W = widths.reduce((s, w) => s + w, 0), rowH = o.rowH || 1300;
+      const W = widths.reduce((s, w) => s + w, 0), rowH = o.rowH || 1100;
       const trs = rowsCells.map((cells, r) => `<hp:tr>${cells.map((c, j) => cellXml(c.text, widths[j], r, j, { ...c, h: c.h || rowH })).join("")}</hp:tr>`).join("");
       const H = rowsCells.reduce((s, cells) => s + Math.max(...cells.map(c => c.h || rowH)), 0);
       return `<hp:p id="${++pid}" paraPrIDRef="${paraId({ after: 160 })}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">` +
         `<hp:tbl id="${1000 + (++tid)}" zOrder="${tid}" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="1" rowCnt="${rowsCells.length}" colCnt="${widths.length}" cellSpacing="0" borderFillIDRef="${fillId("")}" noAdjust="0">` +
         `<hp:sz width="${W}" widthRelTo="ABSOLUTE" height="${H}" heightRelTo="ABSOLUTE" protect="0"/>` +
-        `<hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>` +
-        `<hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="${CM.l}" right="${CM.r}" top="${CM.t}" bottom="${CM.b}"/>` +
+        `<hp:pos treatAsChar="0" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>` +
+        `<hp:outMargin left="0" right="0" top="0" bottom="400"/><hp:inMargin left="${CM.l}" right="${CM.r}" top="${CM.t}" bottom="${CM.b}"/>` +
         `${trs}</hp:tbl></hp:run></hp:p>`;
     };
     // cols: [{ h: 머리글, w: 폭(twip), align }] — 워드와 같은 값
@@ -137,13 +137,13 @@
     const box = (lines = 6, hint = "", filled = null) => {
       const items = filled && filled.length ? filled : Array.from({ length: lines }, () => "");
       const paras = [hint ? pXml([run(hint, { size: 18, color: "808080", italics: true })], { after: 60, line: 150 }) : "",
-        ...items.map(t => pXml([run("○ " + t, { size: 21 })], { after: 60, line: 160 }))].join("");
+        ...items.map(t => pXml([run("○ " + t, { size: 21 })], { after: 60, line: 160, hang: 290 }))].join("");
       const w = 9600 * TW;
       return `<hp:p id="${++pid}" paraPrIDRef="${paraId({ after: 160 })}" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">` +
-        `<hp:tbl id="${1000 + (++tid)}" zOrder="${tid}" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="1" colCnt="1" cellSpacing="0" borderFillIDRef="${fillId("")}" noAdjust="0">` +
+        `<hp:tbl id="${1000 + (++tid)}" zOrder="${tid}" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="TABLE" repeatHeader="0" rowCnt="1" colCnt="1" cellSpacing="0" borderFillIDRef="${fillId("")}" noAdjust="0">` +
         `<hp:sz width="${w}" widthRelTo="ABSOLUTE" height="${(items.length + 1) * 1800}" heightRelTo="ABSOLUTE" protect="0"/>` +
-        `<hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>` +
-        `<hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="850" right="850" top="400" bottom="400"/>` +
+        `<hp:pos treatAsChar="0" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/>` +
+        `<hp:outMargin left="0" right="0" top="0" bottom="400"/><hp:inMargin left="850" right="850" top="400" bottom="400"/>` +
         `<hp:tr><hp:tc name="" header="0" hasMargin="1" protect="0" editable="0" dirty="0" borderFillIDRef="${fillId("FFFFF0")}">` +
         `<hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">${paras}</hp:subList>` +
         `<hp:cellAddr colAddr="0" rowAddr="0"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="${w}" height="${(items.length + 1) * 1800}"/>` +
@@ -169,7 +169,7 @@
         `<hh:align horizontal="${p.align}" vertical="BASELINE"/><hh:heading type="NONE" idRef="0" level="0"/>` +
         `<hh:breakSetting breakLatinWord="KEEP_WORD" breakNonLatinWord="KEEP_WORD" widowOrphan="0" keepWithNext="0" keepLines="0" pageBreakBefore="0" lineWrap="BREAK"/>` +
         `<hh:autoSpacing eAsianEng="0" eAsianNum="0"/>` +
-        `<hh:margin><hc:intent value="0" unit="HWPUNIT"/><hc:left value="${p.left}" unit="HWPUNIT"/><hc:right value="0" unit="HWPUNIT"/>` +
+        `<hh:margin><hc:intent value="${p.intent}" unit="HWPUNIT"/><hc:left value="${p.left}" unit="HWPUNIT"/><hc:right value="0" unit="HWPUNIT"/>` +
         `<hc:prev value="${p.prev}" unit="HWPUNIT"/><hc:next value="${p.next}" unit="HWPUNIT"/></hh:margin>` +
         `<hh:lineSpacing type="PERCENT" value="${p.line}" unit="HWPUNIT"/>` +
         `<hh:border borderFillIDRef="2" offsetLeft="0" offsetRight="0" offsetTop="0" offsetBottom="0" connect="0" ignoreMargin="0"/></hh:paraPr>`);
