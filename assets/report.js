@@ -513,10 +513,10 @@
     const P = (text, o = {}) => new D.Paragraph({
       children: Array.isArray(text) ? text : [run(text, o)],
       alignment: o.align === "center" ? D.AlignmentType.CENTER : o.align === "right" ? D.AlignmentType.RIGHT : D.AlignmentType.LEFT,
-      spacing: { before: o.before ?? 0, after: o.after ?? 120, line: 300 }, indent: o.indent ? { left: o.indent } : undefined,
+      spacing: { before: o.before ?? 0, after: o.after ?? 120, line: 300 }, indent: o.indent || o.hang ? { left: (o.indent || 0) + (o.hang || 0), hanging: o.hang || 0 } : undefined,
     });
     const H = (text, lvl = 1) => P(text, { bold: true, size: lvl === 1 ? 26 : 22, before: lvl === 1 ? 300 : 160, after: 120, color: lvl === 1 ? "1F3864" : undefined });
-    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, ...o });
+    const B = (text, o = {}) => P([run("○ ", o), run(text, o)], { indent: 200, hang: 290, ...o });
     const cell = (text, w, o = {}) => new D.TableCell({
       width: { size: w, type: D.WidthType.DXA },
       shading: o.fill ? { type: D.ShadingType.CLEAR, color: "auto", fill: o.fill } : undefined,
@@ -590,8 +590,8 @@
     c.push(K.H("나. 사업 목록", 2));
     c.push(K.P(`공고일 최근순 · 금액 단위 백만원 · 재공고 등 중복 공고는 1건으로 정리`, { size: 18, color: "595959" }));
     c.push(K.table([
-      { h: "No", w: 450, align: "center" }, { h: "공고명", w: 2700 }, { h: "수요기관", w: 1650 }, { h: "분야", w: 1300 },
-      { h: "공고일", w: 1300, align: "center" }, { h: "배정예산", w: 900, align: "right" }, { h: "상태(낙찰업체)", w: 1300 },
+      { h: "No", w: 400, align: "center" }, { h: "공고명", w: 3000 }, { h: "수요기관", w: 1650 }, { h: "분야", w: 1250 },
+      { h: "공고일", w: 1100, align: "center" }, { h: "배정예산", w: 950, align: "right" }, { h: "상태(낙찰업체)", w: 1250 },
     ], A.homeRows.length ? A.homeRows.map((b, i) => [i + 1, b.title, b.demand, b._field, ymd(b._notice), mil(b.budget), b._st + (b.winner ? `\n(${b.winner})` : "")])
       : [["", "도내 공고가 없습니다.", "", "", "", "", ""]]));
 
@@ -640,18 +640,18 @@
     c.push(K.P(`금액 단위 백만원 · 배정예산 0원·미기재 제외 · '${A.R.statsExcludeFields.join(", ")}' 분야 제외 · 분야는 공고명 키워드 자동 분류`, { size: 18, color: "595959" }));
     const all = [...A.fieldStats, A.fieldTotal];
     c.push(K.table([
-      { h: "분야", w: 2000 }, { h: "공고 건수", w: 900, align: "right" }, { h: "예산 기재", w: 900, align: "right" },
-      { h: "평균", w: 1100, align: "right" }, { h: "중앙값", w: 1100, align: "right" }, { h: "최소", w: 1000, align: "right" },
-      { h: "최대", w: 1200, align: "right" }, { h: "평균 낙찰률(%)", w: 1300, align: "right" },
+      { h: "분야", w: 1950 }, { h: "공고", w: 750, align: "right" }, { h: "예산 기재", w: 950, align: "right" },
+      { h: "평균", w: 1150, align: "right" }, { h: "중앙값", w: 1150, align: "right" }, { h: "최소", w: 1000, align: "right" },
+      { h: "최대", w: 1250, align: "right" }, { h: "평균 낙찰률(%)", w: 1400, align: "right" },
     ], all.map(s => [s.name === A.fieldTotal.name ? "전체" : s.name, s.n, s.budgetN, mil(s.avgBudget), mil(s.median), mil(s.min), mil(s.max), pct1(s.avgRate)]),
     { highlight: i => all[i].name === field, bold: i => i === all.length - 1 }));
 
     c.push(K.H(`3. '${field}' 분야 사례 (배정예산순)`));
     c.push(K.P(list.length > LIMIT ? `상위 ${LIMIT}건 (전체 ${list.length}건은 분석 엑셀의 공고목록 참고) · 금액 단위 백만원` : `${list.length}건 · 금액 단위 백만원`, { size: 18, color: "595959" }));
     c.push(K.table([
-      { h: "No", w: 450, align: "center" }, { h: "공고명", w: 2600 }, { h: "수요기관", w: 1600 }, { h: "지역", w: 950, align: "center" },
-      { h: "공고일", w: 1300, align: "center" }, { h: "배정예산", w: 900, align: "right" }, { h: "낙찰금액", w: 900, align: "right" },
-      { h: "낙찰률(%)", w: 900, align: "right" },
+      { h: "No", w: 400, align: "center" }, { h: "공고명", w: 2950 }, { h: "수요기관", w: 1550 }, { h: "지역", w: 850, align: "center" },
+      { h: "공고일", w: 1100, align: "center" }, { h: "배정예산", w: 950, align: "right" }, { h: "낙찰금액", w: 950, align: "right" },
+      { h: "낙찰률(%)", w: 850, align: "right" },
     ], list.length ? list.slice(0, LIMIT).map((b, i) => [i + 1, b.title, b.demand, b.region, ymd(b._notice), mil(b.budget), b.awardAmt ? mil(b.awardAmt) : "-", b.rate ? b.rate.toFixed(1) : "-"])
       : [["", "해당 분야 사례가 없습니다.", "", "", "", "", "", ""]]));
 
