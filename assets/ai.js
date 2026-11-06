@@ -87,8 +87,13 @@
         `하한·적정·상한 각각의 근거(사례 건수·분포 위치 등)와, 추가 근거 3~5개(검토 범위, 사업 범위·기간·장비 포함 여부에 따른 차이, 사례 비교 시 유의점)를 write_range_basis 로 제출하세요.`
       : head + `'4. 시사점' 칸에 들어갈 문장 4~5개를 write_insights 로 제출하세요: 기준 지역 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항. 한 문장에 한 가지 내용만.`;
     const tool = OUT_TOOLS[kind === "cost" ? "cost" : "home"];
-    const res = await call({ model: opts.model || reportModel(), system, messages: [{ role: "user", content: prompt }], max_tokens: 3000,
+    const ask = () => call({ model: opts.model || reportModel(), system, messages: [{ role: "user", content: prompt }], max_tokens: 3000,
       tools: [tool], tool_choice: { type: "tool", name: tool.name } });
+    try { return pick(kind, await ask()); }
+    catch (e) { if (!e.retry) throw e; }
+    return pick(kind, await ask());   // 형식이 이상하면 한 번 더 시도
+  }
+  function pick(kind, res) {
     const use = (res.content || []).find(b => b.type === "tool_use");
     const inp = use && use.input || {};
     const list = v => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, 8);
@@ -102,7 +107,10 @@
     // 예비: 도구 대신 글로 답한 경우
     const t = textOf(res), got = salvage(t).map(clean).filter(Boolean);
     const arr = (got.length ? got : t.split("\n").map(clean)).filter(x => x && !/^[\[\]{}]/.test(x)).slice(0, 8);
-    if (!arr.length) throw new Error("AI 응답을 읽지 못했습니다");
+    if (!arr.length) {
+      const why = `모델 ${res.model || "?"}, 종료 ${res.stop_reason || "?"}, 내용 ${(res.content || []).map(b => b.type).join("+") || "없음"}`;
+      const err = new Error(`AI 응답을 읽지 못했습니다 (${why})`); err.retry = true; throw err;
+    }
     return { bullets: arr };
   }
 
@@ -378,7 +386,9 @@
     document.dispatchEvent(new CustomEvent("g2b-ai-key"));
   }
 
+  const VERSION = "20261106h";   // index.html 의 ?v= 와 같이 올림 — 화면 맨 아래에 표시해 새 버전이 받아졌는지 확인용
   function build() {
+    const ft = document.querySelector("footer"); if (ft) ft.insertAdjacentHTML("beforeend", `<br><span style="opacity:.7">화면 버전 ${VERSION}</span>`);
     const st = document.createElement("style"); st.textContent = CSS; document.head.append(st);
     panel = document.createElement("aside");
     panel.className = "aip"; panel.setAttribute("aria-label", "AI 도우미");
