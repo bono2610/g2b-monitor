@@ -6,9 +6,9 @@
 <title>나라장터 AI 사업 모니터</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-<script src="assets/hwpx.js?v=20261106e" defer></script>
-<script src="assets/report.js?v=20261106e" defer></script>
-<script src="assets/ai.js?v=20261106e" defer></script>
+<script src="assets/hwpx.js?v=20261106f" defer></script>
+<script src="assets/report.js?v=20261106f" defer></script>
+<script src="assets/ai.js?v=20261106f" defer></script>
 <style>
 :root{
   color-scheme: light;
@@ -242,9 +242,9 @@ tbody tr:hover{background:var(--surface-2)}
         <summary class="btn ico" id="dlBtn">다운로드</summary>
         <div class="menu">
           <button class="mi" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기"><b>화면 목록 엑셀</b><small>지금 걸린 필터 그대로</small></button>
-          <button class="mi" id="anaBtn" title="현재 화면 필터 결과로 시도별·도내·사업비·업체 분석 시트를 만듭니다"><b>분석 엑셀</b><small id="anaCnt">현재 필터 기준</small></button>
+          <button class="mi" id="anaBtn" title="현재 화면 필터 결과로 시도별·기준 지역·사업비·업체 분석 시트를 만듭니다"><b>분석 엑셀</b><small id="anaCnt">현재 필터 기준</small></button>
           <button class="mi mi-sub" id="anaAllBtn" title="필터와 상관없이 수집된 전체 데이터로 분석 엑셀을 만듭니다"><b>└ 전체 데이터 기준으로 받기</b></button>
-          <button class="mi" id="repBtn" title="현재 필터 기준 보고서 초안(한글 .hwpx)을 받습니다"><b>보고서 초안 (한글)</b><small id="repCnt">현재 필터 기준 · 도내 현황 / 사업비 근거</small></button>
+          <button class="mi" id="repBtn" title="현재 필터 기준 보고서 초안(한글 .hwpx)을 받습니다"><b>보고서 초안 (한글)</b><small id="repCnt">현재 필터 기준 · 지역 현황 / 사업비 근거</small></button>
         </div>
       </details>
       <button class="btn ico" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환"></button>
@@ -361,7 +361,8 @@ tbody tr:hover{background:var(--surface-2)}
   <h2 id="repTitle">보고서 초안 다운로드</h2>
   <div class="desc">숫자는 모두 코드가 집계 · 고정 문장에 숫자를 채움 · 시사점·적정 범위는 빈칸(또는 AI 초안)</div>
   <label class="opt"><input type="radio" name="repKind" value="home" checked>
-    <span>① 도내 AI 사업 추진현황<small>개요 · 도내 발주 현황 · 타 시도 비교 · 시사점 · 자료 한계 (지역 필터는 시도 비교를 위해 빼고 적용)</small></span></label>
+    <span>① 기준 지역 AI 사업 추진현황<small>개요 · 기준 지역 발주 현황 · 타 시도 비교 · 시사점 · 자료 한계 (지역 필터는 시도 비교를 위해 빼고 적용)</small></span></label>
+  <div class="field" id="repHomeRow"><select id="repHome" aria-label="기준 지역"></select></div>
   <label class="opt"><input type="radio" name="repKind" value="cost">
     <span>② ○○사업 사업비 산정 근거<small>개요 · 분야별 사업비 분포 · 선택 분야 사례 · 적정 범위 · 유의사항</small></span></label>
   <div class="field" id="repFieldRow"><select id="repField" aria-label="사업비 근거 분야"></select></div>
@@ -1029,7 +1030,7 @@ tbody tr:hover{background:var(--surface-2)}
     drawKpis(rows); drawExecLine(rows); drawCharts(rows, rowsAll); drawTable(tableRows(rows));
     const n = tableRows(rows).length.toLocaleString("ko-KR");
     $("#anaCnt").textContent = `현재 필터 기준 · ${n}건`;
-    $("#repCnt").textContent = `현재 필터 기준 · ${n}건 · 도내 현황 / 사업비 근거`;
+    $("#repCnt").textContent = `현재 필터 기준 · ${n}건 · 지역 현황 / 사업비 근거`;
   }
   // 표에 보일 공고: 분야 이름을 누르면 그 분야만
   const tableRows = rows => state.field ? rows.filter(b => fieldOf(b) === state.field) : rows;
@@ -1286,7 +1287,7 @@ tbody tr:hover{background:var(--surface-2)}
       total: state.all.length, from: ymd(d[0]), to: ymd(d[d.length - 1]) };
   }
   window.G2BApp = { applyFilters, resetFilters, summarize, listBids, findSimilar, vocab,
-    meta: () => state.meta, getRows: (o = {}) => tableRows(filtered(o)), filterSummary: o => filterSummary(o) };
+    normRegion, meta: () => state.meta, getRows: (o = {}) => tableRows(filtered(o)), filterSummary: o => filterSummary(o) };
 
   // ───────── 샘플 데이터 (실데이터가 없을 때 화면 미리보기용) ─────────
   function makeSample() {
