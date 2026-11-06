@@ -1,9 +1,11 @@
 /*
  * 나라장터 AI 사업 모니터 — 분석 엑셀 · 보고서 초안 (브라우저에서 생성, 서버 불필요)
  *
- * - 외부 LLM 없음: 모든 숫자는 bids.json 집계, 문장은 고정 템플릿에 숫자만 채움
+ * - 범위: 기본은 '현재 화면 필터' 결과, 선택하면 '전체 데이터'
+ * - 숫자는 모두 코드가 집계, 문장은 고정 템플릿에 숫자만 채움
+ * - Claude API 키가 있고 사용자가 고르면 '시사점'·'적정 범위 근거' 빈칸만 AI 초안으로 채움 (assets/ai.js) — 키가 없으면 빈칸 그대로
  * - 분류(지역·기관구분·분야)는 수집기가 config.json 규칙으로 계산해 둔 값을 그대로 씀
- * - 라이브러리는 버튼을 누를 때만 CDN에서 불러옴 (ExcelJS, docx)
+ * - 보고서는 HWPX(한글, assets/hwpx.js) 기본, .docx 도 선택 가능. 라이브러리는 버튼을 누를 때만 CDN에서 불러옴 (ExcelJS, docx)
  */
 (() => {
   "use strict";
@@ -228,7 +230,7 @@
   }
   const link = url => url ? { text: "원문", hyperlink: url } : "";
 
-  async function buildAnalysisWorkbook(A, meta) {
+  async function buildAnalysisWorkbook(A, meta, scope = {}) {
     const ExcelJS = await loadLib("ExcelJS");
     const wb = new ExcelJS.Workbook();
     wb.creator = "나라장터 AI 사업 모니터";
@@ -248,6 +250,7 @@
     const fieldRuleText = (R.fieldRules || []).map(([l, p]) => `${l}: ${p}`).join("\n") ||
       R.fields.join(", ");
     const guide = [
+      ["자료 범위", scope.text || "전체 데이터 (필터 없음)"],
       ["자료 기준일", `마지막 수집 ${updated} (공고일 ${ymd(A.from)} ~ ${ymd(A.to)})`],
       ["출처", "조달청 나라장터 OpenAPI(공공데이터포털) — 입찰공고정보서비스, 낙찰정보서비스. 매일 1회 자동 수집"],
       ["수집 키워드", `공고명에 다음 단어가 들어간 용역·물품 공고: ${(meta && meta.keywords || []).join(", ")}`],
@@ -264,7 +267,7 @@
       ["기관구분", "수요기관명 규칙으로 추정: " + A.kinds.join(" / ") + " ('기타'는 중앙행정기관·군·민간업체 등)"],
       ["분야(자동분류)", "공고명 키워드 규칙으로 자동 분류(위에서부터 먼저 걸리는 것). 해당 없으면 물품은 '장비·물품 구매', 나머지는 '기타'\n" + fieldRuleText],
       ["주의사항", "· 공고명에 키워드가 없으면 수집되지 않아 실제 사업보다 적을 수 있습니다.\n· 지역·기관구분·분야는 규칙 기반 추정값이라 오분류가 있을 수 있습니다. 보고 전 원문을 확인하세요.\n· '단가계약(통계제외)' 분야는 사업비 통계에서 뺍니다.\n· 시트 3~6의 집계는 '공고목록' 시트를 참조하는 수식입니다. 공고목록을 고치면 집계도 바뀝니다.\n· 업체현황은 공개된 낙찰 정보를 정리한 내부 참고용이며 업체 평가 자료가 아닙니다."],
-      ["시트 구성", "공고목록(전체 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
+      ["시트 구성", "공고목록(자료 범위의 공고) / 시도별비교 / 도내현황(" + home + ") / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
     ];
     guide.forEach(([k, v], i) => {
       const r = s1.getRow(4 + i);
@@ -493,7 +496,7 @@
   // 한글(HWP)에서도 열리도록 단순 구조만 사용: 굵은 글씨 문단, 고정폭(DXA) 표, 맑은 고딕
   const mil = n => n == null ? "-" : (n / 1e6).toLocaleString("ko-KR", { maximumFractionDigits: 1 });
   const pct1 = n => n == null ? "-" : n.toFixed(1);
-  const periodText = A => A.from ? `약 ${A.months}개월(${ymd(A.from)}~${ymd(A.to)})` : "수집 기간";
+  const periodText = A => A.from ? `최근 약 ${A.months}개월(${ymd(A.from)}~${ymd(A.to)})간` : "해당 기간";
   const fileSafe = s => String(s).replace(/[\\/:*?"<>|\s]+/g, "_");
   // 받침 유무로 조사 선택: josa("서울", "이", "가") → "서울이"
   const josa = (word, withB, without) => {
@@ -537,12 +540,13 @@
         })),
       ],
     });
-    const box = (lines = 6, hint = "") => new D.Table({
+    const box = (lines = 6, hint = "", filled = null) => new D.Table({
       width: { size: 9600, type: D.WidthType.DXA }, columnWidths: [9600], layout: D.TableLayoutType.FIXED, borders,
       rows: [new D.TableRow({ children: [new D.TableCell({
         width: { size: 9600, type: D.WidthType.DXA }, shading: { type: D.ShadingType.CLEAR, color: "auto", fill: "FFFFF0" },
         margins: { top: 80, bottom: 80, left: 120, right: 120 },
-        children: [P(hint, { size: 18, color: "808080", italics: true }), ...Array.from({ length: lines }, () => P("○ ", { size: 21 }))],
+        children: [P(hint, { size: 18, color: "808080", italics: true }),
+          ...(filled && filled.length ? filled : Array.from({ length: lines }, () => "")).map(t => P("○ " + t, { size: 21 }))],
       })] })],
     });
     const doc = children => new D.Document({
@@ -550,11 +554,14 @@
       styles: { default: { document: { run: { font: FONTS, size: 21 } } } },
       sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } } }, children }],
     });
-    return { run, P, H, B, table, box, doc };
+    return { run, P, H, B, table, box, doc, toBlob: d => D.Packer.toBlob(d), ext: "docx" };
   }
 
-  function homeReport(D, A, meta) {
-    const K = docKit(D);
+  // 범위·AI 안내 줄 (제목 아래)
+  const scopeLine = (K, x) => x.scopeText ? K.P(`적용 조건: ${x.scopeText}`, { size: 18, align: "center", color: "1F3864", after: 200 }) : null;
+  const AI_HINT = "※ AI(Claude) 초안 — 숫자는 위 표에서 코드가 계산한 값만 썼습니다. 내용은 담당자가 반드시 검토·수정하세요.";
+
+  function homeReport(K, A, meta, x = {}) {
     const { home, total } = A;
     const hs = A.regionStats.find(s => s.name === home) || { n: 0, budget: 0, countRank: "-", budgetRank: "-" };
     const ht = A.homeTotal;
@@ -564,10 +571,11 @@
     const updated = meta && meta.updated ? String(meta.updated).slice(0, 10).replace(/-/g, ".") : ymd(new Date());
     const c = [];
     c.push(K.P(`${home} 도내 AI 사업 추진현황`, { bold: true, size: 32, align: "center", after: 80 }));
-    c.push(K.P(`(자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: 240 }));
+    c.push(K.P(`(자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: x.scopeText ? 60 : 240 }));
+    const sl = scopeLine(K, x); if (sl) c.push(sl);
 
     c.push(K.H("1. 개요"));
-    c.push(K.B(`최근 ${periodText(A)}간 도내 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 ${A.sidos.length}개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`${periodText(A)} 도내 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 ${A.sidos.length}개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
     c.push(K.B(`같은 기간 전체 공고(중앙·기타 포함)는 ${total.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(total.budget)}억원이며, 도내 공고는 건수의 ${share(ht.n, total.n)}%, 예산의 ${share(ht.budget, total.budget)}%입니다.`));
     c.push(K.B(`도내 공고 ${ht.n}건 중 낙찰 ${ht.awards}건, 진행중 ${ht.open}건, 결과대기 ${ht.closed}건입니다.`));
 
@@ -599,7 +607,8 @@
     { highlight: i => ranked[i].name === home }));
 
     c.push(K.H("4. 시사점"));
-    c.push(K.box(6, "※ 담당자 작성 — 위 현황과 타 시도 비교를 바탕으로 직접 작성하세요. (자동 생성하지 않음)"));
+    c.push(x.ai && x.ai.length ? K.box(0, AI_HINT, x.ai)
+      : K.box(6, "※ 담당자 작성 — 위 현황과 타 시도 비교를 바탕으로 직접 작성하세요. (자동 생성하지 않음)"));
 
     c.push(K.H("5. 자료 한계"));
     [
@@ -612,18 +621,18 @@
     return K.doc(c);
   }
 
-  function costReport(D, A, meta, field) {
-    const K = docKit(D);
+  function costReport(K, A, meta, field, x = {}) {
     const fs = A.fieldStats.find(s => s.name === field) || A.fieldTotal;
     const list = A.cases(field);
     const LIMIT = 30;
     const updated = meta && meta.updated ? String(meta.updated).slice(0, 10).replace(/-/g, ".") : ymd(new Date());
     const c = [];
     c.push(K.P("○○사업 사업비 산정 근거", { bold: true, size: 32, align: "center", after: 80 }));
-    c.push(K.P(`(참고 분야: ${field} · 자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: 240 }));
+    c.push(K.P(`(참고 분야: ${field} · 자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: x.scopeText ? 60 : 240 }));
+    const sl = scopeLine(K, x); if (sl) c.push(sl);
 
     c.push(K.H("1. 개요"));
-    c.push(K.B(`최근 ${periodText(A)}간 나라장터에 공고된 AI 관련 사업 중 '${field}' 분야는 ${fs.n}건이며, 배정예산이 기재된 ${fs.budgetN}건의 평균은 ${mil(fs.avgBudget)}백만원, 중앙값은 ${mil(fs.median)}백만원(최소 ${mil(fs.min)}백만원 ~ 최대 ${mil(fs.max)}백만원)입니다.`));
+    c.push(K.B(`${periodText(A)} 나라장터에 공고된 AI 관련 사업 중 '${field}' 분야는 ${fs.n}건이며, 배정예산이 기재된 ${fs.budgetN}건의 평균은 ${mil(fs.avgBudget)}백만원, 중앙값은 ${mil(fs.median)}백만원(최소 ${mil(fs.min)}백만원 ~ 최대 ${mil(fs.max)}백만원)입니다.`));
     c.push(K.B(fs.awards ? `이 중 낙찰은 ${fs.awards}건이며, 낙찰률이 공개된 ${fs.rateN}건의 평균 낙찰률은 ${pct1(fs.avgRate)}%입니다.` : "이 분야에 연결된 낙찰 정보는 아직 없습니다."));
     c.push(K.B(`전체 AI 관련 공고(통계제외 분야 제외) ${A.fieldTotal.n}건의 배정예산 중앙값은 ${mil(A.fieldTotal.median)}백만원입니다.`));
 
@@ -650,7 +659,7 @@
     c.push(K.P("※ 담당자 작성 — 위 분포와 사례를 참고해 사업 범위·규모에 맞게 직접 작성하세요. (자동 생성하지 않음)", { size: 18, color: "808080", italics: true }));
     c.push(K.table([{ h: "구분", w: 1600, align: "center" }, { h: "금액(백만원)", w: 2000, align: "right" }, { h: "산정 근거·비고", w: 6000 }],
       [["하한", "", ""], ["적정", "", ""], ["상한", "", ""]]));
-    c.push(K.box(4, "※ 담당자 작성 — 사업 범위 비교, 단가·인력 산정 등 추가 근거"));
+    c.push(x.ai && x.ai.length ? K.box(0, AI_HINT, x.ai) : K.box(4, "※ 담당자 작성 — 사업 범위 비교, 단가·인력 산정 등 추가 근거"));
 
     c.push(K.H("5. 유의사항"));
     [
@@ -662,66 +671,138 @@
     return K.doc(c);
   }
 
-  async function downloadReport(kind, field) {
-    const D = await loadLib("docx");
+  // ───────── 범위 (현재 필터 / 전체 데이터) ─────────
+  // 도내현황 보고서는 '도내 vs 타 시도' 비교가 목적이라 지역 필터만 빼고 거름(noRegion)
+  function scopeRows(scope, kind) {
+    if (scope === "all" || !ctx.getRows) return { rows: ctx.getItems(), text: "전체 데이터 (필터 없음)" };
+    const noRegion = kind === "home";
+    const f = (ctx.filterSummary && ctx.filterSummary({ noRegion })) || "";
+    return { rows: ctx.getRows({ noRegion }),
+      text: (f ? `현재 화면 필터 — ${f}` : "현재 화면 필터 (조건 없음 = 전체)") +
+        (noRegion && ctx.regionFilter && ctx.regionFilter() ? ` · 지역 필터(${ctx.regionFilter()})는 시도 비교를 위해 적용하지 않음` : "") };
+  }
+
+  // AI 에 넘길 숫자 묶음: 보고서 표에 들어간 값과 같은 값만 (AI 는 문장만 씀)
+  function aiPayload(kind, A, field) {
+    const m = v => v == null ? null : Math.round(v / 1e6 * 10) / 10;   // 백만원
+    if (kind === "home") {
+      const hs = A.regionStats.find(s => s.name === A.home) || {};
+      const fieldCnt = {}; A.homeRows.forEach(b => { fieldCnt[b._field] = (fieldCnt[b._field] || 0) + 1; });
+      return {
+        보고서: `${A.home} 도내 AI 사업 추진현황`, 기간: periodText(A), 도: A.home,
+        도내: { 공고: A.homeTotal.n, 배정예산_백만원: m(A.homeTotal.budget), 낙찰: A.homeTotal.awards, 진행중: A.homeTotal.open, 결과대기: A.homeTotal.closed,
+          건수순위: hs.countRank, 예산순위: hs.budgetRank, 시도수: A.sidos.length },
+        전체: { 공고: A.total.n, 배정예산_백만원: m(A.total.budget) },
+        도내_기관구분별: A.homeKinds.filter(k => k.n).map(k => ({ 구분: k.name, 공고: k.n, 배정예산_백만원: m(k.budget) })),
+        도내_분야별_건수: fieldCnt,
+        도내_사업_예시: A.homeRows.slice(0, 15).map(b => ({ 공고명: b.title, 기관: b.demand, 분야: b._field, 배정예산_백만원: m(b.budget), 상태: b._st })),
+        시도별_예산상위: [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank).slice(0, 6)
+          .map(s => ({ 시도: s.name, 공고: s.n, 배정예산_백만원: m(s.budget), 건당평균_백만원: m(s.avgBudget) })),
+      };
+    }
+    const fs = A.fieldStats.find(s => s.name === field) || A.fieldTotal, list = A.cases(field);
+    const sorted = list.map(b => b.budget).sort((a, b) => a - b);
+    const qt = p => { if (!sorted.length) return null; const i = (sorted.length - 1) * p, lo = Math.floor(i);
+      return sorted[lo] + (sorted[Math.min(lo + 1, sorted.length - 1)] - sorted[lo]) * (i - lo); };
+    return {
+      보고서: "○○사업 사업비 산정 근거", 분야: field, 기간: periodText(A),
+      분야통계: { 공고: fs.n, 예산기재: fs.budgetN, 평균_백만원: m(fs.avgBudget), 중앙값_백만원: m(fs.median), 하위25_백만원: m(qt(.25)), 상위25_백만원: m(qt(.75)),
+        최소_백만원: m(fs.min), 최대_백만원: m(fs.max), 낙찰: fs.awards, 평균낙찰률: fs.avgRate == null ? null : +fs.avgRate.toFixed(1) },
+      전체_중앙값_백만원: m(A.fieldTotal.median),
+      규모구간별_예산집행률_중앙값: A.bandStats.map(s => ({ 구간: s.name, 건수: s.exec.n, 중앙값: s.exec.med == null ? null : +s.exec.med.toFixed(1) })),
+      사례_상위: list.slice(0, 12).map(b => ({ 공고명: b.title, 기관: b.demand, 지역: b.region, 배정예산_백만원: m(b.budget),
+        낙찰금액_백만원: m(b.awardAmt), 낙찰률: b.rate ? +b.rate.toFixed(1) : null })),
+    };
+  }
+
+  // 보고서 만들기: opts = { scope: "filter"|"all", format: "hwpx"|"docx", ai: bool, onStatus }
+  async function buildReport(kind, field, opts = {}) {
     const meta = ctx.getMeta();
-    const A = analyze(ctx.getItems(), meta, ctx.statusLabel);
-    const doc = kind === "cost" ? costReport(D, A, meta, field) : homeReport(D, A, meta);
-    const blob = await D.Packer.toBlob(doc);
-    const name = kind === "cost" ? `사업비_산정근거_${fileSafe(field)}_초안_${stamp()}.docx` : `${A.home}_AI사업_추진현황_초안_${stamp()}.docx`;
+    const sc = scopeRows(opts.scope || "filter", kind);
+    const A = analyze(sc.rows, meta, ctx.statusLabel);
+    if (kind === "cost" && !field) field = (A.fieldStats.filter(s => s.n).sort((a, b) => b.n - a.n)[0] || A.fieldStats[0] || {}).name || "기타";
+    let ai = null, aiError = null;
+    if (opts.ai && window.G2BAI && window.G2BAI.hasKey()) {
+      try {
+        opts.onStatus && opts.onStatus("AI가 시사점 작성 중…");
+        ai = await window.G2BAI.reportInsights(kind, aiPayload(kind, A, field), sc.text);
+      } catch (e) { aiError = e && e.message || String(e); ai = null; }
+    }
+    opts.onStatus && opts.onStatus("파일 만드는 중…");
+    const K = (opts.format || "hwpx") === "docx" ? docKit(await loadLib("docx")) : window.G2BHwpx.kit();
+    const x = { scopeText: sc.text, ai };
+    const doc = kind === "cost" ? costReport(K, A, meta, field, x) : homeReport(K, A, meta, x);
+    if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : `${A.home} AI 사업 추진현황`;
+    const blob = await K.toBlob(doc);
+    const tag = sc.text.startsWith("전체") ? "" : "_필터";
+    const name = (kind === "cost" ? `사업비_산정근거_${fileSafe(field)}` : `${A.home}_AI사업_추진현황`) + `${tag}_초안_${stamp()}.${K.ext}`;
     download(blob, name);
+    return { name, n: sc.rows.length, ai: !!ai, aiError, scope: sc.text, field };
   }
 
   // ───────── 진입점 ─────────
-  let ctx = null;   // { getItems, getMeta, statusLabel }
+  let ctx = null;   // { getItems, getMeta, statusLabel, getRows, filterSummary, regionFilter }
   async function withBusy(btn, label, fn) {
     const old = btn.innerHTML;
     btn.disabled = true; btn.textContent = label;
-    try { await fn(); }
+    try { return await fn(t => { btn.textContent = t; }); }
     catch (e) { console.error(e); alert("파일을 만들지 못했습니다: " + (e && e.message || e)); }
     finally { btn.disabled = false; btn.innerHTML = old; }
   }
 
-  async function downloadAnalysis() {
-    const A = analyze(ctx.getItems(), ctx.getMeta(), ctx.statusLabel);
-    const wb = await buildAnalysisWorkbook(A, ctx.getMeta());
+  async function downloadAnalysis(scope = "filter") {
+    const sc = scopeRows(scope, "analysis");
+    const A = analyze(sc.rows, ctx.getMeta(), ctx.statusLabel);
+    const wb = await buildAnalysisWorkbook(A, ctx.getMeta(), sc);
     const buf = await wb.xlsx.writeBuffer();
     download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
-      `나라장터_AI사업_분석자료_${stamp()}.xlsx`);
+      `나라장터_AI사업_분석자료${scope === "all" ? "_전체" : "_필터"}_${stamp()}.xlsx`);
+    return { n: sc.rows.length, scope: sc.text };
   }
 
   function init(c) {
     ctx = c;
-    const ab = document.getElementById("anaBtn");
-    if (ab) ab.addEventListener("click", () => withBusy(ab, "생성 중…", downloadAnalysis));
+    const ab = document.getElementById("anaBtn"), abAll = document.getElementById("anaAllBtn");
+    if (ab) ab.addEventListener("click", () => withBusy(ab, "생성 중…", () => downloadAnalysis("filter")));
+    if (abAll) abAll.addEventListener("click", () => withBusy(abAll, "생성 중…", () => downloadAnalysis("all")));
 
     // 보고서 초안 대화상자
     const rb = document.getElementById("repBtn"), dlg = document.getElementById("repDlg");
     if (!rb || !dlg) return;
     const sel = dlg.querySelector("#repField");
     const R = { ...DEFAULT_RULES, ...(c.getMeta() && c.getMeta().rules || {}) };
-    const counts = new Map();
-    c.getItems().forEach(b => counts.set(b.field || "기타", (counts.get(b.field || "기타") || 0) + 1));
-    sel.innerHTML = R.fields.filter(f => !R.statsExcludeFields.includes(f))
-      .map(f => `<option value="${f.replace(/"/g, "&quot;")}">${f} (${counts.get(f) || 0}건)</option>`).join("");
-    const sync = () => {
-      const cost = dlg.querySelector("input[name=repKind]:checked").value === "cost";
-      sel.disabled = !cost; dlg.querySelector("#repFieldRow").classList.toggle("off", !cost);
+    const val = name => (dlg.querySelector(`input[name=${name}]:checked`) || {}).value;
+    const fillFields = () => {   // 분야 선택지: 고른 범위 기준 건수
+      const keep = sel.value, counts = new Map();
+      scopeRows(val("repScope"), "cost").rows.forEach(b => counts.set(b.field || "기타", (counts.get(b.field || "기타") || 0) + 1));
+      const fields = R.fields.filter(f => !R.statsExcludeFields.includes(f));
+      sel.innerHTML = fields.map(f => `<option value="${f.replace(/"/g, "&quot;")}">${f} (${counts.get(f) || 0}건)</option>`).join("");
+      if (fields.includes(keep)) sel.value = keep;
+      else { const best = fields.slice().sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0))[0]; if (best) sel.value = best; }
     };
-    dlg.querySelectorAll("input[name=repKind]").forEach(r => r.addEventListener("change", sync));
-    sync();
-    rb.addEventListener("click", () => { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); });
+    const sync = () => {
+      const cost = val("repKind") === "cost";
+      sel.disabled = !cost; dlg.querySelector("#repFieldRow").classList.toggle("off", !cost);
+      const sc = scopeRows(val("repScope"), val("repKind"));
+      dlg.querySelector("#repScopeNote").textContent = `${sc.rows.length.toLocaleString("ko-KR")}건 · ${sc.text}`;
+      const has = !!(window.G2BAI && window.G2BAI.hasKey()), aiBox = dlg.querySelector("#repAi");
+      aiBox.disabled = !has; if (!has) aiBox.checked = false;
+      dlg.querySelector("#repAiNote").textContent = has ? (cost ? "'적정 범위 근거' 칸을 AI 초안으로 채움" : "'시사점' 칸을 AI 초안으로 채움") + " · 숫자는 코드 계산값만 사용"
+        : "Claude API 키를 넣으면 쓸 수 있어요 (AI 도우미 › ⚙ 설정). 키가 없으면 빈칸으로 둡니다";
+    };
+    dlg.querySelectorAll("input[name=repKind],input[name=repScope]").forEach(r => r.addEventListener("change", () => { fillFields(); sync(); }));
+    rb.addEventListener("click", () => { fillFields(); sync(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); });
     dlg.querySelector("#repClose").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
     const go = dlg.querySelector("#repGo");
-    go.addEventListener("click", () => withBusy(go, "생성 중…", async () => {
-      const kind = dlg.querySelector("input[name=repKind]:checked").value;
-      await downloadReport(kind, sel.value);
+    go.addEventListener("click", () => withBusy(go, "생성 중…", async status => {
+      const r = await buildReport(val("repKind"), sel.value, { scope: val("repScope"), format: val("repFmt"), ai: dlg.querySelector("#repAi").checked, onStatus: status });
+      if (r && r.aiError) alert("AI 초안은 만들지 못해 해당 칸을 빈칸으로 두었습니다.\n사유: " + r.aiError);
       if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
     }));
   }
 
   let inited = false;
   const initOnce = c => { if (!inited) { inited = true; init(c); } };
-  window.G2BReport = { init: initOnce, analyze, loadLib };
+  window.G2BReport = { init: initOnce, analyze, loadLib, buildReport, downloadAnalysis };
   if (window.__g2bReportCfg) initOnce(window.__g2bReportCfg);   // 데이터가 먼저 준비된 경우
 })();
