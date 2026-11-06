@@ -31,7 +31,7 @@
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   // ───────── Claude 호출 ─────────
-  async function call({ model, system, messages, tools, max_tokens = 1500 }) {
+  async function call({ model, system, messages, tools, tool_choice, max_tokens = 1500 }) {
     if (!hasKey()) throw new Error("Claude API 키가 없습니다");
     let r;
     try {
@@ -39,7 +39,7 @@
         method: "POST",
         headers: { "content-type": "application/json", "x-api-key": getKey(), "anthropic-version": "2023-06-01",
           "anthropic-dangerous-direct-browser-access": "true" },
-        body: JSON.stringify({ model: model || chatModel(), max_tokens, system, messages, ...(tools ? { tools } : {}) }),
+        body: JSON.stringify({ model: model || chatModel(), max_tokens, system, messages, ...(tools ? { tools } : {}), ...(tool_choice ? { tool_choice } : {}) }),
       });
     } catch (e) {
       throw new Error("Claude 서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요 (기관망에서는 api.anthropic.com 접속이 막혀 있을 수 있어요)");
@@ -62,33 +62,47 @@
   // payload: report.js 가 계산한 숫자 묶음. 돌려주는 값: { bullets: [문장…], basis?: { 하한, 적정, 상한 } }
   // 사업비 보고서의 하한·적정·상한 금액은 코드가 정한 값(유사 사례 하위25%·중앙값·상위25%)이고, AI 는 '산정 근거' 문장만 씀
   const clean = s => String(s ?? "").replace(/^\s*([○\-•*]|\d+[.)])\s*/, "").trim();
+  // 답을 '문장 칸'이 정해진 도구 호출로 받음 → 형식이 깨지지 않음. 그래도 이상하면 글에서 온전한 문장만 건짐
+  const SENT = { type: "string", description: "개조식 문장 하나 (80자 안팎, 앞에 기호 없이)" };
+  const OUT_TOOLS = {
+    home: { name: "write_insights", description: "시사점 문장들을 제출합니다.",
+      input_schema: { type: "object", required: ["시사점"], properties: { 시사점: { type: "array", items: SENT, minItems: 3, maxItems: 6 } } } },
+    cost: { name: "write_range_basis", description: "적정 범위 표의 근거 문장과 추가 근거를 제출합니다.",
+      input_schema: { type: "object", required: ["하한", "적정", "상한", "추가근거"], properties: {
+        하한: { type: "string", description: "하한 금액의 산정 근거·비고 (40자 안팎)" },
+        적정: { type: "string", description: "적정 금액의 산정 근거·비고 (40자 안팎)" },
+        상한: { type: "string", description: "상한 금액의 산정 근거·비고 (40자 안팎)" },
+        추가근거: { type: "array", items: SENT, minItems: 3, maxItems: 5 } } } },
+  };
+  // 끊긴 JSON 등에서 따옴표로 닫힌 문자열만 꺼냄
+  const salvage = t => [...String(t).matchAll(/"((?:[^"\\]|\\.){8,})"/g)].map(m => { try { return JSON.parse(`"${m[1]}"`); } catch (e) { return m[1]; } })
+    .filter(x => !/^(하한|적정|상한|추가근거|시사점)$/.test(x));
   async function reportInsights(kind, payload, scopeText, opts = {}) {
     const system = "당신은 지방자치단체 행정 보고서 초안 작성을 돕는 보조자입니다. 주어진 JSON 숫자만 근거로 쓰고, JSON 에 없는 숫자·사실·사업명은 절대 만들지 마세요. " +
-      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다. 보고 대상 지역은 이름을 쓰지 말고 '기준 지역'이라고만 씁니다.";
+      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 짧고 명확하게 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다. " +
+      "보고 대상 지역은 이름을 쓰지 말고 '기준 지역'이라고만 씁니다. 금액은 100백만원 이상이면 억원 단위(소수 첫째 자리, 예: 37.2억원), 그 미만은 백만원 단위로 씁니다.";
     const head = `아래는 나라장터 공고 자동 수집 자료를 코드로 집계한 결과입니다.\n자료 범위: ${scopeText}\n\n${JSON.stringify(payload)}\n\n`;
     const prompt = kind === "cost"
-      ? head + `'4. 적정 범위(안)' 표와 그 아래 '추가 근거' 칸을 채웁니다. 표의 금액은 이미 정해져 있습니다: ` +
-        `하한 = 분야통계.하위25_백만원, 적정 = 분야통계.중앙값_백만원, 상한 = 분야통계.상위25_백만원 (백만원).\n` +
-        `1) 하한·적정·상한 각각의 '산정 근거·비고' 칸에 들어갈 짧은 문장(40자 안팎, 사례 건수·분포 위치 등 JSON 근거 포함)\n` +
-        `2) 추가 근거 문장 3~5개(80자 안팎): 어느 범위에서 검토하면 좋을지, 사업 범위·기간·장비 포함 여부에 따른 차이, 사례 비교 시 유의점\n` +
-        `문장 앞에 기호를 붙이지 마세요. 반드시 이 모양의 JSON 하나만 출력하세요: {"하한":"…","적정":"…","상한":"…","추가근거":["…","…"]}`
-      : head + `'4. 시사점' 칸에 들어갈 문장을 4~6개 작성하세요: 기준 지역 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항. ` +
-        `각 문장은 80자 안팎, 앞에 기호(○, -, 숫자)를 붙이지 마세요.\n반드시 JSON 문자열 배열 하나만 출력하세요. 예: ["…", "…"]`;
-    const res = await call({ model: opts.model || reportModel(), system, messages: [{ role: "user", content: prompt }], max_tokens: 1500 });
-    const t = textOf(res);
-    const parse = (o, c) => { try { return JSON.parse(t.slice(t.indexOf(o), t.lastIndexOf(c) + 1)); } catch (e) { return null; } };
+      ? head + `'4. 적정 범위(안)' 표와 '추가 근거' 칸을 채웁니다. 표의 금액은 이미 정해져 있습니다: 하한 = 분야통계.하위25_백만원, 적정 = 분야통계.중앙값_백만원, 상한 = 분야통계.상위25_백만원.\n` +
+        `하한·적정·상한 각각의 근거(사례 건수·분포 위치 등)와, 추가 근거 3~5개(검토 범위, 사업 범위·기간·장비 포함 여부에 따른 차이, 사례 비교 시 유의점)를 write_range_basis 로 제출하세요.`
+      : head + `'4. 시사점' 칸에 들어갈 문장 4~5개를 write_insights 로 제출하세요: 기준 지역 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항. 한 문장에 한 가지 내용만.`;
+    const tool = OUT_TOOLS[kind === "cost" ? "cost" : "home"];
+    const res = await call({ model: opts.model || reportModel(), system, messages: [{ role: "user", content: prompt }], max_tokens: 3000,
+      tools: [tool], tool_choice: { type: "tool", name: tool.name } });
+    const use = (res.content || []).find(b => b.type === "tool_use");
+    const inp = use && use.input || {};
+    const list = v => (Array.isArray(v) ? v : []).map(clean).filter(Boolean).slice(0, 8);
     if (kind === "cost") {
-      const j = parse("{", "}");
-      if (j && typeof j === "object" && !Array.isArray(j)) {
-        const bullets = (Array.isArray(j.추가근거) ? j.추가근거 : []).map(clean).filter(Boolean).slice(0, 8);
-        const basis = { 하한: clean(j.하한), 적정: clean(j.적정), 상한: clean(j.상한) };
-        if (bullets.length || basis.적정) return { bullets, basis };
-      }
+      const bullets = list(inp.추가근거), basis = { 하한: clean(inp.하한), 적정: clean(inp.적정), 상한: clean(inp.상한) };
+      if (bullets.length || basis.적정) return { bullets, basis };
+    } else {
+      const bullets = list(inp.시사점);
+      if (bullets.length) return { bullets };
     }
-    let arr = parse("[", "]");
-    if (!Array.isArray(arr)) arr = t.split("\n");
-    arr = arr.map(clean).filter(Boolean).slice(0, 8);
-    if (!arr.length) throw new Error("AI 응답이 비어 있습니다");
+    // 예비: 도구 대신 글로 답한 경우
+    const t = textOf(res), got = salvage(t).map(clean).filter(Boolean);
+    const arr = (got.length ? got : t.split("\n").map(clean)).filter(x => x && !/^[\[\]{}]/.test(x)).slice(0, 8);
+    if (!arr.length) throw new Error("AI 응답을 읽지 못했습니다");
     return { bullets: arr };
   }
 
