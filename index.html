@@ -6,7 +6,9 @@
 <title>나라장터 AI 사업 모니터</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="assets/hwpx.js" defer></script>
 <script src="assets/report.js" defer></script>
+<script src="assets/ai.js" defer></script>
 <style>
 :root{
   color-scheme: light;
@@ -74,6 +76,7 @@ dialog.rep .row{display:flex;gap:8px;justify-content:flex-end}
   border:1px solid var(--border);border-radius:8px;padding:7px 10px;min-width:0}
 .filters input[type=search]{flex:1 1 220px}
 .filters select{flex:0 1 auto}
+.filters .range{display:inline-flex;align-items:center;gap:6px;color:var(--text-2)}.filters .range[hidden]{display:none}
 .chips{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%}
 .chip{border:1px solid var(--border);background:var(--bg);color:var(--text-2);border-radius:999px;
   padding:4px 11px;font-size:12px;cursor:pointer;user-select:none}
@@ -193,6 +196,15 @@ header .refresh .msg.warn{color:#ffd88a}header .refresh .msg.ok{color:#86efac}
 #refreshBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36'/%3E%3Cpath d='M21 3v6h-6'/%3E%3C/svg%3E")}
 #dlBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11m-5-5 5 5 5-5M5 20h14'/%3E%3C/svg%3E")}
 #themeBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3a9 9 0 1 0 0 18z' fill='black'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='black' stroke-width='2.2'/%3E%3C/svg%3E");padding:8px 10px}
+#aiBtn{--i:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10 2l1.8 5.2L17 9l-5.2 1.8L10 16l-1.8-5.2L3 9l5.2-1.8zM18 13l.9 2.6 2.6.9-2.6.9L18 20l-.9-2.6-2.6-.9 2.6-.9z'/%3E%3C/svg%3E")}
+dialog.rep .grp{font-size:12px;font-weight:600;color:var(--text-2);margin:12px 0 6px}
+dialog.rep .seg2{display:flex;gap:6px;flex-wrap:wrap}
+dialog.rep .seg2 label{display:flex;gap:6px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
+dialog.rep .seg2 label:has(input:checked){border-color:var(--series-1);background:var(--surface-2)}
+dialog.rep .mini{color:var(--muted);font-size:11.5px;margin-top:4px;line-height:1.5}
+dialog.rep label.aichk{display:flex;gap:8px;align-items:flex-start;margin-top:4px;font-size:13px;cursor:pointer}
+dialog.rep label.aichk:has(input:disabled){opacity:.6;cursor:default}
+.dl .mi.mi-sub{padding:5px 12px 8px 24px}.dl .mi.mi-sub b{font-size:12.5px;font-weight:500;color:var(--text-2)}
 #refreshBtn:disabled::before{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .dl{position:relative}.dl summary{list-style:none}.dl summary::-webkit-details-marker{display:none}
 .dl summary::after{content:"";width:6px;height:6px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg) translateY(-2px);margin-left:2px}
@@ -224,12 +236,14 @@ tbody tr:hover{background:var(--surface-2)}
         <span class="msg" id="refreshMsg" role="status" aria-live="polite"></span>
         <button class="btn primary ico" id="refreshBtn" title="나라장터에서 지금 다시 수집합니다 (30분에 한 번)">갱신</button>
       </span>
+      <button class="btn ico" id="aiBtn" title="AI 도우미 — Claude API 키를 넣으면 사용 (선택 기능)">AI 도우미 <span class="k" aria-hidden="true"></span></button>
       <details class="dl">
         <summary class="btn ico" id="dlBtn">다운로드</summary>
         <div class="menu">
           <button class="mi" id="xlsxBtn" title="현재 화면의 필터 결과를 엑셀로 받기"><b>화면 목록 엑셀</b><small>지금 걸린 필터 그대로</small></button>
-          <button class="mi" id="anaBtn" title="필터와 무관하게 전체 데이터로 시도별·도내·사업비·업체 분석 시트를 만듭니다"><b>분석 엑셀</b><small>시도별·도내·사업비·업체 분석</small></button>
-          <button class="mi" id="repBtn" title="숫자만 채운 보고서 초안(.docx)을 받습니다"><b>보고서 초안 (.docx)</b><small>숫자만 채운 초안 2종</small></button>
+          <button class="mi" id="anaBtn" title="현재 화면 필터 결과로 시도별·도내·사업비·업체 분석 시트를 만듭니다"><b>분석 엑셀</b><small id="anaCnt">현재 필터 기준</small></button>
+          <button class="mi mi-sub" id="anaAllBtn" title="필터와 상관없이 수집된 전체 데이터로 분석 엑셀을 만듭니다"><b>└ 전체 데이터 기준으로 받기</b></button>
+          <button class="mi" id="repBtn" title="현재 필터 기준 보고서 초안(한글 .hwpx)을 받습니다"><b>보고서 초안 (한글)</b><small id="repCnt">현재 필터 기준 · 도내 현황 / 사업비 근거</small></button>
         </div>
       </details>
       <button class="btn ico" id="themeBtn" title="화면 테마 전환" aria-label="화면 테마 전환"></button>
@@ -248,8 +262,9 @@ tbody tr:hover{background:var(--surface-2)}
     </select>
     <select id="fPeriod">
       <option value="30">최근 30일</option><option value="90" selected>최근 90일</option>
-      <option value="180">최근 180일</option><option value="0">전체 기간</option>
+      <option value="180">최근 180일</option><option value="0">전체 기간</option><option value="custom">기간 직접 지정…</option>
     </select>
+    <span class="range" id="customRange" hidden><input type="date" id="fFrom" aria-label="공고일 시작"><span>~</span><input type="date" id="fTo" aria-label="공고일 끝"></span>
     <select id="fAmount">
       <option value="0">금액 전체</option><option value="50000000">5천만원 이상</option>
       <option value="100000000">1억 이상</option><option value="500000000">5억 이상</option>
@@ -344,13 +359,26 @@ tbody tr:hover{background:var(--surface-2)}
 <div class="tip" id="tip"></div>
 <dialog class="rep" id="repDlg" aria-labelledby="repTitle">
   <h2 id="repTitle">보고서 초안 다운로드</h2>
-  <div class="desc">전체 데이터 기준 · 고정 문장에 숫자만 채운 .docx (한글에서 열림) · 시사점·적정 범위는 빈칸</div>
+  <div class="desc">숫자는 모두 코드가 집계 · 고정 문장에 숫자를 채움 · 시사점·적정 범위는 빈칸(또는 AI 초안)</div>
   <label class="opt"><input type="radio" name="repKind" value="home" checked>
-    <span>① 도내 AI 사업 추진현황<small>개요 · 도내 발주 현황 · 타 시도 비교 · 시사점(빈칸) · 자료 한계</small></span></label>
+    <span>① 도내 AI 사업 추진현황<small>개요 · 도내 발주 현황 · 타 시도 비교 · 시사점 · 자료 한계 (지역 필터는 시도 비교를 위해 빼고 적용)</small></span></label>
   <label class="opt"><input type="radio" name="repKind" value="cost">
-    <span>② ○○사업 사업비 산정 근거<small>개요 · 분야별 사업비 분포 · 선택 분야 사례 · 적정 범위(빈칸) · 유의사항</small></span></label>
+    <span>② ○○사업 사업비 산정 근거<small>개요 · 분야별 사업비 분포 · 선택 분야 사례 · 적정 범위 · 유의사항</small></span></label>
   <div class="field" id="repFieldRow"><select id="repField" aria-label="사업비 근거 분야"></select></div>
-  <div class="row">
+  <div class="grp">자료 범위</div>
+  <div class="seg2">
+    <label><input type="radio" name="repScope" value="filter" checked>현재 화면 필터</label>
+    <label><input type="radio" name="repScope" value="all">전체 데이터</label>
+  </div>
+  <div class="mini" id="repScopeNote"></div>
+  <div class="grp">파일 형식</div>
+  <div class="seg2">
+    <label><input type="radio" name="repFmt" value="hwpx" checked>한글 (.hwpx)</label>
+    <label><input type="radio" name="repFmt" value="docx">워드 (.docx)</label>
+  </div>
+  <div class="grp">AI 초안 (선택)</div>
+  <label class="aichk"><input type="checkbox" id="repAi" checked> <span>빈칸을 AI(Claude) 초안으로 채우기<div class="mini" id="repAiNote"></div></span></label>
+  <div class="row" style="margin-top:16px">
     <button class="btn" id="repClose" type="button">닫기</button>
     <button class="btn primary" id="repGo" type="button">⬇ 다운로드</button>
   </div>
@@ -484,12 +512,32 @@ tbody tr:hover{background:var(--surface-2)}
   }
 
   // ───────── 필터 ─────────
+  // 공고일 범위 [시작, 끝) (ms). 0 = 제한 없음. '기간 직접 지정'이면 날짜 입력칸 값 (끝 날짜는 그날 하루 포함)
+  const dayStart = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? +new Date(+m[1], +m[2] - 1, +m[3]) : 0; };
+  function periodRange() {
+    const v = $("#fPeriod").value;
+    if (v === "custom") { const f = dayStart($("#fFrom").value), t = dayStart($("#fTo").value); return [f, t ? t + DAY : 0]; }
+    return [+v ? Date.now() - +v * DAY : 0, 0];
+  }
+  const isoDay = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  function periodLabel() {
+    if ($("#fPeriod").value !== "custom") return $("#fPeriod").selectedOptions[0].textContent;
+    const f = $("#fFrom").value, t = $("#fTo").value, dot = s => s.replace(/-/g, ".");
+    return f || t ? `공고일 ${f ? dot(f) : "처음"} ~ ${t ? dot(t) : "오늘"}` : "전체 기간";
+  }
+  // '기간 직접 지정'을 고르면 날짜칸을 보여 주고, 비어 있으면 최근 90일로 채워 둠
+  function showRange(fill = true) {
+    const on = $("#fPeriod").value === "custom";
+    $("#customRange").hidden = !on;
+    if (on && fill && !$("#fFrom").value && !$("#fTo").value) {
+      $("#fFrom").value = isoDay(new Date(Date.now() - 90 * DAY)); $("#fTo").value = isoDay(new Date());
+    }
+  }
   // noRegion: 지역 선택만 빼고 거른 결과 (지도 색칠·산점도 강조용)
   function filtered({ noRegion = false } = {}) {
     const q = $("#q").value.trim().toLowerCase();
     const type = $("#fType").value, region = $("#fRegion").value, st = $("#fStatus").value;
-    const period = +$("#fPeriod").value, amt = +$("#fAmount").value;
-    const since = period ? Date.now() - period*DAY : 0;
+    const amt = +$("#fAmount").value, [since, until] = periodRange();
     return state.all.filter(b =>
       (!q || b._hay.includes(q)) &&
       (!type || b.type === type) &&
@@ -497,6 +545,7 @@ tbody tr:hover{background:var(--surface-2)}
       (!state.localOnly || b.kind === "지자체") &&
       (!st || b.status === st) &&
       (!since || (b._notice && +b._notice >= since)) &&
+      (!until || (b._notice && +b._notice < until)) &&
       (!amt || (b.budget || 0) >= amt) &&
       (!state.kws.size || (b.keywords || []).some(k => state.kws.has(k)))
     );
@@ -912,11 +961,11 @@ tbody tr:hover{background:var(--surface-2)}
 
   // ───────── 엑셀 ─────────
   // 엑셀에 적어 둘 현재 필터 설명
-  function filterSummary() {
+  function filterSummary({ noRegion = false, includeField = true } = {}) {
     const opt = s => { const o = $(s).selectedOptions[0]; return o && o.value ? o.textContent : ""; };
-    const parts = [opt("#fType"), $("#fRegion").value, opt("#fStatus"), $("#fPeriod").selectedOptions[0].textContent, opt("#fAmount"),
+    const parts = [opt("#fType"), noRegion ? "" : $("#fRegion").value, opt("#fStatus"), periodLabel(), opt("#fAmount"),
       state.localOnly ? "지자체 사업만" : "", $("#q").value.trim() ? `검색 "${$("#q").value.trim()}"` : "",
-      state.kws.size ? `키워드 ${[...state.kws].join("·")}` : ""].filter(Boolean);
+      state.kws.size ? `키워드 ${[...state.kws].join("·")}` : "", includeField && state.field ? `분야 ${state.field}` : ""].filter(Boolean);
     return parts.join(" / ");
   }
 
@@ -948,7 +997,7 @@ tbody tr:hover{background:var(--surface-2)}
       const line = s => [s.field, s.n, wonInt(s.min), wonInt(s.q1), wonInt(s.med), wonInt(s.q3), wonInt(s.max), wonInt(s.avg), r1(s.execMed), s.execN];
       const ws2 = XLSX.utils.aoa_to_sheet([
         ["분야별 사업비(배정예산) 분포"],
-        ["적용 필터", filterSummary() || "없음 (전체)"],
+        ["적용 필터", filterSummary({ includeField: false }) || "없음 (전체)"],
         ["대상", "배정예산 기재 공고(미기재·0원 제외) · 단가계약 제외 · 금액 단위 원 · 하위25%·상위25%는 사분위수(엑셀 QUARTILE.INC와 같은 방식)"],
         ["예산 집행률", `낙찰금액 ÷ 배정예산 × 100. 낙찰 완료 건 중 통계 제외(단가계약 · 배정예산 미기재·0원 · ${r.lo}% 미만 또는 ${r.hi}% 초과) 뺀 값의 중앙값`],
         [],
@@ -978,6 +1027,9 @@ tbody tr:hover{background:var(--surface-2)}
     const rows = filtered(), rowsAll = filtered({ noRegion: true });
     if (state.org && $("#q").value !== state.org) state.org = "";
     drawKpis(rows); drawExecLine(rows); drawCharts(rows, rowsAll); drawTable(tableRows(rows));
+    const n = tableRows(rows).length.toLocaleString("ko-KR");
+    $("#anaCnt").textContent = `현재 필터 기준 · ${n}건`;
+    $("#repCnt").textContent = `현재 필터 기준 · ${n}건 · 도내 현황 / 사업비 근거`;
   }
   // 표에 보일 공고: 분야 이름을 누르면 그 분야만
   const tableRows = rows => state.field ? rows.filter(b => fieldOf(b) === state.field) : rows;
@@ -1015,7 +1067,7 @@ tbody tr:hover{background:var(--surface-2)}
       state.page = 1; render();
     });
     let t; $("#q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { state.page = 1; render(); }, 150); });
-    ["#fType", "#fRegion", "#fStatus", "#fPeriod", "#fAmount"].forEach(s => $(s).addEventListener("change", () => { state.page = 1; render(); }));
+    ["#fType", "#fRegion", "#fStatus", "#fPeriod", "#fAmount", "#fFrom", "#fTo"].forEach(s => $(s).addEventListener("change", () => { state.page = 1; showRange(); render(); }));
     document.querySelectorAll("th[data-k]").forEach(th => th.addEventListener("click", () => {
       const k = th.dataset.k;
       state.sort = state.sort.k === k ? { k, dir: -state.sort.dir } : { k, dir: ["title", "demand", "winner", "status"].includes(k) ? 1 : -1 };
@@ -1114,6 +1166,128 @@ tbody tr:hover{background:var(--surface-2)}
     }
   }
 
+  // ───────── AI 도우미용 페이지 API (assets/ai.js 가 부름) ─────────
+  // 숫자 계산은 모두 여기서: AI 는 이 함수들을 고르고 결과를 문장으로 설명만 함
+  const toM = v => v == null ? null : Math.round(v / 1e6 * 10) / 10;          // 원 → 백만원(소수 1자리)
+  const toE = v => v == null ? null : Math.round(v / 1e8 * 100) / 100;        // 원 → 억원(소수 2자리)
+  const r1n = v => v == null ? null : Math.round(v * 10) / 10;
+  const REGION_ALIAS = [[/광주|전남|전라남/, "전남광주"], [/전북|전라북/, "전북"], [/충북|충청북/, "충북"], [/충남|충청남/, "충남"],
+    [/경북|경상북/, "경북"], [/경남|경상남/, "경남"], [/중앙|전국|기타/, OTHER]];
+  function normRegion(r) {
+    r = String(r || "").trim(); if (!r) return "";
+    const opts = [...$("#fRegion").options].map(o => o.value).filter(Boolean);
+    if (opts.includes(r)) return r;
+    for (const [re, v] of REGION_ALIAS) if (re.test(r)) return v;
+    return opts.find(o => r.startsWith(o)) || null;
+  }
+  function setSel(id, v, label) {
+    const s = $(id); v = String(v);
+    if (![...s.options].some(o => o.value === v)) { const o = document.createElement("option"); o.value = v; o.textContent = label; s.append(o); }
+    s.value = v;
+  }
+  const syncSeg = () => $("#localOnly").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.v === (state.localOnly ? "1" : "")));
+  const syncChips = () => document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x.dataset.kw ? state.kws.has(x.dataset.kw) : !state.kws.size));
+  const afterFilter = warn => {
+    state.page = 1; render();
+    return { count: tableRows(filtered()).length, filter: filterSummary() || "조건 없음", ...(warn && warn.length ? { warnings: warn } : {}) };
+  };
+  function applyFilters(f) {
+    const warn = [];
+    if (f.query !== undefined) { $("#q").value = f.query || ""; state.org = ""; }
+    if (f.type !== undefined) {
+      if (!f.type || [...$("#fType").options].some(o => o.value === f.type)) $("#fType").value = f.type || "";
+      else warn.push(`유형 '${f.type}'은 데이터에 없어 적용하지 않음`);
+    }
+    if (f.region !== undefined) { const r = normRegion(f.region); if (r == null) warn.push(`지역 '${f.region}'을 찾지 못해 적용하지 않음`); else $("#fRegion").value = r; }
+    if (f.status !== undefined) { if (["", "open", "closed", "award"].includes(f.status || "")) $("#fStatus").value = f.status || ""; else warn.push(`상태 '${f.status}' 무시`); }
+    if (f.date_from || f.date_to) {
+      const ok = v => !v || dayStart(v);
+      if (!ok(f.date_from) || !ok(f.date_to)) warn.push("날짜는 YYYY-MM-DD 형식이어야 해서 기간을 바꾸지 않음");
+      else { $("#fPeriod").value = "custom"; $("#fFrom").value = f.date_from || ""; $("#fTo").value = f.date_to || ""; showRange(false); }
+    } else if (f.period_days !== undefined) { const d = Math.max(0, Math.round(+f.period_days || 0)); setSel("#fPeriod", d, `최근 ${d}일`); showRange(); }
+    if (f.min_amount !== undefined) { const a = Math.max(0, Math.round(+f.min_amount || 0)); setSel("#fAmount", a, `${amtLabel(a)} 이상`); }
+    if (f.keywords !== undefined) {
+      const all = state.meta.keywords || [...new Set(state.all.flatMap(b => b.keywords || []))];
+      const ok = (f.keywords || []).filter(k => all.includes(k)), bad = (f.keywords || []).filter(k => !all.includes(k));
+      state.kws = new Set(ok); syncChips();
+      if (bad.length) warn.push(`키워드 칩에 없는 단어(${bad.join(", ")})는 무시 — 글자 검색(query)을 쓰세요`);
+    }
+    if (f.local_only !== undefined) { state.localOnly = !!f.local_only; syncSeg(); }
+    if (f.field !== undefined) {
+      if (!f.field || fieldList(state.all).includes(f.field)) state.field = f.field || "";
+      else warn.push(`분야 '${f.field}'를 찾지 못해 적용하지 않음`);
+    }
+    return afterFilter(warn);
+  }
+  function resetFilters() {
+    $("#q").value = ""; ["#fType", "#fRegion", "#fStatus"].forEach(s => { $(s).value = ""; });
+    $("#fPeriod").value = "90"; $("#fAmount").value = "0"; $("#fFrom").value = ""; $("#fTo").value = ""; showRange();
+    state.kws.clear(); state.localOnly = false; state.field = ""; state.org = ""; syncChips(); syncSeg();
+    return afterFilter();
+  }
+  // 묶음 하나의 통계 (단가계약·예산 미기재는 금액 통계에서 제외, 예산 집행률은 통계 제외 규칙 적용)
+  function statOf(list) {
+    const v = list.filter(budgetOk).map(b => b.budget).sort((a, b) => a - b);
+    const aw = list.filter(b => b.award), rates = aw.map(b => b.rate).filter(x => x > 0);
+    const ex = aw.filter(b => !b._excl && b._exec > 0).map(b => b._exec).sort((a, b) => a - b);
+    return { 건수: list.length, 배정예산합계_억원: toE(list.reduce((s, b) => s + (b.budget || 0), 0)),
+      금액통계_대상: v.length, 배정예산_중앙값_백만원: toM(quant(v, .5)), 하위25_백만원: toM(quant(v, .25)), 상위25_백만원: toM(quant(v, .75)),
+      최소_백만원: toM(v[0]), 최대_백만원: toM(v[v.length - 1]),
+      낙찰: aw.length, 낙찰금액합계_억원: toE(aw.reduce((s, b) => s + (b.awardAmt || 0), 0)),
+      평균낙찰률_예정가격대비: r1n(mean(rates)), 예산집행률_중앙값: r1n(quant(ex, .5)), 진행중: list.filter(b => b.status === "open").length };
+  }
+  function summarize({ group_by = "none", sort_by = "count", top_n = 10 } = {}) {
+    const rows = tableRows(filtered());
+    const out = { 조건: filterSummary() || "조건 없음", 전체: statOf(rows) };
+    const keyFn = { region: b => b.region || "미분류", field: fieldOf, kind: b => b.kind || "기타", status: b => STATUS_LABEL[b.status],
+      month: b => b._notice ? `${b._notice.getFullYear()}-${String(b._notice.getMonth() + 1).padStart(2, "0")}` : "날짜없음",
+      org: b => b.demand || b.org || "미상", winner: b => b.winner || "" }[group_by];
+    if (keyFn) {
+      const m = new Map();
+      (group_by === "winner" ? rows.filter(b => b.award && b.winner) : rows).forEach(b => { const k = keyFn(b); if (!m.has(k)) m.set(k, []); m.get(k).push(b); });
+      let g = [...m].map(([k, list]) => ({ 이름: k, ...statOf(list) }));
+      const sk = { count: "건수", budget: "배정예산합계_억원", award_amount: "낙찰금액합계_억원" }[sort_by] || "건수";
+      g = group_by === "month" ? g.sort((a, b) => a.이름.localeCompare(b.이름)) : g.sort((a, b) => (b[sk] || 0) - (a[sk] || 0));
+      out.묶음기준 = group_by; out.묶음수 = g.length;
+      out.묶음 = g.slice(0, Math.min(30, Math.max(1, top_n || 10)));
+      if (group_by === "winner") out.주의 = "공개 낙찰 정보 기반 참고용 (업체 평가 아님)";
+    }
+    return out;
+  }
+  const brief = b => ({ 공고명: b.title, 수요기관: b.demand || b.org, 지역: b.region, 분야: fieldOf(b), 유형: b.type, 상태: STATUS_LABEL[b.status],
+    공고일: ymd(b._notice), 마감일: ymd(b._close), 배정예산_백만원: toM(b.budget), 낙찰업체: b.winner || null,
+    낙찰금액_백만원: toM(b.awardAmt), 낙찰률: b.rate == null ? null : r1n(b.rate), 공고번호: b.no });
+  function listBids({ sort_by = "notice_desc", limit = 10 } = {}) {
+    const S = { notice_desc: ["noticeDt", -1], budget_desc: ["budget", -1], budget_asc: ["budget", 1], rate_asc: ["rate", 1], rate_desc: ["rate", -1], close_asc: ["closeDt", 1] }[sort_by] || ["noticeDt", -1];
+    state.sort = { k: S[0], dir: S[1] }; state.page = 1; render();
+    let rows = sortRows(tableRows(filtered()));
+    if (sort_by === "close_asc") rows = rows.filter(b => b.status === "open");
+    return { 조건: filterSummary() || "조건 없음", 전체건수: rows.length, 정렬: sort_by, 공고: rows.slice(0, Math.min(20, Math.max(1, limit || 10))).map(brief) };
+  }
+  function findSimilar({ keywords = [], must_include = [], field = "", region = "", type = "", limit = 10 } = {}) {
+    const norm = s => String(s || "").toLowerCase().replace(/\s+/g, "");
+    const kws = keywords.map(norm).filter(Boolean), must = must_include.map(norm).filter(Boolean);
+    const reg = region ? normRegion(region) : "";
+    const list = state.all.filter(b => { const t = norm(b.title);
+      return (!kws.length || kws.some(k => t.includes(k))) && must.every(k => t.includes(k)) &&
+        (!field || fieldOf(b) === field) && (!reg || b.region === reg) && (!type || b.type === type); });
+    const ok = list.filter(budgetOk);
+    const byField = {}; list.forEach(b => { byField[fieldOf(b)] = (byField[fieldOf(b)] || 0) + 1; });
+    const s = statOf(list);
+    return { 조건: { keywords, must_include, field: field || undefined, region: reg || undefined, type: type || undefined, 범위: "현재 필터와 무관한 전체 수집 데이터" },
+      matched: list.length, stats: { n: ok.length, ...s }, 분야별_건수: byField,
+      사례_최근순: [...ok].sort((a, b) => +(b._notice || 0) - +(a._notice || 0)).slice(0, Math.min(20, Math.max(1, limit || 10))).map(brief),
+      주의: "공고명 키워드로 찾은 결과라 사업 범위가 다른 공고가 섞일 수 있음. 단가계약·예산 미기재는 금액 통계에서 제외" };
+  }
+  function vocab() {
+    const d = state.all.map(b => b._notice).filter(Boolean).sort((a, b) => a - b);
+    return { types: [...new Set(state.all.map(b => b.type))].filter(Boolean).sort(), regions: regionOrder(),
+      fields: fieldList(state.all), keywords: state.meta.keywords || [...new Set(state.all.flatMap(b => b.keywords || []))],
+      total: state.all.length, from: ymd(d[0]), to: ymd(d[d.length - 1]) };
+  }
+  window.G2BApp = { applyFilters, resetFilters, summarize, listBids, findSimilar, vocab,
+    meta: () => state.meta, getRows: (o = {}) => tableRows(filtered(o)), filterSummary: o => filterSummary(o) };
+
   // ───────── 샘플 데이터 (실데이터가 없을 때 화면 미리보기용) ─────────
   function makeSample() {
     let seed = 20261104; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
@@ -1152,9 +1326,10 @@ tbody tr:hover{background:var(--surface-2)}
     if (!state.cfg.refresh_relay_url) $("#refreshBtn").title = "갱신 기능이 아직 설정되지 않았습니다 (config.json의 refresh_relay_url)";
     initControls(); render();
     // assets/report.js(defer)와 데이터 중 어느 쪽이 먼저 준비돼도 연결되도록: 모듈이 있으면 바로, 없으면 설정을 남겨 두고 모듈이 가져감
-    const reportCfg = { getItems: () => state.all, getMeta: () => state.meta, statusLabel: STATUS_LABEL, getRateRule: rateRule, basis: BASIS };
+    const reportCfg = { getItems: () => state.all, getMeta: () => state.meta, statusLabel: STATUS_LABEL, getRateRule: rateRule, basis: BASIS,
+      getRows: (o = {}) => tableRows(filtered(o)), filterSummary, regionFilter: () => $("#fRegion").value };
     if (window.G2BReport) window.G2BReport.init(reportCfg); else window.__g2bReportCfg = reportCfg;
-    ["#anaBtn", "#repBtn"].forEach(s => $(s).addEventListener("click", () => {
+    ["#anaBtn", "#anaAllBtn", "#repBtn"].forEach(s => $(s).addEventListener("click", () => {
       if (!window.G2BReport) alert("분석 모듈(assets/report.js)을 불러오지 못했습니다. 새로고침해 주세요.");
     }));
   });
