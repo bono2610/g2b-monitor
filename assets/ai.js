@@ -64,7 +64,7 @@
   const clean = s => String(s ?? "").replace(/^\s*([○\-•*]|\d+[.)])\s*/, "").trim();
   async function reportInsights(kind, payload, scopeText, opts = {}) {
     const system = "당신은 지방자치단체 행정 보고서 초안 작성을 돕는 보조자입니다. 주어진 JSON 숫자만 근거로 쓰고, JSON 에 없는 숫자·사실·사업명은 절대 만들지 마세요. " +
-      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다. 보고 대상 지역은 이름을 쓰지 말고 '도내'라고만 씁니다.";
+      "공문서 개조식 문체('~임', '~필요', '~검토' 등 명사형 종결)로 씁니다. 판단이 들어가는 표현은 '검토 필요', '~로 보임'처럼 단정하지 않습니다. 보고 대상 지역은 이름을 쓰지 말고 '기준 지역'이라고만 씁니다.";
     const head = `아래는 나라장터 공고 자동 수집 자료를 코드로 집계한 결과입니다.\n자료 범위: ${scopeText}\n\n${JSON.stringify(payload)}\n\n`;
     const prompt = kind === "cost"
       ? head + `'4. 적정 범위(안)' 표와 그 아래 '추가 근거' 칸을 채웁니다. 표의 금액은 이미 정해져 있습니다: ` +
@@ -72,7 +72,7 @@
         `1) 하한·적정·상한 각각의 '산정 근거·비고' 칸에 들어갈 짧은 문장(40자 안팎, 사례 건수·분포 위치 등 JSON 근거 포함)\n` +
         `2) 추가 근거 문장 3~5개(80자 안팎): 어느 범위에서 검토하면 좋을지, 사업 범위·기간·장비 포함 여부에 따른 차이, 사례 비교 시 유의점\n` +
         `문장 앞에 기호를 붙이지 마세요. 반드시 이 모양의 JSON 하나만 출력하세요: {"하한":"…","적정":"…","상한":"…","추가근거":["…","…"]}`
-      : head + `'4. 시사점' 칸에 들어갈 문장을 4~6개 작성하세요: 도내 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항. ` +
+      : head + `'4. 시사점' 칸에 들어갈 문장을 4~6개 작성하세요: 기준 지역 현황의 특징(규모·순위·분야 쏠림이나 공백), 타 시도와 비교한 시사점, 향후 검토할 사항. ` +
         `각 문장은 80자 안팎, 앞에 기호(○, -, 숫자)를 붙이지 마세요.\n반드시 JSON 문자열 배열 하나만 출력하세요. 예: ["…", "…"]`;
     const res = await call({ model: opts.model || reportModel(), system, messages: [{ role: "user", content: prompt }], max_tokens: 1500 });
     const t = textOf(res);
@@ -134,15 +134,16 @@
         limit: { type: "integer", description: "사례 최대 개수 (기본 10, 최대 20)" },
       } } },
     { name: "download_report",
-      description: "현재 필터 기준 보고서 초안 파일을 만들어 내려받게 합니다. kind=home: 도내 AI 사업 추진현황, kind=cost: ○○사업 사업비 산정 근거(field 필요).",
+      description: "현재 필터 기준 보고서 초안 파일을 만들어 내려받게 합니다. kind=home: 기준 지역 AI 사업 추진현황(region 으로 기준 지역 지정, 비우면 사용자가 정해 둔 기준 지역), kind=cost: ○○사업 사업비 산정 근거(field 필요).",
       input_schema: { type: "object", required: ["kind"], properties: {
         kind: { type: "string", enum: ["home", "cost"] },
         field: { type: "string", description: "kind=cost 일 때 분야" },
+        region: { type: "string", description: "kind=home 일 때 기준 지역(시도 이름, 선택)" },
         ai_fill: { type: "boolean", description: "시사점/추가 근거 칸을 AI 초안으로 채울지 (기본 true)" },
         format: { type: "string", enum: ["hwpx", "docx"], description: "기본 hwpx(한글)" },
       } } },
     { name: "download_excel",
-      description: "분석 엑셀(시도별·도내·사업비·업체·규모구간 시트)을 내려받게 합니다.",
+      description: "분석 엑셀(시도별·기준 지역·사업비·업체·규모구간 시트)을 내려받게 합니다.",
       input_schema: { type: "object", properties: { scope: { type: "string", enum: ["filter", "all"], description: "filter=현재 필터(기본), all=전체 데이터" } } } },
   ];
 
@@ -158,8 +159,8 @@
         case "find_similar": return A.findSimilar(input || {});
         case "download_report": {
           if (!window.G2BReport) return { error: "보고서 모듈을 불러오지 못했습니다" };
-          const r = await window.G2BReport.buildReport(input.kind, input.field, { scope: "filter", format: input.format || "hwpx", ai: input.ai_fill !== false });
-          return { ok: true, file: r.name, rows: r.n, scope: r.scope, field: r.field, ai_filled: r.ai, ai_error: r.aiError || undefined };
+          const r = await window.G2BReport.buildReport(input.kind, input.field, { scope: "filter", home: input.region ? A.normRegion(input.region) : undefined, format: input.format || "hwpx", ai: input.ai_fill !== false });
+          return { ok: true, file: r.name, rows: r.n, scope: r.scope, field: r.field, home: r.home, ai_filled: r.ai, ai_error: r.aiError || undefined };
         }
         case "download_excel": {
           if (!window.G2BReport) return { error: "분석 모듈을 불러오지 못했습니다" };

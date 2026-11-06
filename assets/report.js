@@ -85,9 +85,9 @@
   }
 
   // ───────── 집계 (엑셀 수식과 같은 기준으로 계산 → 수식 결과값·보고서 숫자로 사용) ─────────
-  function analyze(items, meta, statusLabel) {
+  function analyze(items, meta, statusLabel, homeArg) {
     const R = { ...DEFAULT_RULES, ...(meta && meta.rules || {}) };
-    const home = R.homeRegion;
+    const home = homeArg || R.homeRegion;
     const rows = [...items].sort((a, b) => (+(b._notice || 0)) - (+(a._notice || 0)) || String(a.no).localeCompare(String(b.no)));
     rows.forEach(b => { b._st = statusLabel[b.status]; b._field = b.field || "기타"; b._kind = b.kind || "기타"; });
 
@@ -251,6 +251,7 @@
       R.fields.join(", ");
     const guide = [
       ["자료 범위", scope.text || "전체 데이터 (필터 없음)"],
+      ["기준 지역", `${home} — '기준지역현황' 시트와 업체현황의 '기준 지역 수행 건수' 기준 (보고서 창에서 바꿀 수 있음)`],
       ["자료 기준일", `마지막 수집 ${updated} (공고일 ${ymd(A.from)} ~ ${ymd(A.to)})`],
       ["출처", "조달청 나라장터 OpenAPI(공공데이터포털) — 입찰공고정보서비스, 낙찰정보서비스. 매일 1회 자동 수집"],
       ["수집 키워드", `공고명에 다음 단어가 들어간 용역·물품 공고: ${(meta && meta.keywords || []).join(", ")}`],
@@ -267,7 +268,7 @@
       ["기관구분", "수요기관명 규칙으로 추정: " + A.kinds.join(" / ") + " ('기타'는 중앙행정기관·군·민간업체 등)"],
       ["분야(자동분류)", "공고명 키워드 규칙으로 자동 분류(위에서부터 먼저 걸리는 것). 해당 없으면 물품은 '장비·물품 구매', 나머지는 '기타'\n" + fieldRuleText],
       ["주의사항", "· 공고명에 키워드가 없으면 수집되지 않아 실제 사업보다 적을 수 있습니다.\n· 지역·기관구분·분야는 규칙 기반 추정값이라 오분류가 있을 수 있습니다. 보고 전 원문을 확인하세요.\n· '단가계약(통계제외)' 분야는 사업비 통계에서 뺍니다.\n· 시트 3~6의 집계는 '공고목록' 시트를 참조하는 수식입니다. 공고목록을 고치면 집계도 바뀝니다.\n· 업체현황은 공개된 낙찰 정보를 정리한 내부 참고용이며 업체 평가 자료가 아닙니다."],
-      ["시트 구성", "공고목록(자료 범위의 공고) / 시도별비교 / 도내현황 / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
+      ["시트 구성", "공고목록(자료 범위의 공고) / 시도별비교 / 기준지역현황 / 사업비근거(분야별 예산 분포·사례) / 업체현황(낙찰 상위 40개사) / 규모구간별통계(1억 미만·1~5억·5~10억·10억 이상, 예산 집행률·낙찰률(예정가격 대비))"],
     ];
     guide.forEach(([k, v], i) => {
       const r = s1.getRow(4 + i);
@@ -324,9 +325,9 @@
     });
     s3.columns.forEach((c, i) => { c.width = [12, 11, 16, 14, 11, 16, 13, 10, 10][i]; });
 
-    // 4. 도내현황
-    const s4 = wb.addWorksheet("도내현황", { properties: { tabColor: { argb: "FFFFC000" } } });
-    title(s4, `도내 AI 사업 현황`, `지역(추정)이 '${home}'인 공고 · 기관구분별 소계는 공고목록 기준 수식`);
+    // 4. 기준지역현황
+    const s4 = wb.addWorksheet("기준지역현황", { properties: { tabColor: { argb: "FFFFC000" } } });
+    title(s4, `기준 지역 AI 사업 현황`, `지역(추정)이 '${home}'인 공고 · 기관구분별 소계는 공고목록 기준 수식`);
     subtitle(s4, 4, "1. 기관구분별 소계");
     const top4 = 5, first4 = top4 + 1;
     const H4a = ["기관구분", "공고 건수", "배정예산 합계(원)", "낙찰 건수", "진행중", "결과대기"];
@@ -344,7 +345,7 @@
       rowStyle: (row, i) => { if (i === hk.length - 1) { fill(row, 1, 6, GRAY); row.eachCell(c => { c.font = { name: FONT, size: 10, bold: true }; }); } },
     });
     subtitle(s4, next + 1, "2. 사업 목록");
-    s4.getCell(`A${next + 2}`).value = "중복 검토: 같은 분야를 도내 다른 수요기관도 발주했으면 '유사사업 있음' (유지보수·교육·물품·연구·기타 분야는 제외, 수식) · 노란 칸은 담당자 입력용";
+    s4.getCell(`A${next + 2}`).value = "중복 검토: 같은 분야를 기준 지역의 다른 수요기관도 발주했으면 '유사사업 있음' (유지보수·교육·물품·연구·기타 분야는 제외, 수식) · 노란 칸은 담당자 입력용";
     s4.getCell(`A${next + 2}`).font = { name: FONT, size: 9, color: { argb: "FF595959" } };
     const top4b = next + 3, first4b = top4b + 1;
     const H4b = ["No", "상태", "공고명", "수요기관", "기관구분", "분야", "공고일", "마감일", "배정예산(원)", "낙찰업체", "낙찰금액(원)", "낙찰률(%)", "묶인 공고 수", "중복 검토", "담당 부서 확인·비고", "원문링크"];
@@ -355,7 +356,7 @@
       return [i + 1, b._st, b.title, b.demand, b._kind, b._field, xlDate(b._notice), xlDate(b._close), b.budget ?? null,
         b.winner || "", b.awardAmt ?? null, b.rate ?? null, b.dups || 1, F(sim, b._similar), "", link(b.url)];
     });
-    if (!hl.length) hl.push(["", "", `도내 공고가 없습니다.`, "", "", "", "", "", "", "", "", "", "", "", "", ""]);
+    if (!hl.length) hl.push(["", "", `기준 지역 공고가 없습니다.`, "", "", "", "", "", "", "", "", "", "", "", "", ""]);
     table(s4, top4b, H4b, hl, {
       fmt: { 6: DATE, 7: DATE, 8: NUM, 10: NUM, 11: PCT },
       rowStyle: row => { row.getCell(15).fill = { type: "pattern", pattern: "solid", fgColor: { argb: INPUT } }; row.getCell(3).alignment = { wrapText: true, vertical: "top" }; },
@@ -410,9 +411,9 @@
 
     // 6. 업체현황
     const s6 = wb.addWorksheet("업체현황");
-    title(s6, "낙찰 업체 현황 (상위 40개사)", "※ 내부 참고용 — 나라장터에 공개된 낙찰 정보를 정리한 것이며 업체 평가·추천 자료가 아닙니다. 건수·금액·낙찰률·지자체·도내 건수는 공고목록 기준 수식");
+    title(s6, "낙찰 업체 현황 (상위 40개사)", "※ 내부 참고용 — 나라장터에 공개된 낙찰 정보를 정리한 것이며 업체 평가·추천 자료가 아닙니다. 건수·금액·낙찰률·지자체·기준 지역 건수는 공고목록 기준 수식");
     s6.getCell("A2").font = { name: FONT, size: 10, bold: true, color: { argb: "FFC00000" } };
-    const H6 = ["순위", "업체명", "낙찰 건수", "낙찰금액 합계(원)", "평균 낙찰률(%)", "주요 분야", "주요 발주기관", "지자체 수행 건수", "도내 수행 건수"];
+    const H6 = ["순위", "업체명", "낙찰 건수", "낙찰금액 합계(원)", "평균 낙찰률(%)", "주요 분야", "주요 발주기관", "지자체 수행 건수", "기준 지역 수행 건수"];
     const top6 = 4, first6 = top6 + 1;
     const r6 = A.winners.map((w, i) => {
       const r = first6 + i, b = crit(`$B${r}`, w.name);
@@ -570,16 +571,16 @@
     const share = (a, b) => b ? (a / b * 100).toFixed(1) : "0.0";
     const updated = meta && meta.updated ? String(meta.updated).slice(0, 10).replace(/-/g, ".") : ymd(new Date());
     const c = [];
-    c.push(K.P(`도내 AI 사업 추진현황`, { bold: true, size: 32, align: "center", after: 80 }));
+    c.push(K.P(`기준 지역 AI 사업 추진현황`, { bold: true, size: 32, align: "center", after: 80 }));
     c.push(K.P(`(자료: 조달청 나라장터 공고 자동 수집 · 기준일 ${updated} · 초안)`, { size: 18, align: "center", color: "595959", after: x.scopeText ? 60 : 240 }));
     const sl = scopeLine(K, x); if (sl) c.push(sl);
 
     c.push(K.H("1. 개요"));
-    c.push(K.B(`${periodText(A)} 도내 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 ${A.sidos.length}개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
-    c.push(K.B(`같은 기간 전체 공고(중앙·기타 포함)는 ${total.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(total.budget)}억원이며, 도내 공고는 건수의 ${share(ht.n, total.n)}%, 예산의 ${share(ht.budget, total.budget)}%입니다.`));
-    c.push(K.B(`도내 공고 ${ht.n}건 중 낙찰 ${ht.awards}건, 진행중 ${ht.open}건, 결과대기 ${ht.closed}건입니다.`));
+    c.push(K.B(`${periodText(A)} 기준 지역 기관이 나라장터에 낸 AI 관련 공고는 ${ht.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(ht.budget)}억원으로 ${A.sidos.length}개 시도 중 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`같은 기간 전체 공고(중앙·기타 포함)는 ${total.n.toLocaleString("ko-KR")}건, 배정예산 ${eok(total.budget)}억원이며, 기준 지역 공고는 건수의 ${share(ht.n, total.n)}%, 예산의 ${share(ht.budget, total.budget)}%입니다.`));
+    c.push(K.B(`기준 지역 공고 ${ht.n}건 중 낙찰 ${ht.awards}건, 진행중 ${ht.open}건, 결과대기 ${ht.closed}건입니다.`));
 
-    c.push(K.H("2. 도내 발주 현황"));
+    c.push(K.H("2. 기준 지역 발주 현황"));
     c.push(K.H("가. 기관구분별", 2));
     c.push(K.B("기관구분별로는 " + A.homeKinds.filter(k => k.n).map(k => `${k.name} ${k.n}건(${eok(k.budget)}억원)`).join(", ") + (A.homeKinds.some(k => k.n) ? "입니다." : "공고가 없습니다.")));
     c.push(K.table([
@@ -593,10 +594,10 @@
       { h: "No", w: 400, align: "center" }, { h: "공고명", w: 3000 }, { h: "수요기관", w: 1650 }, { h: "분야", w: 1250 },
       { h: "공고일", w: 1100, align: "center" }, { h: "배정예산", w: 950, align: "right" }, { h: "상태(낙찰업체)", w: 1250 },
     ], A.homeRows.length ? A.homeRows.map((b, i) => [i + 1, b.title, b.demand, b._field, ymd(b._notice), mil(b.budget), b._st + (b.winner ? `\n(${b.winner})` : "")])
-      : [["", "도내 공고가 없습니다.", "", "", "", "", ""]]));
+      : [["", "기준 지역 공고가 없습니다.", "", "", "", "", ""]]));
 
     c.push(K.H("3. 타 시도 비교"));
-    c.push(K.B(`${A.sidos.length}개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. 도내는 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
+    c.push(K.B(`${A.sidos.length}개 시도 중 공고 건수는 ${byCount.name}(${byCount.n}건)${pp(byCount.name, "이", "가")} 가장 많고, 배정예산은 ${byBudget.name}(${eok(byBudget.budget)}억원)${pp(byBudget.name, "이", "가")} 가장 큽니다. 기준 지역은 건수 ${hs.countRank}위, 예산 ${hs.budgetRank}위입니다.`));
     c.push(K.P("배정예산 순 · 지역은 수요기관명 기준 추정 · 중앙부처·전국 단위 기관(중앙·기타)은 순위에서 제외", { size: 18, color: "595959" }));
     const ranked = [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank || a.countRank - b.countRank);
     c.push(K.table([
@@ -676,7 +677,17 @@
   }
 
   // ───────── 범위 (현재 필터 / 전체 데이터) ─────────
-  // 도내현황 보고서는 '도내 vs 타 시도' 비교가 목적이라 지역 필터만 빼고 거름(noRegion)
+  // 기준 지역 보고서는 '기준 지역 vs 타 시도' 비교가 목적이라 지역 필터만 빼고 거름(noRegion)
+  // 기준 지역: 보고서 창에서 고른 값(이 브라우저에 기억) → 없으면 config.json home_region
+  const HOME_KEY = "g2b-home-region";
+  function regionsOf() { const R = { ...DEFAULT_RULES, ...(ctx.getMeta() && ctx.getMeta().rules || {}) }; return R.regions.filter(r => r !== OTHER); }
+  function getHome() {
+    let h = null; try { h = localStorage.getItem(HOME_KEY); } catch (e) {}
+    const rs = regionsOf(), R = { ...DEFAULT_RULES, ...(ctx.getMeta() && ctx.getMeta().rules || {}) };
+    return rs.includes(h) ? h : R.homeRegion;
+  }
+  function setHome(h) { try { if (regionsOf().includes(h)) localStorage.setItem(HOME_KEY, h); } catch (e) {} }
+
   function scopeRows(scope, kind) {
     if (scope === "all" || !ctx.getRows) return { rows: ctx.getItems(), text: "전체 데이터 (필터 없음)" };
     const noRegion = kind === "home";
@@ -693,13 +704,13 @@
       const hs = A.regionStats.find(s => s.name === A.home) || {};
       const fieldCnt = {}; A.homeRows.forEach(b => { fieldCnt[b._field] = (fieldCnt[b._field] || 0) + 1; });
       return {
-        보고서: "도내 AI 사업 추진현황", 기간: periodText(A), 안내: "시도별 목록 중 도내 시도는 도내_순위로만 표시 (이름 비공개)",
-        도내: { 공고: A.homeTotal.n, 배정예산_백만원: m(A.homeTotal.budget), 낙찰: A.homeTotal.awards, 진행중: A.homeTotal.open, 결과대기: A.homeTotal.closed,
+        보고서: "기준 지역 AI 사업 추진현황", 기간: periodText(A), 안내: "기준 지역 이름은 비공개 — 문장에서는 '기준 지역'이라고만 씀",
+        기준지역: { 공고: A.homeTotal.n, 배정예산_백만원: m(A.homeTotal.budget), 낙찰: A.homeTotal.awards, 진행중: A.homeTotal.open, 결과대기: A.homeTotal.closed,
           건수순위: hs.countRank, 예산순위: hs.budgetRank, 시도수: A.sidos.length },
         전체: { 공고: A.total.n, 배정예산_백만원: m(A.total.budget) },
-        도내_기관구분별: A.homeKinds.filter(k => k.n).map(k => ({ 구분: k.name, 공고: k.n, 배정예산_백만원: m(k.budget) })),
-        도내_분야별_건수: fieldCnt,
-        도내_사업_예시: A.homeRows.slice(0, 15).map(b => ({ 공고명: b.title, 기관: b.demand, 분야: b._field, 배정예산_백만원: m(b.budget), 상태: b._st })),
+        기준지역_기관구분별: A.homeKinds.filter(k => k.n).map(k => ({ 구분: k.name, 공고: k.n, 배정예산_백만원: m(k.budget) })),
+        기준지역_분야별_건수: fieldCnt,
+        기준지역_사업_예시: A.homeRows.slice(0, 15).map(b => ({ 공고명: b.title, 기관: b.demand, 분야: b._field, 배정예산_백만원: m(b.budget), 상태: b._st })),
         시도별_예산상위: [...A.sidoStats].sort((a, b) => a.budgetRank - b.budgetRank).filter(s => s.name !== A.home).slice(0, 6)
           .map(s => ({ 시도: s.name, 공고: s.n, 배정예산_백만원: m(s.budget), 건당평균_백만원: m(s.avgBudget) })),
       };
@@ -723,7 +734,9 @@
   async function buildReport(kind, field, opts = {}) {
     const meta = ctx.getMeta();
     const sc = scopeRows(opts.scope || "filter", kind);
-    const A = analyze(sc.rows, meta, ctx.statusLabel);
+    const home = opts.home && regionsOf().includes(opts.home) ? opts.home : getHome();
+    if (kind === "home") sc.text += ` · 기준 지역: ${home}`;
+    const A = analyze(sc.rows, meta, ctx.statusLabel, home);
     if (kind === "cost" && !field) field = (A.fieldStats.filter(s => s.n).sort((a, b) => b.n - a.n)[0] || A.fieldStats[0] || {}).name || "기타";
     let ai = null, aiError = null;
     if (opts.ai && window.G2BAI && window.G2BAI.hasKey()) {
@@ -743,12 +756,12 @@
     }
     const x = { scopeText: sc.text, ai: ai && ai.bullets, range };
     const doc = kind === "cost" ? costReport(K, A, meta, field, x) : homeReport(K, A, meta, x);
-    if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : "도내 AI 사업 추진현황";
+    if (K.ext === "hwpx") doc.title = kind === "cost" ? `사업비 산정 근거 (${field})` : "기준 지역 AI 사업 추진현황";
     const blob = await K.toBlob(doc);
     const tag = sc.text.startsWith("전체") ? "" : "_필터";
-    const name = (kind === "cost" ? `사업비_산정근거_${fileSafe(field)}` : "도내_AI사업_추진현황") + `${tag}_초안_${stamp()}.${K.ext}`;
+    const name = (kind === "cost" ? `사업비_산정근거_${fileSafe(field)}` : "기준지역_AI사업_추진현황") + `${tag}_초안_${stamp()}.${K.ext}`;
     download(blob, name);
-    return { name, n: sc.rows.length, ai: !!ai, aiError, scope: sc.text, field };
+    return { name, n: sc.rows.length, ai: !!ai, aiError, scope: sc.text, field, home: kind === "home" ? home : undefined };
   }
 
   // ───────── 진입점 ─────────
@@ -763,7 +776,7 @@
 
   async function downloadAnalysis(scope = "filter") {
     const sc = scopeRows(scope, "analysis");
-    const A = analyze(sc.rows, ctx.getMeta(), ctx.statusLabel);
+    const A = analyze(sc.rows, ctx.getMeta(), ctx.statusLabel, getHome());
     const wb = await buildAnalysisWorkbook(A, ctx.getMeta(), sc);
     const buf = await wb.xlsx.writeBuffer();
     download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
@@ -791,8 +804,16 @@
       if (fields.includes(keep)) sel.value = keep;
       else { const best = fields.slice().sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0))[0]; if (best) sel.value = best; }
     };
+    const hs = dlg.querySelector("#repHome");
+    const fillHome = () => {   // 지역 필터가 시도면 그 지역, 아니면 기억한 기준 지역
+      const rs = regionsOf(), f = c.regionFilter && c.regionFilter();
+      hs.innerHTML = rs.map(r => `<option value="${r}">${r === "전남광주" ? "전남광주 (광주·전남)" : r}</option>`).join("");
+      hs.value = rs.includes(f) ? f : getHome();
+    };
+    hs.addEventListener("change", () => setHome(hs.value));
     const sync = () => {
       const cost = val("repKind") === "cost";
+      hs.disabled = cost; dlg.querySelector("#repHomeRow").classList.toggle("off", cost);
       sel.disabled = !cost; dlg.querySelector("#repFieldRow").classList.toggle("off", !cost);
       const sc = scopeRows(val("repScope"), val("repKind"));
       dlg.querySelector("#repScopeNote").textContent = `${sc.rows.length.toLocaleString("ko-KR")}건 · ${sc.text}`;
@@ -809,11 +830,11 @@
     dlg.querySelectorAll("input[name=repKind],input[name=repScope]").forEach(r => r.addEventListener("change", () => { fillFields(); sync(); }));
     dlg.querySelector("#repAi").addEventListener("change", sync);
     dlg.querySelector("#repModel").addEventListener("change", e => window.G2BAI && window.G2BAI.setReportModel(e.target.value));
-    rb.addEventListener("click", () => { fillFields(); sync(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); });
+    rb.addEventListener("click", () => { fillFields(); fillHome(); sync(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", ""); });
     dlg.querySelector("#repClose").addEventListener("click", () => dlg.close ? dlg.close() : dlg.removeAttribute("open"));
     const go = dlg.querySelector("#repGo");
     go.addEventListener("click", () => withBusy(go, "생성 중…", async status => {
-      const r = await buildReport(val("repKind"), sel.value, { scope: val("repScope"), format: val("repFmt"), ai: dlg.querySelector("#repAi").checked, model: dlg.querySelector("#repModel").value || undefined, onStatus: status });
+      const r = await buildReport(val("repKind"), sel.value, { scope: val("repScope"), home: hs.value, format: val("repFmt"), ai: dlg.querySelector("#repAi").checked, model: dlg.querySelector("#repModel").value || undefined, onStatus: status });
       if (r && r.aiError) alert("AI 초안은 만들지 못해 해당 칸을 빈칸으로 두었습니다.\n사유: " + r.aiError);
       if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
     }));
@@ -821,6 +842,6 @@
 
   let inited = false;
   const initOnce = c => { if (!inited) { inited = true; init(c); } };
-  window.G2BReport = { init: initOnce, analyze, loadLib, buildReport, downloadAnalysis };
+  window.G2BReport = { init: initOnce, analyze, loadLib, buildReport, downloadAnalysis, getHome: () => ctx && getHome() };
   if (window.__g2bReportCfg) initOnce(window.__g2bReportCfg);   // 데이터가 먼저 준비된 경우
 })();
