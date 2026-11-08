@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-07T10:20+09:00",
+ "updated": "2026-11-08T09:57+09:00",
  "keywords": [
   "인공지능",
   "AI",
@@ -119,14 +119,42 @@
  },
  "stats": {
   "total": 1594,
-  "addedThisRun": 10,
-  "awardsLinked": 5,
+  "addedThisRun": 1,
+  "awardsLinked": 0,
   "excluded": 0,
-  "beforeDedup": 2410,
+  "beforeDedup": 2411,
   "afterDedup": 1594
  },
  "errors": [],
  "items": [
+  {
+   "id": "R26BK01816115-000",
+   "no": "R26BK01816115",
+   "ord": "000",
+   "type": "물품",
+   "title": "노트북컴퓨터(AI연산용노트북 ASUS ROG Strix G18 G815LR-TT302)",
+   "org": "광운대학교 산학협력단",
+   "demand": "광운대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-07 13:31:40",
+   "closeDt": "",
+   "budget": 203252000,
+   "estPrice": 184774545,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01816115&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01788941-000",
+    "R26BK01816115-000"
+   ],
+   "dups": 2
+  },
   {
    "id": "R26BK01815758-000",
    "no": "R26BK01815758",
@@ -147,12 +175,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "공공기관·출자출연",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01789619-000",
     "R26BK01815758-000"
    ],
+   "kind": "공공기관·출자출연",
+   "field": "플랫폼·시스템 구축",
    "dups": 2
   },
   {
@@ -175,11 +203,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01815896-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 1
   },
   {
@@ -202,12 +230,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01802172-000",
     "R26BK01802172-001"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 2
   },
   {
@@ -230,12 +258,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "공공기관·출자출연",
-   "field": "영상·CCTV 분석",
    "dupIds": [
     "R26BK01797427-000",
     "R26BK01815732-000"
    ],
+   "kind": "공공기관·출자출연",
+   "field": "영상·CCTV 분석",
    "dups": 2
   },
   {
@@ -258,11 +286,11 @@
     "디지털트윈"
    ],
    "award": null,
-   "kind": "공공기관·출자출연",
-   "field": "디지털트윈",
    "dupIds": [
     "R26BK01814625-000"
    ],
+   "kind": "공공기관·출자출연",
+   "field": "디지털트윈",
    "dups": 1
   },
   {
@@ -285,11 +313,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "공공기관·출자출연",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01815561-000"
    ],
+   "kind": "공공기관·출자출연",
+   "field": "플랫폼·시스템 구축",
    "dups": 1
   },
   {
@@ -312,11 +340,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "공공기관·출자출연",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01815532-000"
    ],
+   "kind": "공공기관·출자출연",
+   "field": "플랫폼·시스템 구축",
    "dups": 1
   },
   {
@@ -339,14 +367,14 @@
     "인공지능"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "감리·컨설팅·연구",
    "dupIds": [
     "R26BK01781373-000",
     "R26BK01781373-001",
     "R26BK01814333-000",
     "R26BK01814333-001"
    ],
+   "kind": "대학·연구기관",
+   "field": "감리·컨설팅·연구",
    "dups": 4
   },
   {
@@ -369,13 +397,13 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "데이터·빅데이터",
    "dupIds": [
     "R26BK01781805-000",
     "R26BK01797151-000",
     "R26BK01814151-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "데이터·빅데이터",
    "dups": 3
   },
   {
@@ -10162,33 +10190,6 @@
    "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01787870-000"
-   ],
-   "dups": 1
-  },
-  {
-   "id": "R26BK01788941-000",
-   "no": "R26BK01788941",
-   "ord": "000",
-   "type": "물품",
-   "title": "노트북컴퓨터(AI연산용노트북 ASUS ROG Strix G18 G815LR-TT302)",
-   "org": "광운대학교 산학협력단",
-   "demand": "광운대학교 산학협력단",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-23 15:46:33",
-   "closeDt": "",
-   "budget": 203252000,
-   "estPrice": 184774545,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01788941&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
-   "dupIds": [
-    "R26BK01788941-000"
    ],
    "dups": 1
   },
