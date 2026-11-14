@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-13T11:11+09:00",
+ "updated": "2026-11-14T10:53+09:00",
  "keywords": [
   "인공지능",
   "AI",
@@ -118,15 +118,630 @@
   "dedup": "공고명(공백 정리·재공고 표시 제거)+수요기관이 같거나 공고번호가 같으면 1건. 낙찰 결과 있는 공고 우선, 없으면 최신 공고일"
  },
  "stats": {
-  "total": 1704,
-  "addedThisRun": 32,
-  "awardsLinked": 4,
+  "total": 1712,
+  "addedThisRun": 23,
+  "awardsLinked": 2,
   "excluded": 0,
-  "beforeDedup": 2587,
-  "afterDedup": 1704
+  "beforeDedup": 2610,
+  "afterDedup": 1712
  },
  "errors": [],
  "items": [
+  {
+   "id": "R26BK01830636-000",
+   "no": "R26BK01830636",
+   "ord": "000",
+   "type": "용역",
+   "title": "로보틱 햅틱 케인 LLM 시스템 구축 지원",
+   "org": "광주과학기술원",
+   "demand": "광주과학기술원",
+   "region": "전남광주",
+   "noticeDt": "2026-11-13 21:36:38",
+   "closeDt": "2026-11-23 10:00:00",
+   "budget": 15000000,
+   "estPrice": 13636364,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830636&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "LLM"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "생성형AI·LLM",
+   "dupIds": [
+    "R26BK01830636-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830561-000",
+   "no": "R26BK01830561",
+   "ord": "000",
+   "type": "용역",
+   "title": "2026년 첨단산업 인재양성 부트캠프(AI분야)「제1회 글로벌 AI 프론티어 프로그램; Change the Ground」운영 용역",
+   "org": "계명대학교 산학협력단",
+   "demand": "계명대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 18:48:38",
+   "closeDt": "",
+   "budget": 81862000,
+   "estPrice": 74420000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830561&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "유지보수·운영",
+   "dupIds": [
+    "R26BK01804987-000",
+    "R26BK01830561-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01826833-000",
+   "no": "R26BK01826833",
+   "ord": "000",
+   "type": "용역",
+   "title": "방글라데시 AI 혁신기술 전문인력 양성사업(2026-2029/1,300만불) PMC  용역",
+   "org": "한국국제협력단",
+   "demand": "한국국제협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 18:07:40",
+   "closeDt": "2026-11-26 10:00:00",
+   "budget": 9704453278,
+   "estPrice": 8822230253,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01826833&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "공공기관·출자출연",
+   "field": "기타",
+   "dupIds": [
+    "R26BK01737195-000",
+    "R26BK01737195-001",
+    "R26BK01826833-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01813699-001",
+   "no": "R26BK01813699",
+   "ord": "001",
+   "type": "물품",
+   "title": "한동대학교 피지컬AI 스튜디오 기자재 구매",
+   "org": "한동대학교",
+   "demand": "한동대학교",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 17:45:55",
+   "closeDt": "2026-11-13 11:00:00",
+   "budget": 0,
+   "estPrice": 0,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01813699&bidPbancOrd=001",
+   "firstSeen": "2026-11-06",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01813699-000",
+    "R26BK01813699-001"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01830041-000",
+   "no": "R26BK01830041",
+   "ord": "000",
+   "type": "물품",
+   "title": "멀티모달 기반 생성AI 전문인력 양성용 GPU 구매",
+   "org": "중앙대학교 산학협력단",
+   "demand": "중앙대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 17:44:31",
+   "closeDt": "2026-11-19 10:00:00",
+   "budget": 26400000,
+   "estPrice": 24000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830041&bidPbancOrd=000",
+   "firstSeen": "2026-11-06",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01813923-000",
+    "R26BK01830041-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01830374-000",
+   "no": "R26BK01830374",
+   "ord": "000",
+   "type": "물품",
+   "title": "[앵커] AI학과지원팀 AI 공용장비(마이크로덕 28개 등) 구매",
+   "org": "명지전문대학",
+   "demand": "명지전문대학",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 17:21:28",
+   "closeDt": "2026-11-26 10:00:00",
+   "budget": 32116000,
+   "estPrice": 29196364,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830374&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01830374-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830301-000",
+   "no": "R26BK01830301",
+   "ord": "000",
+   "type": "용역",
+   "title": "천안시 AI기본사회 실현을 위한 아이디어 경진대회 및 리빙랩 운영",
+   "org": "한국기술교육대학교산학협력단",
+   "demand": "한국기술교육대학교산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 17:08:37",
+   "closeDt": "2026-11-24 10:00:00",
+   "budget": 30000000,
+   "estPrice": 27272727,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830301&bidPbancOrd=000",
+   "firstSeen": "2026-11-13",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01827581-000",
+    "R26BK01827581-001",
+    "R26BK01830301-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01830257-000",
+   "no": "R26BK01830257",
+   "ord": "000",
+   "type": "용역",
+   "title": "연암공과대학교「앵커사업 평생교육 성과분석 및 성인학습자 X+AI 교육체계 구축 연구」 용역",
+   "org": "연암공과대학교산학협력단",
+   "demand": "연암공과대학교산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 16:58:06",
+   "closeDt": "2026-11-24 10:00:00",
+   "budget": 55000000,
+   "estPrice": 50000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830257&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01830257-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830187-000",
+   "no": "R26BK01830187",
+   "ord": "000",
+   "type": "용역",
+   "title": "[대학혁신] 대구대학교 2026학년도 차세대 통합 교육 플랫폼(AI LXP) 구축 사업",
+   "org": "대구대학교",
+   "demand": "대구대학교",
+   "region": "대구",
+   "noticeDt": "2026-11-13 16:39:09",
+   "closeDt": "",
+   "budget": 715000000,
+   "estPrice": 650000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830187&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01830187-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830056-000",
+   "no": "R26BK01830056",
+   "ord": "000",
+   "type": "용역",
+   "title": "2027년 서울로봇인공지능과학관 전시 운영 및 콘텐츠 기획·개발 용역",
+   "org": "서울특별시",
+   "demand": "서울특별시 서울시립과학관",
+   "region": "서울",
+   "noticeDt": "2026-11-13 16:30:48",
+   "closeDt": "2026-11-24 16:00:00",
+   "budget": 1122251000,
+   "estPrice": 1020228182,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830056&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "인공지능"
+   ],
+   "award": null,
+   "kind": "지자체",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01830056-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01829962-000",
+   "no": "R26BK01829962",
+   "ord": "000",
+   "type": "용역",
+   "title": "(26G057-H)AI기반 문진,진료보조체계 개발 실증 용역",
+   "org": "국방부 국군재정관리단",
+   "demand": "국방부 국군재정관리단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 16:02:57",
+   "closeDt": "2026-12-04 10:00:00",
+   "budget": 453000000,
+   "estPrice": 411818182,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829962&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01829962-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01829923-000",
+   "no": "R26BK01829923",
+   "ord": "000",
+   "type": "용역",
+   "title": "(26G056-H) 군 의료지원 AI로봇 적용 실증 용역",
+   "org": "국방부 국군재정관리단",
+   "demand": "국방부 국군재정관리단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 16:02:00",
+   "closeDt": "2026-12-04 10:00:00",
+   "budget": 296000000,
+   "estPrice": 269090909,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829923&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "기타",
+   "dupIds": [
+    "R26BK01829923-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01828288-000",
+   "no": "R26BK01828288",
+   "ord": "000",
+   "type": "용역",
+   "title": "해양경찰KICS 수사지원 AI 모델 개발을 위한 정보화전략계획(ISP) 수립 용역",
+   "org": "조달청 인천지방조달청",
+   "demand": "해양경찰청",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 14:59:10",
+   "closeDt": "2026-11-26 10:00:00",
+   "budget": 301582400,
+   "estPrice": 271818182,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01828288&bidPbancOrd=000",
+   "firstSeen": "2026-11-14",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "감리·컨설팅·연구",
+   "dupIds": [
+    "R26BK01828288-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01829604-000",
+   "no": "R26BK01829604",
+   "ord": "000",
+   "type": "용역",
+   "title": "26~27-N-교육훈련용 AI 조교 체계개발 실증",
+   "org": "국방부 국군재정관리단",
+   "demand": "해군교육사령부",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 14:37:17",
+   "closeDt": "2026-11-24 11:00:00",
+   "budget": 799000000,
+   "estPrice": 726363636,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829604&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01783601-000",
+    "R26BK01829604-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01829273-000",
+   "no": "R26BK01829273",
+   "ord": "000",
+   "type": "물품",
+   "title": "AI 자율이동 연구용 사족보행 로봇 플랫폼 구매",
+   "org": "대구경북과학기술원",
+   "demand": "대구경북과학기술원",
+   "region": "대구",
+   "noticeDt": "2026-11-13 14:02:49",
+   "closeDt": "2026-11-13 17:00:00",
+   "budget": 55880000,
+   "estPrice": 50800000,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829273&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "감리·컨설팅·연구",
+   "dupIds": [
+    "R26BK01773985-000",
+    "R26BK01789166-000",
+    "R26BK01829273-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01829080-000",
+   "no": "R26BK01829080",
+   "ord": "000",
+   "type": "물품",
+   "title": "2026년 AI 기반 자동 취약점 진단 솔루션(재공고)",
+   "org": "강원대학교 산학협력단",
+   "demand": "강원대학교 산학협력단",
+   "region": "강원",
+   "noticeDt": "2026-11-13 13:35:44",
+   "closeDt": "2026-11-23 10:00:00",
+   "budget": 49500000,
+   "estPrice": 45000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829080&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01811404-000",
+    "R26BK01829080-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01829254-000",
+   "no": "R26BK01829254",
+   "ord": "000",
+   "type": "물품",
+   "title": "한동대학교 피지컬AI스튜디오 구축을 위한 기자재(로봇) 구매",
+   "org": "한동대학교",
+   "demand": "한동대학교",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 13:25:23",
+   "closeDt": "2026-11-19 11:00:00",
+   "budget": 0,
+   "estPrice": 0,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829254&bidPbancOrd=000",
+   "firstSeen": "2026-11-06",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01813082-000",
+    "R26BK01829254-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01829240-000",
+   "no": "R26BK01829240",
+   "ord": "000",
+   "type": "물품",
+   "title": "거대 생성형 모델 학습용 GPU Server 구매",
+   "org": "대구경북과학기술원",
+   "demand": "대구경북과학기술원",
+   "region": "대구",
+   "noticeDt": "2026-11-13 13:23:07",
+   "closeDt": "2026-11-13 15:00:00",
+   "budget": 69091000,
+   "estPrice": 62810000,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829240&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "생성형"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "생성형AI·LLM",
+   "dupIds": [
+    "R26BK01781959-000",
+    "R26BK01800536-000",
+    "R26BK01829240-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01829167-000",
+   "no": "R26BK01829167",
+   "ord": "000",
+   "type": "물품",
+   "title": "[지역주도형 AI대전환 사업] AI기반 3D검사",
+   "org": "(주)엠엔비젼",
+   "demand": "(주)엠엔비젼",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 13:07:52",
+   "closeDt": "2026-11-24 10:00:00",
+   "budget": 83600000,
+   "estPrice": 76000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829167&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01802011-000",
+    "R26BK01829167-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01829100-000",
+   "no": "R26BK01829100",
+   "ord": "000",
+   "type": "물품",
+   "title": "AI,DX 기반 분자진동 발열처리 공정 자동화 시스템의 데이터수집/데이터저장/연산 모니터링/피드백 제어 시스템 구축",
+   "org": "주식회사 코솔러스",
+   "demand": "주식회사 코솔러스",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 12:00:02",
+   "closeDt": "2026-11-16 17:00:00",
+   "budget": 63376500,
+   "estPrice": 57615000,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829100&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "RPA·업무자동화",
+   "dupIds": [
+    "R26BK01787204-000",
+    "R26BK01799859-000",
+    "R26BK01829100-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01829098-000",
+   "no": "R26BK01829098",
+   "ord": "000",
+   "type": "물품",
+   "title": "(재공고)[통합]AX 융합교육 및 AI·SW 실습을 위한 노트북 구입",
+   "org": "울산대학교 산학협력단",
+   "demand": "울산대학교 산학협력단",
+   "region": "울산",
+   "noticeDt": "2026-11-13 11:53:32",
+   "closeDt": "2026-11-19 10:00:00",
+   "budget": 48649690,
+   "estPrice": 44226991,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829098&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01784097-000",
+    "R26BK01812345-000",
+    "R26BK01829098-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01828948-000",
+   "no": "R26BK01828948",
+   "ord": "000",
+   "type": "물품",
+   "title": "[기술교육전공 운영기반구축] AI 및 IoT 응용실험장비 구매",
+   "org": "국립경국대학교",
+   "demand": "국립경국대학교",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-13 11:21:48",
+   "closeDt": "2026-11-20 10:00:00",
+   "budget": 52000000,
+   "estPrice": 47272727,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01828948&bidPbancOrd=000",
+   "firstSeen": "2026-11-11",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01822696-000",
+    "R26BK01822696-001",
+    "R26BK01828948-000"
+   ],
+   "dups": 3
+  },
   {
    "id": "R26BK01828912-000",
    "no": "R26BK01828912",
@@ -147,14 +762,14 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01797934-000",
     "R26BK01811876-000",
     "R26BK01811876-001",
     "R26BK01828912-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 4
   },
   {
@@ -177,11 +792,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01828457-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 1
   },
   {
@@ -204,11 +819,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01828770-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 1
   },
   {
@@ -231,13 +846,13 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01794064-000",
     "R26BK01794064-001",
     "R26BK01818570-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 3
   },
   {
@@ -260,11 +875,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01827990-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 1
   },
   {
@@ -287,11 +902,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "기타",
    "dupIds": [
     "R26BK01823446-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "기타",
    "dups": 1
   },
   {
@@ -314,11 +929,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "교육청·학교",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01820788-000"
    ],
+   "kind": "교육청·학교",
+   "field": "교육·연수·행사",
    "dups": 1
   },
   {
@@ -341,13 +956,13 @@
     "인공지능"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "감리·컨설팅·연구",
    "dupIds": [
     "R26BK01761509-000",
     "R26BK01801975-000",
     "R26BK01801975-001"
    ],
+   "kind": "대학·연구기관",
+   "field": "감리·컨설팅·연구",
    "dups": 3
   },
   {
@@ -370,11 +985,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01828005-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 1
   },
   {
@@ -397,12 +1012,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01826851-000",
     "R26BK01826851-001"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 2
   },
   {
@@ -426,13 +1041,13 @@
     "LLM"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01826759-000",
     "R26BK01826759-001",
     "R26BK01826759-002"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 3
   },
   {
@@ -455,12 +1070,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01826708-000",
     "R26BK01826708-001"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 2
   },
   {
@@ -483,12 +1098,12 @@
     "빅데이터"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01807952-000",
     "R26BK01827986-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 2
   },
   {
@@ -511,11 +1126,11 @@
     "빅데이터"
    ],
    "award": null,
-   "kind": "지자체",
-   "field": "유지보수·운영",
    "dupIds": [
     "R26BK01827928-000"
    ],
+   "kind": "지자체",
+   "field": "유지보수·운영",
    "dups": 1
   },
   {
@@ -528,7 +1143,7 @@
    "demand": "전주비전대학 산학협력단",
    "region": "전북",
    "noticeDt": "2026-11-12 16:56:28",
-   "closeDt": "2026-11-13 14:00:00",
+   "closeDt": "2026-11-13 16:00:00",
    "budget": 74750000,
    "estPrice": 67954545,
    "method": "수의계약",
@@ -538,38 +1153,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "데이터·빅데이터",
    "dupIds": [
     "R26BK01827605-000"
    ],
-   "dups": 1
-  },
-  {
-   "id": "R26BK01827581-000",
-   "no": "R26BK01827581",
-   "ord": "000",
-   "type": "용역",
-   "title": "천안시 AI기본사회 실현을 위한 아이디어 경진대회 및 리빙랩 운영",
-   "org": "한국기술교육대학교산학협력단",
-   "demand": "한국기술교육대학교산학협력단",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-12 16:54:04",
-   "closeDt": "2026-11-23 10:00:00",
-   "budget": 30000000,
-   "estPrice": 27272727,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01827581&bidPbancOrd=000",
-   "firstSeen": "2026-11-13",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
    "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
-   "dupIds": [
-    "R26BK01827581-000"
-   ],
+   "field": "데이터·빅데이터",
    "dups": 1
   },
   {
@@ -592,13 +1180,13 @@
     "빅데이터"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "유지보수·운영",
    "dupIds": [
     "R26BK01733186-000",
     "R26BK01775466-000",
     "R26BK01827397-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "유지보수·운영",
    "dups": 3
   },
   {
@@ -621,12 +1209,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01807409-000",
     "R26BK01827522-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 2
   },
   {
@@ -649,12 +1237,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01807380-000",
     "R26BK01827505-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 2
   },
   {
@@ -677,12 +1265,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01807352-000",
     "R26BK01827489-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 2
   },
   {
@@ -705,12 +1293,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "교육청·학교",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01802992-000",
     "R26BK01802992-001"
    ],
+   "kind": "교육청·학교",
+   "field": "플랫폼·시스템 구축",
    "dups": 2
   },
   {
@@ -733,11 +1321,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "기타",
    "dupIds": [
     "R26BK01827109-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "기타",
    "dups": 1
   },
   {
@@ -760,11 +1348,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01826481-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 1
   },
   {
@@ -787,11 +1375,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01826373-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 1
   },
   {
@@ -814,11 +1402,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dupIds": [
     "R26BK01827016-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
    "dups": 1
   },
   {
@@ -841,11 +1429,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01826771-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
    "dups": 1
   },
   {
@@ -868,11 +1456,11 @@
     "AI"
    ],
    "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
    "dupIds": [
     "R26BK01826217-000"
    ],
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
    "dups": 1
   },
   {
@@ -895,12 +1483,12 @@
     "AI"
    ],
    "award": null,
-   "kind": "기타",
-   "field": "장비·물품 구매",
    "dupIds": [
     "R26BK01806190-000",
     "R26BK01826344-000"
    ],
+   "kind": "기타",
+   "field": "장비·물품 구매",
    "dups": 2
   },
   {
@@ -1230,34 +1818,6 @@
    "kind": "교육청·학교",
    "field": "교육·연수·행사",
    "dups": 1
-  },
-  {
-   "id": "R26BK01737195-001",
-   "no": "R26BK01737195",
-   "ord": "001",
-   "type": "용역",
-   "title": "방글라데시 AI 혁신기술 전문인력 양성사업(2026-2029/1,300만불) PMC 용역",
-   "org": "한국국제협력단",
-   "demand": "한국국제협력단",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-11 17:53:34",
-   "closeDt": "2026-11-04 10:00:00",
-   "budget": 9704453278,
-   "estPrice": 8822230253,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01737195&bidPbancOrd=001",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01737195-000",
-    "R26BK01737195-001"
-   ],
-   "kind": "공공기관·출자출연",
-   "field": "기타",
-   "dups": 2
   },
   {
    "id": "R26BK01824932-000",
@@ -1849,34 +2409,6 @@
    "kind": "공공기관·출자출연",
    "field": "생성형AI·LLM",
    "dups": 1
-  },
-  {
-   "id": "R26BK01822696-001",
-   "no": "R26BK01822696",
-   "ord": "001",
-   "type": "물품",
-   "title": "[기술교육전공 운영기반구축] AI 및 IoT 응용실험장비 구매",
-   "org": "국립경국대학교",
-   "demand": "국립경국대학교",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-11 14:37:23",
-   "closeDt": "2026-11-17 10:00:00",
-   "budget": 52000000,
-   "estPrice": 47272727,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01822696&bidPbancOrd=001",
-   "firstSeen": "2026-11-11",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01822696-000",
-    "R26BK01822696-001"
-   ],
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
-   "dups": 2
   },
   {
    "id": "R26BK01823726-000",
@@ -5272,33 +5804,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01813923-000",
-   "no": "R26BK01813923",
-   "ord": "000",
-   "type": "물품",
-   "title": "멀티모달 기반 생성AI 전문인력 양성용 GPU 구매",
-   "org": "중앙대학교 산학협력단",
-   "demand": "중앙대학교 산학협력단",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-05 21:20:04",
-   "closeDt": "2026-11-13 10:00:00",
-   "budget": 26400000,
-   "estPrice": 24000000,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01813923&bidPbancOrd=000",
-   "firstSeen": "2026-11-06",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01813923-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
-   "dups": 1
-  },
-  {
    "id": "R26BK01813749-000",
    "no": "R26BK01813749",
    "ord": "000",
@@ -5323,33 +5828,6 @@
    ],
    "kind": "공공기관·출자출연",
    "field": "감리·컨설팅·연구",
-   "dups": 1
-  },
-  {
-   "id": "R26BK01813699-000",
-   "no": "R26BK01813699",
-   "ord": "000",
-   "type": "물품",
-   "title": "한동대학교 피지컬AI 스튜디오 기자재 구매",
-   "org": "한동대학교",
-   "demand": "한동대학교",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-05 18:25:55",
-   "closeDt": "2026-11-13 11:00:00",
-   "budget": 0,
-   "estPrice": 0,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01813699&bidPbancOrd=000",
-   "firstSeen": "2026-11-06",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01813699-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
    "dups": 1
   },
   {
@@ -5719,61 +6197,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01813082-000",
-   "no": "R26BK01813082",
-   "ord": "000",
-   "type": "물품",
-   "title": "한동대학교 피지컬AI스튜디오 구축을 위한 기자재(로봇) 구매",
-   "org": "한동대학교",
-   "demand": "한동대학교",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-05 16:01:12",
-   "closeDt": "2026-11-13 11:00:00",
-   "budget": 0,
-   "estPrice": 0,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01813082&bidPbancOrd=000",
-   "firstSeen": "2026-11-06",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01813082-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
-   "dups": 1
-  },
-  {
-   "id": "R26BK01812345-000",
-   "no": "R26BK01812345",
-   "ord": "000",
-   "type": "물품",
-   "title": "[통합]AX 융합교육 및 AI·SW 실습을 위한 노트북 구입",
-   "org": "울산대학교 산학협력단",
-   "demand": "울산대학교 산학협력단",
-   "region": "울산",
-   "noticeDt": "2026-11-05 15:51:25",
-   "closeDt": "2026-11-13 10:00:00",
-   "budget": 48649690,
-   "estPrice": 44226991,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01812345&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01784097-000",
-    "R26BK01812345-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
-   "dups": 2
-  },
-  {
    "id": "R26BK01759226-000",
    "no": "R26BK01759226",
    "ord": "000",
@@ -6138,7 +6561,13 @@
    "keywords": [
     "AI"
    ],
-   "award": null,
+   "award": {
+    "winner": "주식회사 엔디",
+    "bizno": "4088166210",
+    "amount": 15273149,
+    "rate": 90.139,
+    "openDt": "2026-11-11 11:06:23"
+   },
    "dupIds": [
     "R26BK01812098-000"
    ],
@@ -6389,33 +6818,6 @@
    "kind": "지자체",
    "field": "장비·물품 구매",
    "dups": 2
-  },
-  {
-   "id": "R26BK01811404-000",
-   "no": "R26BK01811404",
-   "ord": "000",
-   "type": "물품",
-   "title": "2026년 AI 기반 자동 취약점 진단 솔루션",
-   "org": "강원대학교 산학협력단",
-   "demand": "강원대학교 산학협력단",
-   "region": "강원",
-   "noticeDt": "2026-11-05 10:06:10",
-   "closeDt": "2026-11-13 10:30:00",
-   "budget": 49500000,
-   "estPrice": 45000000,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01811404&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01811404-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "장비·물품 구매",
-   "dups": 1
   },
   {
    "id": "R26BK01811263-000",
@@ -8497,33 +8899,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01804987-000",
-   "no": "R26BK01804987",
-   "ord": "000",
-   "type": "용역",
-   "title": "2026년 첨단산업 인재양성 부트캠프(AI분야)「제1회 글로벌 AI 프론티어 프로그램; Change the Ground」운영 용역",
-   "org": "계명대학교 산학협력단",
-   "demand": "계명대학교 산학협력단",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-02 17:59:01",
-   "closeDt": "",
-   "budget": 81862000,
-   "estPrice": 74420000,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01804987&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01804987-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "유지보수·운영",
-   "dups": 1
-  },
-  {
    "id": "R26BK01805013-000",
    "no": "R26BK01805013",
    "ord": "000",
@@ -9428,33 +9803,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01802011-000",
-   "no": "R26BK01802011",
-   "ord": "000",
-   "type": "물품",
-   "title": "[지역주도형 AI대전환 사업] AI기반 3D검사",
-   "org": "(주)엠엔비젼",
-   "demand": "(주)엠엔비젼",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-02 10:46:19",
-   "closeDt": "2026-11-13 10:00:00",
-   "budget": 83600000,
-   "estPrice": 76000000,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01802011&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "기타",
-   "field": "장비·물품 구매",
-   "dupIds": [
-    "R26BK01802011-000"
-   ],
-   "dups": 1
-  },
-  {
    "id": "R26BK01802545-000",
    "no": "R26BK01802545",
    "ord": "000",
@@ -9966,34 +10314,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01800536-000",
-   "no": "R26BK01800536",
-   "ord": "000",
-   "type": "물품",
-   "title": "거대 생성형 모델 학습용 GPU Server 구매(재공고)",
-   "org": "대구경북과학기술원",
-   "demand": "대구경북과학기술원",
-   "region": "대구",
-   "noticeDt": "2026-10-30 09:50:02",
-   "closeDt": "2026-11-04 12:00:00",
-   "budget": 69091000,
-   "estPrice": 62810000,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01800536&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "생성형"
-   ],
-   "award": null,
-   "kind": "대학·연구기관",
-   "field": "생성형AI·LLM",
-   "dupIds": [
-    "R26BK01781959-000",
-    "R26BK01800536-000"
-   ],
-   "dups": 2
-  },
-  {
    "id": "R26BK01800474-000",
    "no": "R26BK01800474",
    "ord": "000",
@@ -10195,34 +10515,6 @@
     "R26BK01797537-000"
    ],
    "dups": 1
-  },
-  {
-   "id": "R26BK01799859-000",
-   "no": "R26BK01799859",
-   "ord": "000",
-   "type": "물품",
-   "title": "AI,DX 기반 분자진동 발열처리 공정 자동화 시스템의 데이터수집/데이터저장/연산 모니터링/피드백 제어 시스템 구축",
-   "org": "주식회사 코솔러스",
-   "demand": "주식회사 코솔러스",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-29 17:50:38",
-   "closeDt": "2026-11-12 16:00:00",
-   "budget": 63376500,
-   "estPrice": 57615000,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01799859&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "기타",
-   "field": "RPA·업무자동화",
-   "dupIds": [
-    "R26BK01787204-000",
-    "R26BK01799859-000"
-   ],
-   "dups": 2
   },
   {
    "id": "R26BK01799826-000",
@@ -13335,7 +13627,13 @@
    "keywords": [
     "AI"
    ],
-   "award": null,
+   "award": {
+    "winner": "주식회사 넥스트스텝",
+    "bizno": "5578603244",
+    "amount": 30000000,
+    "rate": 95.32,
+    "openDt": "2026-11-12 14:03:38"
+   },
    "kind": "교육청·학교",
    "field": "교육·연수·행사",
    "dupIds": [
@@ -13507,34 +13805,6 @@
     "R26BK01789169-000"
    ],
    "dups": 1
-  },
-  {
-   "id": "R26BK01789166-000",
-   "no": "R26BK01789166",
-   "ord": "000",
-   "type": "물품",
-   "title": "AI 자율이동 연구용 사족보행 로봇 플랫폼 구매(재공고)",
-   "org": "대구경북과학기술원",
-   "demand": "대구경북과학기술원",
-   "region": "대구",
-   "noticeDt": "2026-10-23 16:40:42",
-   "closeDt": "2026-10-29 12:00:00",
-   "budget": 55880000,
-   "estPrice": 50800000,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01789166&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "대학·연구기관",
-   "field": "감리·컨설팅·연구",
-   "dupIds": [
-    "R26BK01773985-000",
-    "R26BK01789166-000"
-   ],
-   "dups": 2
   },
   {
    "id": "R26BK01788782-000",
@@ -15366,33 +15636,6 @@
    "field": "유지보수·운영",
    "dupIds": [
     "R26BK01783701-000"
-   ],
-   "dups": 1
-  },
-  {
-   "id": "R26BK01783601-000",
-   "no": "R26BK01783601",
-   "ord": "000",
-   "type": "용역",
-   "title": "26~27-N-교육훈련용 AI 조교 체계개발 실증",
-   "org": "국방부 국군재정관리단",
-   "demand": "해군교육사령부",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-21 13:52:46",
-   "closeDt": "2026-11-11 11:00:00",
-   "budget": 799000000,
-   "estPrice": 726363636,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01783601&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "기타",
-   "field": "교육·연수·행사",
-   "dupIds": [
-    "R26BK01783601-000"
    ],
    "dups": 1
   },
