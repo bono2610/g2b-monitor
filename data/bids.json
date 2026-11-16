@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-15T10:23+09:00",
+ "updated": "2026-11-16T10:27+09:00",
  "keywords": [
   "인공지능",
   "AI",
@@ -118,15 +118,262 @@
   "dedup": "공고명(공백 정리·재공고 표시 제거)+수요기관이 같거나 공고번호가 같으면 1건. 낙찰 결과 있는 공고 우선, 없으면 최신 공고일"
  },
  "stats": {
-  "total": 1712,
-  "addedThisRun": 0,
-  "awardsLinked": 0,
+  "total": 1719,
+  "addedThisRun": 9,
+  "awardsLinked": 2,
   "excluded": 0,
-  "beforeDedup": 2610,
-  "afterDedup": 1712
+  "beforeDedup": 2619,
+  "afterDedup": 1719
  },
  "errors": [],
  "items": [
+  {
+   "id": "R26BK01828701-000",
+   "no": "R26BK01828701",
+   "ord": "000",
+   "type": "물품",
+   "title": "첨단제조기술(AI-DfAM) 기반 모빌리티 제조 혁신거점 조성사업 PBF 방식 중형 금속 3D 프린터 구매",
+   "org": "남서울대학교 산학협력단",
+   "demand": "남서울대학교 산학협력단",
+   "region": "서울",
+   "noticeDt": "2026-11-16 10:17:40",
+   "closeDt": "2026-12-03 15:00:00",
+   "budget": 1100000000,
+   "estPrice": 1000000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01828701&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01828701-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01831347-000",
+   "no": "R26BK01831347",
+   "ord": "000",
+   "type": "용역",
+   "title": "2026년 충남 지역주도형 AI대전환 사업 - 대시보드 구축 용역",
+   "org": "(주)지에스티",
+   "demand": "(주)지에스티",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-16 10:08:19",
+   "closeDt": "2026-11-27 10:00:00",
+   "budget": 77000000,
+   "estPrice": 70000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01831347&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01831347-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01826599-000",
+   "no": "R26BK01826599",
+   "ord": "000",
+   "type": "물품",
+   "title": "양산부산대학교병원 AI 운영환경 구축사업",
+   "org": "양산부산대학교병원",
+   "demand": "양산부산대학교병원",
+   "region": "경남",
+   "noticeDt": "2026-11-16 10:00:58",
+   "closeDt": "2026-11-24 10:00:00",
+   "budget": 1000000000,
+   "estPrice": 909090909,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01826599&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "공공기관·출자출연",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01801988-000",
+    "R26BK01826599-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01806106-000",
+   "no": "R26BK01806106",
+   "ord": "000",
+   "type": "용역",
+   "title": "가천대학교 AI부트캠프 사업 로보틱스 AI 고급 교육 기획·운영 위탁 용역(2026-동계학기)",
+   "org": "가천대학교 산학협력단",
+   "demand": "가천대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-16 09:38:06",
+   "closeDt": "",
+   "budget": 29500000,
+   "estPrice": 26818182,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01806106&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01806106-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01831194-000",
+   "no": "R26BK01831194",
+   "ord": "000",
+   "type": "용역",
+   "title": "2026년 충남 지역주도형 AI대전환 사업- 제조 온톨로지 공정최적화 구축",
+   "org": "(주)지에스티",
+   "demand": "(주)지에스티",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-16 09:33:21",
+   "closeDt": "2026-11-27 10:00:00",
+   "budget": 165000000,
+   "estPrice": 150000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01831194&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01831194-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01823383-000",
+   "no": "R26BK01823383",
+   "ord": "000",
+   "type": "물품",
+   "title": "AI for Science 기술 개발을 위한 AI 학습용 GPU 구매",
+   "org": "한국과학기술정보연구원",
+   "demand": "한국과학기술정보연구원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-16 09:18:04",
+   "closeDt": "2026-11-18 16:00:00",
+   "budget": 250000000,
+   "estPrice": 227272727,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01823383&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01780580-000",
+    "R26BK01799636-000",
+    "R26BK01823383-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01831078-000",
+   "no": "R26BK01831078",
+   "ord": "000",
+   "type": "물품",
+   "title": "2026년도 전문대학 혁신지원사업 의료인공지능학과 실험실습기자재(인공지능(AI) 딥러닝 서버) 구입",
+   "org": "동남보건대학 산학협력단",
+   "demand": "동남보건대학 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-16 08:55:12",
+   "closeDt": "2026-11-24 11:00:00",
+   "budget": 29100000,
+   "estPrice": 26454545,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01831078&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI",
+    "인공지능"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01831078-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830832-000",
+   "no": "R26BK01830832",
+   "ord": "000",
+   "type": "물품",
+   "title": "2026. 충북수학체험센터 AI·디지털 기반 전시체험물 개선 사업 입찰 공고",
+   "org": "충청북도교육청 충청북도자연과학교육원",
+   "demand": "충청북도교육청 충청북도자연과학교육원",
+   "region": "충북",
+   "noticeDt": "2026-11-16 08:53:53",
+   "closeDt": "2026-11-27 10:00:00",
+   "budget": 97000000,
+   "estPrice": 88181818,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830832&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "교육청·학교",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01830832-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01830846-000",
+   "no": "R26BK01830846",
+   "ord": "000",
+   "type": "물품",
+   "title": "AI 연구용 GPU 서버 2식 구매 설치",
+   "org": "대구경북과학기술원",
+   "demand": "대구경북과학기술원",
+   "region": "대구",
+   "noticeDt": "2026-11-15 10:39:52",
+   "closeDt": "2026-11-23 12:00:00",
+   "budget": 1410200000,
+   "estPrice": 1282000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01830846&bidPbancOrd=000",
+   "firstSeen": "2026-11-16",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "감리·컨설팅·연구",
+   "dupIds": [
+    "R26BK01830846-000"
+   ],
+   "dups": 1
+  },
   {
    "id": "R26BK01830636-000",
    "no": "R26BK01830636",
@@ -532,7 +779,13 @@
    "keywords": [
     "AI"
    ],
-   "award": null,
+   "award": {
+    "winner": "위고로보틱스 주식회사",
+    "bizno": "5768600461",
+    "amount": 54762400,
+    "rate": 99.568,
+    "openDt": "2026-11-13 18:00:13"
+   },
    "dupIds": [
     "R26BK01773985-000",
     "R26BK01789166-000",
@@ -1152,7 +1405,13 @@
    "keywords": [
     "AI"
    ],
-   "award": null,
+   "award": {
+    "winner": "제이케이컴퍼니",
+    "bizno": "8971302101",
+    "amount": 74525000,
+    "rate": 99.698,
+    "openDt": "2026-11-16 09:09:37"
+   },
    "dupIds": [
     "R26BK01827605-000"
    ],
@@ -8662,33 +8921,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01801988-000",
-   "no": "R26BK01801988",
-   "ord": "000",
-   "type": "물품",
-   "title": "양산부산대학교병원 AI 운영환경 구축사업",
-   "org": "양산부산대학교병원",
-   "demand": "양산부산대학교병원",
-   "region": "경남",
-   "noticeDt": "2026-11-03 10:02:21",
-   "closeDt": "2026-11-11 10:00:00",
-   "budget": 1000000000,
-   "estPrice": 909090909,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01801988&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01801988-000"
-   ],
-   "kind": "공공기관·출자출연",
-   "field": "플랫폼·시스템 구축",
-   "dups": 1
-  },
-  {
    "id": "R26BK01802851-000",
    "no": "R26BK01802851",
    "ord": "000",
@@ -9949,34 +10181,6 @@
     "R26BK01802150-000"
    ],
    "dups": 1
-  },
-  {
-   "id": "R26BK01799636-000",
-   "no": "R26BK01799636",
-   "ord": "000",
-   "type": "물품",
-   "title": "AI for Science 기술 개발을 위한 AI 학습용 GPU 구매",
-   "org": "한국과학기술정보연구원",
-   "demand": "한국과학기술정보연구원",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-30 16:03:35",
-   "closeDt": "2026-11-09 10:00:00",
-   "budget": 250000000,
-   "estPrice": 227272727,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01799636&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
-   "dupIds": [
-    "R26BK01780580-000",
-    "R26BK01799636-000"
-   ],
-   "dups": 2
   },
   {
    "id": "R26BK01800935-000",
