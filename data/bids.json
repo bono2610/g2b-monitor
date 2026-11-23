@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-22T10:42+09:00",
+ "updated": "2026-11-23T11:02+09:00",
  "keywords": [
   "인공지능",
   "AI",
@@ -118,15 +118,266 @@
   "dedup": "공고명(공백 정리·재공고 표시 제거)+수요기관이 같거나 공고번호가 같으면 1건. 낙찰 결과 있는 공고 우선, 없으면 최신 공고일"
  },
  "stats": {
-  "total": 1847,
-  "addedThisRun": 0,
+  "total": 1851,
+  "addedThisRun": 9,
   "awardsLinked": 0,
   "excluded": 0,
-  "beforeDedup": 2804,
-  "afterDedup": 1847
+  "beforeDedup": 2813,
+  "afterDedup": 1851
  },
  "errors": [],
  "items": [
+  {
+   "id": "R26BK01847763-000",
+   "no": "R26BK01847763",
+   "ord": "000",
+   "type": "물품",
+   "title": "AID사업 AI Academy 환경개선 공사 자재 구입(LED전광판)",
+   "org": "영남이공대학교 산학협력단",
+   "demand": "영남이공대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:48:29",
+   "closeDt": "2026-12-04 12:00:00",
+   "budget": 111000000,
+   "estPrice": 100909091,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847763&bidPbancOrd=000",
+   "firstSeen": "2026-11-23",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "장비·물품 구매",
+   "dupIds": [
+    "R26BK01847763-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01847703-000",
+   "no": "R26BK01847703",
+   "ord": "000",
+   "type": "용역",
+   "title": "첨단 AI 기반 디지털의료기기 신속제품화 지원사업(AX-Sprint 300) - 식약처 허가를 위한 개발 문서 및 디지털의료기기 GMP 컨설팅 용역",
+   "org": "주식회사 알에스리햅",
+   "demand": "주식회사 알에스리햅",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:42:16",
+   "closeDt": "2026-12-04 10:00:00",
+   "budget": 313500000,
+   "estPrice": 285000000,
+   "method": "일반경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847703&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "감리·컨설팅·연구",
+   "dupIds": [
+    "R26BK01764812-000",
+    "R26BK01847703-000"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01847697-000",
+   "no": "R26BK01847697",
+   "ord": "000",
+   "type": "물품",
+   "title": "AI 모델 개발용 계산서버 구매",
+   "org": "한국화학연구원",
+   "demand": "한국화학연구원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:37:53",
+   "closeDt": "2026-11-23 16:00:00",
+   "budget": 29700000,
+   "estPrice": 27000000,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847697&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "플랫폼·시스템 구축",
+   "dupIds": [
+    "R26BK01805604-000",
+    "R26BK01825884-000",
+    "R26BK01847697-000"
+   ],
+   "dups": 3
+  },
+  {
+   "id": "R26BK01829077-001",
+   "no": "R26BK01829077",
+   "ord": "001",
+   "type": "물품",
+   "title": "[앵커 2차년도]보건의료 AI 교육과정 실습기자재 구입-심폐소생술마네킹 외",
+   "org": "남부대학교",
+   "demand": "남부대학교",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:32:14",
+   "closeDt": "2026-12-01 10:00:00",
+   "budget": 135385000,
+   "estPrice": 123077273,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829077&bidPbancOrd=001",
+   "firstSeen": "2026-11-20",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "교육·연수·행사",
+   "dupIds": [
+    "R26BK01829077-000",
+    "R26BK01829077-001"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01842795-001",
+   "no": "R26BK01842795",
+   "ord": "001",
+   "type": "용역",
+   "title": "피지컬AI 기반 건설로보틱스 활성화 방안 연구",
+   "org": "국토교통부",
+   "demand": "국토교통부",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:30:29",
+   "closeDt": "2026-12-01 10:00:00",
+   "budget": 60000000,
+   "estPrice": 54545455,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01842795&bidPbancOrd=001",
+   "firstSeen": "2026-11-20",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "기타",
+   "field": "감리·컨설팅·연구",
+   "dupIds": [
+    "R26BK01842795-000",
+    "R26BK01842795-001"
+   ],
+   "dups": 2
+  },
+  {
+   "id": "R26BK01847606-000",
+   "no": "R26BK01847606",
+   "ord": "000",
+   "type": "물품",
+   "title": "[세종산단20260035-1호] 세종대학교 인공지능데이터사이언스학과 로봇용 전동 리프트 등 3종 구매",
+   "org": "세종대학교 산학협력단",
+   "demand": "세종대학교 산학협력단",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 10:22:57",
+   "closeDt": "",
+   "budget": 48367396,
+   "estPrice": 43970360,
+   "method": "제한경쟁",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847606&bidPbancOrd=000",
+   "firstSeen": "2026-11-23",
+   "keywords": [
+    "인공지능"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "데이터·빅데이터",
+   "dupIds": [
+    "R26BK01847606-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01847358-000",
+   "no": "R26BK01847358",
+   "ord": "000",
+   "type": "용역",
+   "title": "AI 스마트 민원 챗봇 구축 용역",
+   "org": "강원특별자치도 고성군",
+   "demand": "강원특별자치도 고성군",
+   "region": "강원",
+   "noticeDt": "2026-11-23 10:08:27",
+   "closeDt": "2026-11-23 12:00:00",
+   "budget": 50000000,
+   "estPrice": 45454545,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847358&bidPbancOrd=000",
+   "firstSeen": "2026-11-23",
+   "keywords": [
+    "AI",
+    "챗봇"
+   ],
+   "award": null,
+   "kind": "지자체",
+   "field": "챗봇·민원상담",
+   "dupIds": [
+    "R26BK01847358-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01846331-000",
+   "no": "R26BK01846331",
+   "ord": "000",
+   "type": "용역",
+   "title": "2027년도 AI 스마트돈사 가축분뇨 위탁처리",
+   "org": "제주대학교 산학협력단",
+   "demand": "제주대학교 산학협력단",
+   "region": "제주",
+   "noticeDt": "2026-11-23 10:05:55",
+   "closeDt": "2026-11-27 10:00:00",
+   "budget": 62000,
+   "estPrice": 62000,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01846331&bidPbancOrd=000",
+   "firstSeen": "2026-11-23",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "기타",
+   "dupIds": [
+    "R26BK01846331-000"
+   ],
+   "dups": 1
+  },
+  {
+   "id": "R26BK01847452-000",
+   "no": "R26BK01847452",
+   "ord": "000",
+   "type": "용역",
+   "title": "스마트 AI 마이닝 시험광산의 지하공간 및 암반구조물 정밀 안전진단",
+   "org": "한국지질자원연구원",
+   "demand": "한국지질자원연구원",
+   "region": "중앙·기타",
+   "noticeDt": "2026-11-23 09:54:29",
+   "closeDt": "2026-11-26 15:00:00",
+   "budget": 45000000,
+   "estPrice": 40909091,
+   "method": "수의계약",
+   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01847452&bidPbancOrd=000",
+   "firstSeen": "2026-11-05",
+   "keywords": [
+    "AI"
+   ],
+   "award": null,
+   "kind": "대학·연구기관",
+   "field": "기타",
+   "dupIds": [
+    "R26BK01729813-000",
+    "R26BK01769863-000",
+    "R26BK01847452-000"
+   ],
+   "dups": 3
+  },
   {
    "id": "R26BK01846535-000",
    "no": "R26BK01846535",
@@ -1061,33 +1312,6 @@
    "dups": 2
   },
   {
-   "id": "R26BK01842795-000",
-   "no": "R26BK01842795",
-   "ord": "000",
-   "type": "용역",
-   "title": "피지컬AI 기반 건설로보틱스 활성화 방안 연구",
-   "org": "국토교통부",
-   "demand": "국토교통부",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-19 16:21:19",
-   "closeDt": "2026-12-01 10:00:00",
-   "budget": 60000000,
-   "estPrice": 54545455,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01842795&bidPbancOrd=000",
-   "firstSeen": "2026-11-20",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01842795-000"
-   ],
-   "kind": "기타",
-   "field": "감리·컨설팅·연구",
-   "dups": 1
-  },
-  {
    "id": "R26BK01841448-000",
    "no": "R26BK01841448",
    "ord": "000",
@@ -1112,33 +1336,6 @@
    ],
    "kind": "대학·연구기관",
    "field": "장비·물품 구매",
-   "dups": 1
-  },
-  {
-   "id": "R26BK01829077-000",
-   "no": "R26BK01829077",
-   "ord": "000",
-   "type": "물품",
-   "title": "[앵커 2차년도]보건의료 AI 교육과정 실습기자재 구입-심폐소생술마네킹 외",
-   "org": "남부대학교",
-   "demand": "남부대학교",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-19 16:02:01",
-   "closeDt": "2026-11-27 10:00:00",
-   "budget": 135385000,
-   "estPrice": 123077273,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01829077&bidPbancOrd=000",
-   "firstSeen": "2026-11-20",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01829077-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "교육·연수·행사",
    "dups": 1
   },
   {
@@ -6618,34 +6815,6 @@
    "kind": "공공기관·출자출연",
    "field": "플랫폼·시스템 구축",
    "dups": 1
-  },
-  {
-   "id": "R26BK01825884-000",
-   "no": "R26BK01825884",
-   "ord": "000",
-   "type": "물품",
-   "title": "AI 모델 개발용 계산서버 구매",
-   "org": "한국화학연구원",
-   "demand": "한국화학연구원",
-   "region": "중앙·기타",
-   "noticeDt": "2026-11-12 10:35:53",
-   "closeDt": "2026-11-20 10:00:00",
-   "budget": 29700000,
-   "estPrice": 27000000,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01825884&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "dupIds": [
-    "R26BK01805604-000",
-    "R26BK01825884-000"
-   ],
-   "kind": "대학·연구기관",
-   "field": "플랫폼·시스템 구축",
-   "dups": 2
   },
   {
    "id": "R26BK01825212-000",
@@ -23362,34 +23531,6 @@
    "dups": 1
   },
   {
-   "id": "R26BK01769863-000",
-   "no": "R26BK01769863",
-   "ord": "000",
-   "type": "용역",
-   "title": "스마트 AI 마이닝 시험광산의 지하공간 및 암반구조물 정밀 안전진단",
-   "org": "한국지질자원연구원",
-   "demand": "한국지질자원연구원",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-14 10:31:27",
-   "closeDt": "2026-10-28 10:00:00",
-   "budget": 45000000,
-   "estPrice": 40909091,
-   "method": "제한경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01769863&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "대학·연구기관",
-   "field": "기타",
-   "dupIds": [
-    "R26BK01729813-000",
-    "R26BK01769863-000"
-   ],
-   "dups": 2
-  },
-  {
    "id": "R26BK01765824-000",
    "no": "R26BK01765824",
    "ord": "000",
@@ -24928,33 +25069,6 @@
     "R26BK01765589-000"
    ],
    "dups": 4
-  },
-  {
-   "id": "R26BK01764812-000",
-   "no": "R26BK01764812",
-   "ord": "000",
-   "type": "용역",
-   "title": "첨단 AI 기반 디지털의료기기 신속제품화 지원사업(AX-Sprint 300) - 식약처 허가를 위한 개발 문서 및 디지털의료기기 GMP 컨설팅 용역",
-   "org": "주식회사 알에스리햅",
-   "demand": "주식회사 알에스리햅",
-   "region": "중앙·기타",
-   "noticeDt": "2026-10-12 14:30:09",
-   "closeDt": "2026-11-23 10:00:00",
-   "budget": 313500000,
-   "estPrice": 285000000,
-   "method": "일반경쟁",
-   "url": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01764812&bidPbancOrd=000",
-   "firstSeen": "2026-11-05",
-   "keywords": [
-    "AI"
-   ],
-   "award": null,
-   "kind": "기타",
-   "field": "감리·컨설팅·연구",
-   "dupIds": [
-    "R26BK01764812-000"
-   ],
-   "dups": 1
   },
   {
    "id": "R26BK01761959-000",
